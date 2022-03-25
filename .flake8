@@ -1,0 +1,4 @@
+[flake8]
+max-line-length = 90
+ignore = F401, E222, E261, E221, E501
+exclude = *.pyi
