@@ -1,8 +1,9 @@
 import platform
 import psutil
 import re
-import uuid
 import socket
+import typing
+import uuid
 
 from NetworkStatisticsService.statistics_service import StatisticsService
 from datetime import datetime
@@ -34,7 +35,7 @@ class Response:
 
         return f"{days} days, {hours} hours, {minutes} minutes, and {seconds} seconds"
 
-    def get_system_info(self) -> dict:
+    def get_system_info(self) -> typing.Dict[str, typing.Any]:
         system_info = {
             "platform": platform.system(),
             "platform-release": platform.release(),
@@ -56,7 +57,7 @@ class Response:
         print(system_info)
         return system_info
 
-    def get_network_info(self) -> dict:
+    def get_network_info(self) -> typing.Dict[str, typing.Any]:
         statistics_service = StatisticsService()
         stats = statistics_service.generate_statistics()
         print(stats)
