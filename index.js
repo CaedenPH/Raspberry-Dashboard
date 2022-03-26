@@ -21,10 +21,10 @@ app.use(auth);
 app.get('/', async (req, res) => {
     const gen = await sys.time()
     const cpu = await sys.cpu()
-    const mem = await sys.memory()
+    const mem = await sys.mem()
     const os = await sys.osInfo()
     const load = await sys.currentLoad()
-    const net = await sys.networkInterfaces()[0]
+    const net = (await sys.networkInterfaces())[0]
 
     res.render('index', {
         general: {
@@ -106,6 +106,14 @@ app.get("/reboot", async (req, res) => {
         console.log(error)
       });
 });
+
+app.get("/execute", async (req, res) => {
+    var { cmd } = req.query
+    exec(cmd, (error, stdout, stderr) => {
+        return error
+      });
+});
+
 
 
 app.listen(8000, () => {
