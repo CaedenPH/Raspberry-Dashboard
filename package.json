@@ -1,5 +1,5 @@
 {
-  "name": "raspwatch",
+  "name": "raspberry-dashboard",
   "version": "1.0.0",
   "description": "A script to generate beautiful statistics about my Raspberry Pi's status",
   "main": "index.js",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CaedenPH/RaspWatch.git"
+    "url": "git+https://github.com/CaedenPH/raspberry-dashboard.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/CaedenPH/RaspWatch/issues"
+    "url": "https://github.com/CaedenPH/raspberry-dashboard/issues"
   },
-  "homepage": "https://github.com/CaedenPH/RaspWatch#readme",
+  "homepage": "https://github.com/CaedenPH/raspberry-dashboard#readme",
   "dependencies": {
     "cookie-parser": "^1.4.6",
     "express": "^4.17.3",
