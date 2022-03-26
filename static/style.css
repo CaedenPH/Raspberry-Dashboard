@@ -11,6 +11,11 @@ div {
     border-radius: 10px;
     margin-bottom: 30px;
 }
-div h3 {
-    color: #00d1ff;
+div table {
+    border-collapse: collapse;
 }
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+  }
