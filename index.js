@@ -1,11 +1,12 @@
+const cookieParser = require('cookie-parser');
+const exec = require('child_process').exec;
+const express = require('express');
+
 const sys = require('systeminformation');
 const bodyParser = require('body-parser');
-const express = require('express');
 const app = express();
 const auth = require('./auth.js');
 const jwt = require("jsonwebtoken");
-const cookieParser = require('cookie-parser');
-const exec = require('child_process').exec;
 const { password } = require('./config.json')
 
 
@@ -18,10 +19,67 @@ app.use(auth);
 
 
 app.get('/', async (req, res) => {
+    const gen = await sys.time()
+    const cpu = await sys.cpu()
+    const mem = await sys.memory()
+    const os = await sys.osInfo()
+    const load = await sys.currentLoad()
+    const net = await sys.networkInterfaces()[0]
+
     res.render('index', {
-        brand: await (await sys.cpu()).brand
+        general: {
+            localTime: gen.current,
+            uptime: gen.uptime,
+            timezone: {
+                time: gen.timezone,
+                name: gen.timezoneName
+            }
+        },
+        cpu: {
+            manufacturer: cpu.manufacturer,
+            brand: cpu.brand,
+            speedMin: cpu.speedMin,
+            speedMax: cpu.speedMax,
+            cores: cpu.cores,
+            socket: cpu.socket,
+            model: cpu.model,
+            volate: cpu.voltage,
+            cache: cpu.cache,
+            currentSpeed: await sys.cpuCurrentSpeed().avg,
+            temp: await sys.cpuTemperature().avg
+        },
+        memory: {
+            total: mem.total,
+            free: mem.free,
+            used: mem.used,
+            active: mem.active,
+            available: mem.available,
+        },
+        os: {
+            platforM: os.platform,
+            distro: os.distro,
+            kernel: os.kernel,
+            release: os.release,
+            arch: os.arch,
+            hostname: os.hostname,
+        },
+        currentLoad: { // graph stuff
+            avgLoad: load.avgLoad,
+            currentLoad: load.currentLoad,
+            currentLoadUser: load.currentLoadUser,
+            currentLoadSystem: load.currentLoadSystem,
+            currentLoadIdle: load.currentLoadIdle,
+            cpus: load.cpus
+        },
+        network: {
+            ip4: net.ip4,
+            ip6: net.ip6,   
+            mac: net.mac,
+            speed: net.speed,
+        }
     });
 });
+
 
 app.get("/signin", async (req, res) => {
     res.render('signin');
@@ -38,7 +96,7 @@ app.post("/signin", async (req, res) => {
             expiresIn: 10800
         });
         res.status(200).json({ message: "s" });
-    } else {
+    } else {    
         res.status(400).json({ message: "Bad Argument" });
     }
 });
