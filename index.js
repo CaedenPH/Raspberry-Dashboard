@@ -44,7 +44,9 @@ app.post("/signin", async (req, res) => {
 });
 
 app.get("/reboot", async (req, res) => {
-    exec('reboot')
+    exec('reboot', (error, stdout, stderr) => {
+        console.log(error)
+      });
 });
 
 
