@@ -35,7 +35,6 @@ app.post("/signin", async (req, res) => {
             expiresIn: 10800
         }), {
             httpOnly: true,
-            secure: true,
             expiresIn: 10800
         });
         res.status(200).json({ message: "s" });
