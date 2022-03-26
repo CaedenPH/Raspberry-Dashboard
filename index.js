@@ -17,7 +17,6 @@ app.use('/static', express.static(__dirname + '/static'));
 app.use(auth);
 
 
-
 app.get('/', async (req, res) => {
     const gen = await sys.time()
     const cpu = await sys.cpu()
@@ -109,11 +108,19 @@ app.get("/reboot", async (req, res) => {
 
 app.get("/execute", async (req, res) => {
     var { cmd } = req.query
-    exec(cmd, (error, stdout, stderr) => {
-        return error
+    console.log(cmd)
+    const result = new Promise(resolve => {
+      exec(cmd, (error, stdout, stderr) => {
+        if (error) {
+          resolve(error.message);
+        } else {
+          resolve(stdout);
+        }
       });
+    });
+    console.log(await result)
+    res.status(200).json({ message: await result });
 });
-
 
 
 app.listen(8000, () => {
