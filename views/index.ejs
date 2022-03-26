@@ -5,6 +5,10 @@
 </head>
 <body>
    
+   <button id="btn">
+      Reboot
+   </button>
+
    <div>
       <h3>
          CPU status
@@ -29,5 +33,12 @@
       </h3>
    </div>
 
+   <script>
+      document.getElementById("btn").onclick = async () => {
+         await fetch("/reboot", {
+            method: "HEAD"
+         });
+      }
+   </script>
 </body>
 </html>
