@@ -44,7 +44,7 @@ app.post("/signin", async (req, res) => {
 });
 
 app.get("/reboot", async (req, res) => {
-    exec('reboot', (error, stdout, stderr) => {
+    exec('sudo /sbin/reboot', (error, stdout, stderr) => {
         console.log(error)
       });
 });
