@@ -8,7 +8,12 @@
    <button id="btn">
       Reboot
    </button>
-
+   <textarea id="message_box">
+      e
+   </textarea>
+   <button id="txtbtn">
+      submit
+   </button>
    <div>
       <h3>
          CPU status
@@ -16,7 +21,11 @@
       <table>
          <tr>
             <th>Brand</th>
-            <td><%- JSON.stringify(brand) %></td>
+            <td><%- JSON.stringify(cpu.brand) %></td>
+         </tr>
+         <tr>
+            <th>Temp</th>
+            <td></td>
          </tr>
       </table>
    </div>
@@ -38,7 +47,21 @@
          await fetch("/reboot", {
             method: "HEAD"
          });
-      }
+      };
+      document.getElementById("txtbtn").onclick = async () => {
+         var cmd = document.getElementById("message_box").value;
+         output = await fetch("/execute?cmd=" + cmd, {
+            method: "HEAD"
+         });
+         console.log(output)
+      };
+      
    </script>
 </body>
 </html>
+
+<!-- <%- JSON.stringify(cpu.temp) %> --> 
+
+<!-- <%- JSON.stringify(cpu.temp) %> -->
+
+<<!-- -->
