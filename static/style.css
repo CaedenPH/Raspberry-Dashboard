@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Encode+Sans:wght@600;900&display=swap');
+
+body { 
+    background-color: #16113a;
+    color: white;
+    font-family: 'Encode Sans', sans-serif;
+}
+div {
+    border: 1px solid white;
+    padding-left: 10px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+div h3 {
+    color: #00d1ff;
+}
