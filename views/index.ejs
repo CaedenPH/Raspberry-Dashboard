@@ -11,152 +11,27 @@
       rel="stylesheet">
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
       rel="stylesheet">
+      <!-- Google Fonts -->
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+      <!-- StyleSheet -->
       <link rel="stylesheet" href="static/style.css">
 </head>  
 <body>
-    <div class="container">
-        <aside>
-            <div class="top">
-                <div class="logo">
-                    <h2>
-                        Rasp<span class="danger">.π</span>
-                    </h2>
-                </div>
-                <div class="close" id="close-btn">
-                    <span class="material-icons-sharp">close</span>
-                </div>
+    <nav>
+        <div class="container">
+            <div class="logo">
+                <h2>
+                    Rasp<span class="danger">.∏</span>
+                </h2>
+            <div class="search-bar">
+                <span class="material-icon-sharp">search</span>
             </div>
-
-            <div class="sidebar">
-                <a href="#">
-                    <span class="material-icons-sharp">grid_view</span>
-                    <h3>Dashboard</h3>
-                </a>
-
-                <a href="#">
-                    <span class="material-icons-sharp">person_outline</span>
-                    <h3>Customers</h3>
-                </a>
-
-                <a href="console.ejs">
-                    <span class="material-icons-sharp">receipt_long</span>
-                    <h3>Console</h3>
-                </a>
-
-                <a href="#">
-                    <span class="material-icons-sharp">insights</span>
-                    <h3>Graph</h3>
-                </a>
-
-                <a href="#">
-                    <span class="material-icons-sharp">mail_outline</span>
-                    <h3>Messages</h3>
-                    <span class="message-count">26</span>
-                </a>
-                <a href="#">
-                    <span class="material-icons-sharp">inventory</span>
-                    <h3>Ips Recorded</h3>
-                </a>
-
-                </a>
-                <a href="#">
-                    <span class="material-icons-sharp">add</span>
-                    <h3>Add Cookies</h3>
-                </a>
-
-                <a href="#">
-                    <span class="material-icons-sharp">report_gmailerrorred</span>
-                    <h3>Settings</h3>
-                </a>
-                <a href="#">
-                    <span class="material-icons-outlined">restart_alt</span>
-                    <h3 id="reboot">Reboot</h3>
-                </a>
-            </div>
-        </aside>
-        <!--------------------------------- END OF ASIDE ------------------------------>
-        <main>
-            <h1>Dashboard</h1>
-            <div class="date">
-                <input type="date">
-            </div>
-            
-            <div class="insights">
-                <div class="ip">
-                    <span class="material-icons-outlined">router</span>
-                    <div class="middle">
-                        <div class="left">
-                            <h3>IPs Relayed</h3>
-                            <h2>Ip4:</h2>
-                            <h1 class="iprelay"> <%- JSON.stringify(network.ip4) %> </h1>
-                            <h2>Ip6:</h2>
-                            <h1 class="iprelay"> <%- JSON.stringify(network.ip6) %> </h1>
-                        </div>
-                        <div class="progress">
-                            <svg>
-                                <circle cx="38" cy="38" r="36"></circle>
-                            </svg>
-                        </div>
-                    </div>
-                    <small class="text-muted">Your IPs Relayed</small>
-                </div>
-                <!------------ END OF IP ------------->
-                <div class="cookies">
-                    <span class="material-icons-outlined">device_thermostat</span>
-                    <div class="middle">
-                        <div class="left">
-                            <h3>CPU Temprature</h3>
-                            <h2>Usage:</h2>
-                            <h1> <%- JSON.stringify(cpu.temp) %> </h1>
-
-                        </div>
-                        <div class="progress">
-                            <svg>
-                                <circle cx="38" cy="38" r="36"></circle>
-                            </svg>
-                            <div class="number">
-                                <p><%- JSON.stringify(cpu.temp) %></p>
-                            </div>
-                        </div>
-                    </div>
-                    <small class="text-muted">Last 24 Hours</small>
-                </div>
-                <!------------ END OF COOKIES ------------->
-                <div class="MacAdress">
-                    <span class="material-icons-outlined">security</span>
-                    <div class="middle">
-                        <div class="left">
-                            <h3>Total Mac Adresses Logged</h3>
-                            <h1>193</h1>
-                        </div>
-                        <div class="progress">
-                            <svg>
-                                <circle cx="38" cy="38" r="36"></circle>
-                            </svg>
-                            <div class="number">
-                                <p>81%</p>
-                            </div>
-                        </div>
-                    </div>
-                    <small class="text-muted">Last 24 Hours</small>
-                </div>
-                <!------------ END OF MacAdress ------------->
-            </div>
-
-         <textarea id="mbx">
-         
-         </textarea>
-         <button id="txtbtn">
-            submit
-         </button>
-         <button id="btn">
-            reboot
-         </button>
-        <h4>Output:</h4>
-        <h5 id="output"></h5>
-        </main>
-    </div>
+        </div>
+    </nav>
 </body>
+
    <script>
        document.documentElement.style.setProperty('--cpuTemp', JSON.stringify(cpu.temp));
        
