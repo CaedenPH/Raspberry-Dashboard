@@ -118,8 +118,7 @@ app.get("/execute", async (req, res) => {
         }
       });
     });
-    console.log(await result)
-    res.status(200).json({ message: await result });
+    res.status(200).json({message: await result + ""});
 });
 
 
