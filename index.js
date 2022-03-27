@@ -84,6 +84,10 @@ app.get("/signin", async (req, res) => {
     res.render('signin');
 });
 
+app.get("/console", async (req, res) => {
+    res.render('console.ejs');
+});
+
 app.post("/signin", async (req, res) => {
     if (req.body.password && req.body.password === password) {
         res.cookie("_ashoisdhiozvsb", jwt.sign({
