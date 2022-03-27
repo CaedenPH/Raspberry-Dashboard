@@ -1,5 +1,6 @@
 const cookieParser = require('cookie-parser');
 const exec = require('child_process').exec;
+const spawn = require('child_process').spawn;
 const express = require('express');
 
 const sys = require('systeminformation');
@@ -44,8 +45,8 @@ app.get('/', async (req, res) => {
             model: cpu.model,
             volate: cpu.voltage,
             cache: cpu.cache,
-            currentSpeed: await sys.cpuCurrentSpeed().avg,
-            temp: await sys.cpuTemperature().avg
+            currentSpeed: (await sys.cpuCurrentSpeed()).avg,
+            temp: (await sys.cpuTemperature()).main
         },
         memory: {
             total: mem.total,
@@ -127,5 +128,5 @@ app.get("/execute", async (req, res) => {
 
 
 app.listen(8000, () => {
-    console.log(`Listening at http://localhost:8000`);
+    console.log("Listening at http://localhost:8000");
 }); 
