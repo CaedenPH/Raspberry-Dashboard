@@ -22,6 +22,7 @@
 --card-padding: 1.8rem;
 --padding-1: 1.2rem;
 --box-shadow: 0 3rem 5rem var(--color-light);
+--cpuTemp: 0;
 }
 
 * {
@@ -308,16 +309,23 @@ main .insights svg circle {
 }
 
 main .insights .ip svg circle {
-    stroke-dashoffset: 156;
-    stroke-dasharray: 80;
+    stroke-dashoffset: 0;
+    stroke-dasharray: 0;
 }
 
 main .insights .cookies svg circle {
     stroke-dashoffset: 10;
-    stroke-dasharray: 150;
+    stroke-dasharray: var(--cpuTemp);
 }
 
 main .insights .MacAdress svg circle {
     stroke-dashoffset: 315;
     stroke-dasharray: 80;
 }
+
+main .insights .ip .iprelay h1 {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
