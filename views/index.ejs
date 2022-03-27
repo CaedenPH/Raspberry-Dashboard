@@ -4,7 +4,7 @@
       <meta charset="UTF-8">
       <meta http-equiv="X-UA-Compatible" content="IE=edge">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Admin • Ropra</title>
+      <title>Dashboard</title>
           
       <!-- Material icons -->
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp"
@@ -38,14 +38,14 @@
                     <h3>Customers</h3>
                 </a>
 
-                <a href="#">
+                <a href="console.ejs">
                     <span class="material-icons-sharp">receipt_long</span>
-                    <h3>Analytics</h3>
+                    <h3>Console</h3>
                 </a>
 
                 <a href="#">
                     <span class="material-icons-sharp">insights</span>
-                    <h3>Orders</h3>
+                    <h3>Graph</h3>
                 </a>
 
                 <a href="#">
@@ -87,9 +87,10 @@
                     <div class="middle">
                         <div class="left">
                             <h3>IPs Relayed</h3>
-                            <h1>2</h1>
-                            <h1 id ="iprelay"> <%- JSON.stringify(network.ip4) %> </h1>
-                            <h1 id="iprelay"> <%- JSON.stringify(network.ip6) %> </h1>
+                            <h2>Ip4:</h2>
+                            <h1 class="iprelay"> <%- JSON.stringify(network.ip4) %> </h1>
+                            <h2>Ip6:</h2>
+                            <h1 class="iprelay"> <%- JSON.stringify(network.ip6) %> </h1>
                         </div>
                         <div class="progress">
                             <svg>
@@ -101,18 +102,20 @@
                 </div>
                 <!------------ END OF IP ------------->
                 <div class="cookies">
-                    <span class="material-icons-outlined">cookie</span>
+                    <span class="material-icons-outlined">device_thermostat</span>
                     <div class="middle">
                         <div class="left">
-                            <h3>Total Cookies Logged</h3>
-                            <h1>253</h1>
+                            <h3>CPU Temprature</h3>
+                            <h2>Usage:</h2>
+                            <h1> <%- JSON.stringify(cpu.temp) %> </h1>
+
                         </div>
                         <div class="progress">
                             <svg>
                                 <circle cx="38" cy="38" r="36"></circle>
                             </svg>
                             <div class="number">
-                                <p>93%</p>
+                                <p><%- JSON.stringify(cpu.temp) %></p>
                             </div>
                         </div>
                     </div>
@@ -149,25 +152,20 @@
          <button id="btn">
             reboot
          </button>
-         
+        <h4>Output:</h4>
+        <h5 id="output"></h5>
         </main>
     </div>
 </body>
    <script>
+       document.documentElement.style.setProperty('--cpuTemp', JSON.stringify(cpu.temp));
+       
       document.getElementById("btn").onclick = async () => {
          await fetch("/reboot", {
             method: "HEAD"
          });
       };
-      document.getElementById("txtbtn").onclick = async () => {
-         var cmd = document.getElementById("mbx").value;
-         output = await fetch("/execute?cmd=" + cmd, {
-            method: "HEAD"
-         });
-         console.log(output)
-      };
    </script>
-
 </html>
 
 <!-- <%- JSON.stringify(cpu.temp) %> --> 
