@@ -15,11 +15,12 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.set("view engine", "ejs");
 app.use('/static', express.static(__dirname + '/static'));
+app.use('/assets', express.static(__dirname + '/assets'));
 app.use(auth);
 
 
 app.get('/', async (req, res) => {
-    const gen = await sys.time()
+    const gen = sys.time()
     const cpu = await sys.cpu()
     const mem = await sys.mem()
     const os = await sys.osInfo()
@@ -86,8 +87,21 @@ app.get("/signin", async (req, res) => {
 });
 
 app.get("/console", async (req, res) => {
-    res.render('console.ejs');
+    res.render('console');
 });
+
+app.get("/processes", async (req, res) => {
+    res.render('processes');
+});
+
+app.get("/statistics", async (req, res) => {
+    res.render('statistics');
+});
+
+app.get("/logs", async (req, res) => {
+    res.render('logs');
+});
+
 
 app.post("/signin", async (req, res) => {
     if (req.body.password && req.body.password === password) {
@@ -127,6 +141,6 @@ app.get("/execute", async (req, res) => {
 });
 
 
-app.listen(8000, () => {
-    console.log("Listening at http://localhost:8000");
+app.listen(8080, () => {
+    console.log("Listening at http://localhost:8080");
 }); 
