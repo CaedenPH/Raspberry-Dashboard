@@ -5,6 +5,5 @@ A script to generate beautiful statistics about my Raspberry Pi's status
 <img src="assets/example-dashboard.png">
 
 **Special thanks:**
-> [Capitalism](https://github.com/NastyPigz) for assisting me along the journey.
-<br>
+> [Capitalism](https://github.com/NastyPigz) for assisting me along the journey.\n
 > [Ropra](https://github.com/RopraMMC) for the website >:(
