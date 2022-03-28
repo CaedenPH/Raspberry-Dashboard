@@ -18,11 +18,18 @@
   },
   "homepage": "https://github.com/CaedenPH/raspberry-dashboard#readme",
   "dependencies": {
+    "autosize": "^5.0.1",
+    "browserify": "^17.0.0",
     "cookie-parser": "^1.4.6",
     "ejs": "^3.1.6",
     "express": "^4.17.3",
+    "fiddle": "^0.0.1",
+    "gulp": "^4.0.2",
     "jsonwebtoken": "^8.5.1",
+    "markdown-it": "^12.3.2",
     "nodemon": "^2.0.15",
+    "pg": "^8.7.3",
+    "react": "^17.0.2",
     "systeminformation": "^5.11.9"
   }
 }
