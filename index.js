@@ -1,6 +1,5 @@
 const cookieParser = require('cookie-parser');
 const exec = require('child_process').exec;
-const spawn = require('child_process').spawn;
 const express = require('express');
 
 const sys = require('systeminformation');
@@ -110,6 +109,11 @@ app.get("/statistics", async (req, res) => {
 
 app.get("/logs", async (req, res) => {
     res.render('logs');
+});
+
+app.get("/logout", async (req, res) => {
+    res.clearCookie("_ashoisdhiozvsb");
+    res.redirect("/login");
 });
 
 
