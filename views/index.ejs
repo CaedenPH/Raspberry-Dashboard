@@ -100,7 +100,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-white" href="logout" id="logout-button">
+          <a class="nav-link text-white" href="logout">
             <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
               <i class="material-icons opacity-10">logout</i>
             </div>
@@ -171,12 +171,12 @@
               </div>
               <div class="text-end pt-1">
                 <p class="text-sm mb-0 text-capitalize">Local time</p>
-                <h4 class="mb-0"><%= JSON.stringify(general.localTime.hourSeconds); %></h4>
+                <h4 class="mb-0"><%= JSON.stringify(general.localTime.hourSeconds).replace('"', '').replace('"', ''); %></h4>
               </div>
             </div>
             <hr class="dark horizontal my-0">
             <div class="card-footer p-3">
-              <p class="mb-0"><%= JSON.stringify(general.localTime.Long); %></p>
+              <p class="mb-0"><%= JSON.stringify(general.localTime.Long).replace('"', '').replace('"', ''); %></p>
             </div>
           </div>
         </div>
