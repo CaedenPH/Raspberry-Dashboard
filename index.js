@@ -26,11 +26,21 @@ app.get('/', async (req, res) => {
     const os = await sys.osInfo()
     const load = await sys.currentLoad()
     const net = (await sys.networkInterfaces())[0]
+    const date = new Date(gen.current)
 
+    var minutes = date.getMinutes()
+    if ( 10 >= minutes ) {
+        minutes = "0" + minutes
+    }
+    console.log(load.currentLoad)
     res.render('index', {
         general: {
-            localTime: gen.current,
-            uptime: gen.uptime,
+            localTime: {
+                Long: date.toLocaleString("en-US", {timeZoneName: "short"}),
+                hourSeconds: date.getHours() + ":" + minutes,
+            },
+            uptimeHours: Math.round((gen.uptime / 3600) * 10, 2) / 10,
+            uptimeDays: Math.round((gen.uptime / 50400) * 10, 2) / 10,
             timezone: {
                 time: gen.timezone,
                 name: gen.timezoneName
@@ -46,8 +56,8 @@ app.get('/', async (req, res) => {
             model: cpu.model,
             volate: cpu.voltage,
             cache: cpu.cache,
-            currentSpeed: (await sys.cpuCurrentSpeed()).avg,
-            temp: (await sys.cpuTemperature()).main
+            currentSpeed: (await sys.cpuCurrentSpeed()).cores,
+            temp: (await sys.cpuTemperature()).cores,
         },
         memory: {
             total: mem.total,
@@ -57,7 +67,7 @@ app.get('/', async (req, res) => {
             available: mem.available,
         },
         os: {
-            platforM: os.platform,
+            platform: os.platform,
             distro: os.distro,
             kernel: os.kernel,
             release: os.release,
@@ -119,15 +129,14 @@ app.post("/signin", async (req, res) => {
     }
 });
 
-app.get("/reboot", async (req, res) => {
+app.get("/restart", async (req, res) => {
     exec('sudo /sbin/reboot', (error, stdout, stderr) => {
         console.log(error)
       });
-});
+}); 
 
 app.get("/execute", async (req, res) => {
     var { cmd } = req.query
-    console.log(cmd)
     const result = new Promise(resolve => {
       exec(cmd, (error, stdout, stderr) => {
         if (error) {
