@@ -6,8 +6,10 @@ const sys = require('systeminformation');
 const bodyParser = require('body-parser');
 const app = express();
 const auth = require('./auth.js');
+const cron = require('node-cron');
 const jwt = require("jsonwebtoken");
 const { password } = require('./config.json')
+const fs = require('fs')
 
 
 app.use(bodyParser.json());
@@ -31,7 +33,9 @@ app.get('/', async (req, res) => {
     if ( 10 >= minutes ) {
         minutes = "0" + minutes
     }
-    console.log(load.currentLoad)
+    const [d, h, m, _] = [gen.uptime / (3600*24), gen.uptime % (3600*24) / 3600, gen.uptime % 3600 / 60, gen.uptime % 3600 / 60].map((i) => Math.floor(i));
+    const s = Math.round(gen.uptime % 60)
+    
     res.render('index', {
         general: {
             localTime: {
@@ -39,7 +43,7 @@ app.get('/', async (req, res) => {
                 hourSeconds: date.getHours() + ":" + minutes,
             },
             uptimeHours: Math.round((gen.uptime / 3600) * 10, 2) / 10,
-            uptimeDays: Math.round((gen.uptime / 50400) * 10, 2) / 10,
+            uptimeLong: `${d} days, ${h} hours, ${m} minutes and ${s} seconds.`,
             timezone: {
                 time: gen.timezone,
                 name: gen.timezoneName
@@ -154,6 +158,23 @@ app.get("/execute", async (req, res) => {
 });
 
 
+cron.schedule('* * * * *', async () => {
+    const load = await sys.currentLoad()
+    console.log("Logging")
+    fs.readFile('network.log', (error, data) => {
+        console.log(data.json(), error)
+    })
+    fs.appendFile('network.log', load.currentLoad, err => {
+        if (err) {
+            console.error(err)
+            return
+        }
+    });
+
+});
+
+
 app.listen(8080, () => {
     console.log("Listening at http://localhost:8080");
 }); 
+

@@ -159,7 +159,7 @@
             </div>
             <hr class="dark horizontal my-0">
             <div class="card-footer p-3">
-              <p class="mb-0"><%= JSON.stringify(general.uptimeHours); %> hours</p>
+              <p class="mb-0"><%= JSON.stringify(general.uptimeLong).replaceAll('"', ''); %></p>
             </div>
           </div>
         </div>
@@ -171,12 +171,12 @@
               </div>
               <div class="text-end pt-1">
                 <p class="text-sm mb-0 text-capitalize">Local time</p>
-                <h4 class="mb-0"><%= JSON.stringify(general.localTime.hourSeconds).replace('"', '').replace('"', ''); %></h4>
+                <h4 class="mb-0"><%= JSON.stringify(general.localTime.hourSeconds).replaceAll('"', ''); %></h4>
               </div>
             </div>
             <hr class="dark horizontal my-0">
             <div class="card-footer p-3">
-              <p class="mb-0"><%= JSON.stringify(general.localTime.Long).replace('"', '').replace('"', ''); %></p>
+              <p class="mb-0"><%= JSON.stringify(general.localTime.Long).replaceAll('"', ''); %></p>
             </div>
           </div>
         </div>
@@ -681,10 +681,7 @@
   <script>
     var temp = "<%= JSON.stringify(cpu.temp); %>";
     var temperature = temp.replace("[", "").replace("]", "").split(',').map(Number);
-    var cores = []
-    for (i = 0; i < temperature.length; i++) {
-      cores.push("Core " + i);
-    };
+    var cores = temperature.map((item, index) => `Core ${index}`);
     var ctx = document.getElementById("chart-bars").getContext("2d");
 
     new Chart(ctx, {
@@ -768,10 +765,7 @@
 
     var perf = "<%= JSON.stringify(cpu.currentSpeed); %>";
     var performance = perf.replace("[", "").replace("]", "").split(',').map(Number);
-    var cores = []
-    for (i = 0; i < performance.length; i++) {
-      cores.push("Core " + i);
-    };
+    var cores = performance.map((item, index) => `Core ${index}`);
     var ctx2 = document.getElementById("chart-line").getContext("2d");
 
     new Chart(ctx2, {
