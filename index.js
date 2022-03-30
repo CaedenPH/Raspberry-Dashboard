@@ -9,8 +9,8 @@ const auth = require('./auth.js');
 const cron = require('node-cron');
 const jwt = require("jsonwebtoken");
 const { password } = require('./config.json')
-const fs = require('fs')
-
+const fs = require('fs');
+const { stdout } = require('process');
 
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -35,63 +35,81 @@ app.get('/', async (req, res) => {
     }
     const [d, h, m, _] = [gen.uptime / (3600*24), gen.uptime % (3600*24) / 3600, gen.uptime % 3600 / 60, gen.uptime % 3600 / 60].map((i) => Math.floor(i));
     const s = Math.round(gen.uptime % 60)
+
     
-    res.render('index', {
-        general: {
-            localTime: {
-                Long: date.toLocaleString("en-US", {timeZoneName: "short"}),
-                hourSeconds: date.getHours() + ":" + minutes,
-            },
-            uptimeHours: Math.round((gen.uptime / 3600) * 10, 2) / 10,
-            uptimeLong: `${d} days, ${h} hours, ${m} minutes and ${s} seconds.`,
-            timezone: {
-                time: gen.timezone,
-                name: gen.timezoneName
-            }
-        },
-        cpu: {
-            manufacturer: cpu.manufacturer,
-            brand: cpu.brand,
-            speedMin: cpu.speedMin,
-            speedMax: cpu.speedMax,
-            cores: cpu.cores,
-            socket: cpu.socket,
-            model: cpu.model,
-            volate: cpu.voltage,
-            cache: cpu.cache,
-            currentSpeed: (await sys.cpuCurrentSpeed()).cores,
-            temp: (await sys.cpuTemperature()).cores,
-        },
-        memory: {
-            total: mem.total,
-            free: mem.free,
-            used: mem.used,
-            active: mem.active,
-            available: mem.available,
-        },
-        os: {
-            platform: os.platform,
-            distro: os.distro,
-            kernel: os.kernel,
-            release: os.release,
-            arch: os.arch,
-            hostname: os.hostname,
-        },
-        currentLoad: { // graph stuff
-            avgLoad: load.avgLoad,
-            currentLoad: load.currentLoad,
-            currentLoadUser: load.currentLoadUser,
-            currentLoadSystem: load.currentLoadSystem,
-            currentLoadIdle: load.currentLoadIdle,
-            cpus: load.cpus
-        },
-        network: {
-            ip4: net.ip4,
-            ip6: net.ip6,   
-            mac: net.mac,
-            speed: net.speed,
+    fs.readFile('logs.txt', async(error, data) => {
+        if (error) {
+            console.log(error);
+            return
         }
-    });
+        var hourData = data.toString().trim().split("\n");
+        
+        const upload = hourData.map((item, index) => Math.round(Number(hourData[index].split(" | ")[2]) / 1000000)).slice(0, 7);
+        const download = hourData.map((item, index) => Math.round(Number(hourData[index].split(" | ")[1]) / 1000000)).slice(0, 7);
+        const ping = Math.round(Number(hourData[hourData.length - 1].split(" | ")[0]));
+        var pingDifference = String(Math.round((ping / Number(hourData[hourData.length - 2].split(" | ")[0]) * 100)) / 100);
+        if (pingDifference >= 0) { pingDifference = "+" + pingDifference; }
+        
+        res.render('index', {
+            general: {
+                localTime: {
+                    Long: date.toLocaleString("en-US", {timeZoneName: "short"}),
+                    hourSeconds: date.getHours() + ":" + minutes,
+                },
+                uptimeHours: Math.round((gen.uptime / 3600) * 10, 2) / 10,
+                uptimeLong: `${d} days, ${h} hours, ${m} minutes and ${s} seconds.`,
+                timezone: {
+                    time: gen.timezone,
+                    name: gen.timezoneName
+                }
+            },
+            cpu: {
+                manufacturer: cpu.manufacturer,
+                brand: cpu.brand,
+                speedMin: cpu.speedMin,
+                speedMax: cpu.speedMax,
+                cores: cpu.cores,
+                socket: cpu.socket,
+                model: cpu.model,
+                volate: cpu.voltage,
+                cache: cpu.cache,
+                currentSpeed: (await sys.cpuCurrentSpeed()).cores,
+                temp: (await sys.cpuTemperature()).cores,
+            },
+            memory: {
+                total: mem.total,
+                free: mem.free,
+                used: mem.used,
+                active: mem.active,
+                available: mem.available,
+            },
+            os: {
+                platform: os.platform,
+                distro: os.distro,
+                kernel: os.kernel,
+                release: os.release,
+                arch: os.arch,
+                hostname: os.hostname,
+            },
+            currentLoad: { // graph stuff
+                avgLoad: load.avgLoad,
+                currentLoad: load.currentLoad,
+                currentLoadUser: load.currentLoadUser,
+                currentLoadSystem: load.currentLoadSystem,
+                currentLoadIdle: load.currentLoadIdle,
+                cpus: load.cpus
+            },
+            network: {
+                ip4: net.ip4,
+                ip6: net.ip6,   
+                mac: net.mac,
+                upload: upload,
+                download: download,
+                ping: ping,
+                pingDifference: pingDifference
+            }
+        });
+    })
 });
 
 
@@ -139,8 +157,8 @@ app.post("/signin", async (req, res) => {
 
 app.get("/restart", async (req, res) => {
     exec('sudo /sbin/reboot', (error, stdout, stderr) => {
-        console.log(error)
-      });
+        console.log(error);
+    });
 }); 
 
 app.get("/execute", async (req, res) => {
@@ -158,19 +176,23 @@ app.get("/execute", async (req, res) => {
 });
 
 
-cron.schedule('* * * * *', async () => {
-    const load = await sys.currentLoad()
-    console.log("Logging")
-    fs.readFile('network.log', (error, data) => {
-        console.log(data.json(), error)
-    })
-    fs.appendFile('network.log', load.currentLoad, err => {
-        if (err) {
-            console.error(err)
+cron.schedule('0 * * * *', async () => {
+    console.log("Logging"); 
+    exec("speedtest --json", (error, stdout, stderr) => {
+        if (error || stderr) {
+            console.log(`Error ${error}`)
             return
         }
+        const speed = JSON.parse(stdout);
+        console.log(speed);
+        fs.appendFile('logs.txt', `${speed.ping} | ${speed.download} | ${speed.upload}\n`, error => {
+            if (error) {
+                console.log(error);
+                return
+            }
+        });
     });
-
+    
 });
 
 
