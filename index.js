@@ -8,9 +8,9 @@ const app = express();
 const auth = require('./auth.js');
 const cron = require('node-cron');
 const jwt = require("jsonwebtoken");
-const { password } = require('./config.json')
+const password = require('./config.json').password;
+
 const fs = require('fs');
-const { stdout } = require('process');
 
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -49,7 +49,7 @@ app.get('/', async (req, res) => {
         const ping = Math.round(Number(hourData[hourData.length - 1].split(" | ")[0]));
         var pingDifference = String(Math.round((ping / Number(hourData[hourData.length - 2].split(" | ")[0]) * 100)) / 100);
         if (pingDifference >= 0) { pingDifference = "+" + pingDifference; }
-        
+
         res.render('index', {
             general: {
                 localTime: {
@@ -61,7 +61,7 @@ app.get('/', async (req, res) => {
                 timezone: {
                     time: gen.timezone,
                     name: gen.timezoneName
-                }
+                },
             },
             cpu: {
                 manufacturer: cpu.manufacturer,
