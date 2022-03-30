@@ -187,13 +187,13 @@
                 <i class="material-icons opacity-10">person</i>
               </div>
               <div class="text-end pt-1">
-                <p class="text-sm mb-0 text-capitalize">New Clients</p>
-                <h4 class="mb-0">3,462</h4>
+                <p class="text-sm mb-0 text-capitalize">Network ping</p>
+                <h4 class="mb-0"><%= JSON.stringify(network.ping); %>ms</h4>
               </div>
             </div>
             <hr class="dark horizontal my-0">
             <div class="card-footer p-3">
-              <p class="mb-0"><span class="text-danger text-sm font-weight-bolder">-2%</span> than yesterday</p>
+              <p class="mb-0"><span class="text-danger text-sm font-weight-bolder"><%= JSON.stringify(network.pingDifference).replaceAll('"', ''); %>%</span> from an hour ago.</p>
             </div>
           </div>
         </div>
@@ -258,8 +258,8 @@
               </div>
             </div>
             <div class="card-body">
-              <h6 class="mb-0 ">Completed Tasks</h6>
-              <p class="text-sm ">Last Campaign Performance</p>
+              <h6 class="mb-0 ">Network latency</h6>
+              <p class="text-sm ">The network upload and download for the past 7 hours</p>
               <hr class="dark horizontal">
             </div>
           </div>
@@ -846,27 +846,46 @@
       },
     });
 
+    var up = "<%= JSON.stringify(network.upload); %>";
+    var down = "<%= JSON.stringify(network.download); %>";
+    const upload = up.replace("[", "").replace("]", "").split(',').map(Number);
+    const download = down.replace("[", "").replace("]", "").split(',').map(Number);
     var ctx3 = document.getElementById("chart-line-tasks").getContext("2d");
 
     new Chart(ctx3, {
       type: "line",
       data: {
-        labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        labels: ["1 hour ago", "2 hours ago", "3 hours ago", "4 hours ago", "5 hours ago", "6 hours ago", "7 hours ago"],
         datasets: [{
-          label: "Mobile apps",
+          label: "Upload",
           tension: 0,
           borderWidth: 0,
           pointRadius: 5,
-          pointBackgroundColor: "rgba(255, 255, 255, .8)",
+          pointBackgroundColor: "#d63384",
           pointBorderColor: "transparent",
-          borderColor: "rgba(255, 255, 255, .8)",
+          borderColor: "#d63384",
           borderWidth: 4,
           backgroundColor: "transparent",
           fill: true,
-          data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
+          data: upload,
+          maxBarThickness: 6
+        },
+        {
+          label: "Download",
+          tension: 0,
+          borderWidth: 0,
+          pointRadius: 5,
+          pointBackgroundColor: "#63B3ED",
+          pointBorderColor: "transparent",
+          borderColor: "#63B3ED",
+          borderWidth: 4,
+          backgroundColor: "transparent",
+          fill: true,
+          data: download,
           maxBarThickness: 6
 
-        }],
+        },
+      ],
       },
       options: {
         responsive: true,
