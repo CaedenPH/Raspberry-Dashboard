@@ -89,7 +89,6 @@ app.get('/', async (req, res) => {
                 kernel: os.kernel,
                 release: os.release,
                 arch: os.arch,
-                hostname: os.hostname,
             },
             currentLoad: { // graph stuff
                 avgLoad: load.avgLoad,

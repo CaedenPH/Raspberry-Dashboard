@@ -184,7 +184,7 @@
           <div class="card">
             <div class="card-header p-3 pt-2">
               <div class="icon icon-lg icon-shape bg-gradient-success shadow-success text-center border-radius-xl mt-n4 position-absolute">
-                <i class="material-icons opacity-10">person</i>
+                <i class="material-icons opacity-10">network_ping</i>
               </div>
               <div class="text-end pt-1">
                 <p class="text-sm mb-0 text-capitalize">Network ping</p>
@@ -201,16 +201,16 @@
           <div class="card">
             <div class="card-header p-3 pt-2">
               <div class="icon icon-lg icon-shape bg-gradient-info shadow-info text-center border-radius-xl mt-n4 position-absolute">
-                <i class="material-icons opacity-10">weekend</i>
+                <i class="material-icons opacity-10">sd_storage</i>
               </div>
               <div class="text-end pt-1">
-                <p class="text-sm mb-0 text-capitalize">Running processes</p>
-                <h4 class="mb-0" id="running-processes"></h4>
+                <p class="text-sm mb-0 text-capitalize">Used memory</p>
+                <h4 class="mb-0"><%= Math.round(JSON.stringify(memory.used) * (9.31*10**-10) * 10) / 10; %>gb</h4>
               </div>
             </div>
             <hr class="dark horizontal my-0">
             <div class="card-footer p-3">
-              <p class="mb-0"><span class="text-success text-sm font-weight-bolder">+5% </span>than yesterday</p>
+              <p class="mb-0"><span class="text-success text-sm font-weight-bolder"><%= Math.round(JSON.stringify(memory.free) * (9.31*10**-10) * 10) / 10; %>gb</span> available</p>
             </div>
           </div>
         </div>
@@ -679,10 +679,6 @@
   <script src="assets/js/plugins/smooth-scrollbar.min.js"></script>
   <script src="assets/js/plugins/chartjs.min.js"></script>
   <script>
-    document.getElementById("running-processes").innerHTML = async () => {
-      await fetch("/execute?cmd=ps -e | wc -l", { method: "GET" })
-    };
-
     var temp = "<%= JSON.stringify(cpu.temp); %>";
     var temperature = temp.replace("[", "").replace("]", "").split(',').map(Number);
     var cores = temperature.map((item, index) => `Core ${index}`);
