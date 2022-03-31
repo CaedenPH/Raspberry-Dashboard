@@ -36,22 +36,21 @@ document.addEventListener('DOMContentLoaded', function() {
   }
  
  
-// Main function to check the entered text and assign it to the correct function
   var checkWord = async() => {
-    textInputValue = document.getElementById('terminalTextInput').value.trim(); //get the text from the text input to a variable
-    textInputValueLowerCase = textInputValue.toLowerCase(); //get the lower case of the string
+    textInputValue = document.getElementById('terminalTextInput').value.trim();
+    textInputValueLowerCase = textInputValue.toLowerCase();
  
-    if (textInputValue != ""){ //checking if text was entered
+    if (textInputValue != ""){
       addTextToResults("<p class='userEnteredText'>> " + textInputValue + "</p>");
       output = await fetch("/execute?cmd=" + textInputValue, {
           method: "GET"
       });
       var msg = (await output.json()).message.trim()
-      
+      console.log(msg);
       if ( msg.endsWith("found") ) {
         msg = "Command " + textInputValue + " not found"
       }
-      addTextToResults("<i>" + msg + "<b>")
+      addTextToResults("<i>" + msg.replaceAll("\n", "<br>") + "<b>")
       clearInput();
     }
   };
