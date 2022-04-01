@@ -197,7 +197,7 @@ app.get("/restart", async (req, res) => {
     }
     else {
         res.redirect("/processes");
-        exec(`sudo systemctl restart ${unit}`, (error, stdout, stderr) => {
+        exec(`sudo systemctl restart ${unit}.service`, (error, stdout, stderr) => {
             if (error) {
                 console.error(error);
             }
