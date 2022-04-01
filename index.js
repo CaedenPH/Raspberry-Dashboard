@@ -21,25 +21,24 @@ app.use(auth);
 
 
 app.get('/', async (req, res) => {
-    const gen = sys.time()
-    const cpu = await sys.cpu()
-    const mem = await sys.mem()
-    const os = await sys.osInfo()
-    const load = await sys.currentLoad()
-    const net = (await sys.networkInterfaces())[0]
-    const date = new Date(gen.current)
+    const gen = sys.time();
+    const cpu = await sys.cpu();
+    const mem = await sys.mem();
+    const os = await sys.osInfo();
+    const load = await sys.currentLoad();
+    const net = (await sys.networkInterfaces())[0];
+    const date = new Date(gen.current);
 
-    var minutes = date.getMinutes()
+    var minutes = date.getMinutes();
     if ( 10 >= minutes ) {
-        minutes = "0" + minutes
+        minutes = "0" + minutes;
     }
     const [d, h, m, _] = [gen.uptime / (3600*24), gen.uptime % (3600*24) / 3600, gen.uptime % 3600 / 60, gen.uptime % 3600 / 60].map((i) => Math.floor(i));
-    const s = Math.round(gen.uptime % 60)
-
+    const s = Math.round(gen.uptime % 60);
     
     fs.readFile('logs.txt', async(error, data) => {
         if (error) {
-            console.log(error);
+            console.error(error);
             return
         }
         var hourData = data.toString().trim().split("\n");
@@ -49,7 +48,7 @@ app.get('/', async (req, res) => {
         const ping = Math.round(Number(hourData[hourData.length - 1].split(" | ")[0]));
         var pingDifference = String(Math.round((ping / Number(hourData[hourData.length - 2].split(" | ")[0]) * 100)) / 100);
         if (pingDifference >= 0) { pingDifference = "+" + pingDifference; }
-
+        
         res.render('index', {
             general: {
                 localTime: {
@@ -106,7 +105,7 @@ app.get('/', async (req, res) => {
                 download: download,
                 ping: ping,
                 pingDifference: pingDifference
-            }
+            },
         });
     })
 });
@@ -121,7 +120,40 @@ app.get("/console", async (req, res) => {
 });
 
 app.get("/processes", async (req, res) => {
-    res.render('processes');
+    exec("systemctl status abrtd.service", (error, stdout, stderr) => {
+        var output = stdout.split('\n').map((value) => value.trim())
+        const jesterbotStatus = output[2].slice(output[2].indexOf("Active")).split(' ')[1];
+        const jesterbotDeployed = output[2].slice(output[2].indexOf("Active")).split(' ')[8];
+    exec("systemctl status abrtd.service", (error, stdout, stderr) => {
+        var output = stdout.split('\n').map((value) => value.trim())
+        const stealthybotStatus = output[2].slice(output[2].indexOf("Active")).split(' ')[1];
+        const stealthybotDeployed = output[2].slice(output[2].indexOf("Active")).split(' ')[8];
+    exec("systemctl status abrtd.service", (error, stdout, stderr) => {
+        var output = stdout.split('\n').map((value) => value.trim())
+        const dashboardStatus = output[2].slice(output[2].indexOf("Active")).split(' ')[1];
+        const dashboardDeployed = output[2].slice(output[2].indexOf("Active")).split(' ')[8];
+    res.render('processes', {
+        processes: {
+            jesterbot: {
+                status: jesterbotStatus,
+                since: jesterbotDeployed,
+                gradient: true ? jesterbotStatus === "active": false
+            },
+            stealthybot: {
+                status: stealthybotStatus,
+                since: stealthybotDeployed,
+                gradient: true ? stealthybotStatus === "active": false
+            },
+            dashboard: {
+                status: dashboardStatus,
+                since: dashboardDeployed,
+                gradient: true ? dashboardStatus === "active": false
+            }
+        }
+    });
+});
+});
+});
 });
 
 app.get("/statistics", async (req, res) => {
@@ -155,13 +187,28 @@ app.post("/signin", async (req, res) => {
 });
 
 app.get("/restart", async (req, res) => {
-    exec('sudo /sbin/reboot', (error, stdout, stderr) => {
-        console.log(error);
-    });
+    var { unit } = req.query;
+    if (!unit) {
+        exec('sudo /sbin/reboot', (error, stdout, stderr) => {
+            if (error) {
+                console.error(error);
+            }
+        });
+    }
+    else {
+        res.redirect("/processes");
+        exec(`sudo systemctl restart ${unit}`, (error, stdout, stderr) => {
+            if (error) {
+                console.error(error);
+            }
+            res.redirect("/processes");
+        });
+    }
+    
 }); 
 
 app.get("/execute", async (req, res) => {
-    var { cmd } = req.query
+    var { cmd } = req.query;
     const result = new Promise(resolve => {
       exec(cmd, (error, stdout, stderr) => {
         if (error) {
@@ -174,26 +221,24 @@ app.get("/execute", async (req, res) => {
     res.status(200).json({message: await result + ""});
 });
 
-
 cron.schedule('0 * * * *', async () => {
     console.log("Logging"); 
     exec("speedtest --json", (error, stdout, stderr) => {
         if (error || stderr) {
-            console.log(`Error ${error}`)
+            console.error(error)
             return
         }
         const speed = JSON.parse(stdout);
         console.log(speed);
         fs.appendFile('logs.txt', `${speed.ping} | ${speed.download} | ${speed.upload}\n`, error => {
             if (error) {
-                console.log(error);
+                console.error(error);
                 return
             }
         });
     });
     
 });
-
 
 app.listen(8080, () => {
     console.log("Listening at http://localhost:8080");
