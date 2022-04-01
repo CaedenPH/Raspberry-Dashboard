@@ -189,7 +189,7 @@
                         <span class="text-secondary text-xs font-weight-bold"><%= JSON.stringify(processes.jesterbot.since).replaceAll('"', ''); %> ago</span>
                       </td>
                       <td class="align-middle">
-                        <a href="restart?unit=jesterbot" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
+                        <a id="jesterbot-restart" href="/processes" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
                           Restart
                         </a>
                       </td>
@@ -216,7 +216,7 @@
                         <span class="text-secondary text-xs font-weight-bold"><%= JSON.stringify(processes.stealthybot.since).replaceAll('"', ''); %> ago</span>
                       </td>
                       <td class="align-middle">
-                        <a href="restart?unit=stealthybot" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
+                        <a id="stealthybot-restart" href="/processes" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
                           Restart
                         </a>
                       </td>
@@ -243,7 +243,7 @@
                         <span class="text-secondary text-xs font-weight-bold"><%= JSON.stringify(processes.dashboard.since).replaceAll('"', ''); %> ago</span>
                       </td>
                       <td class="align-middle">
-                        <a href="restart?unit=dashboard" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
+                        <a id="dashboard-restart" href="/processes" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
                           Restart
                         </a>
                       </td>
@@ -342,7 +342,16 @@
     else {
       document.getElementById("dashboard").className = `badge badge-sm bg-gradient-secondary`;
     }
-    
+
+  document.getElementById("jesterbot-restart").onclick = () => {
+    fetch("/restart?unit=jesterbot");
+  }
+  document.getElementById("stealthybot-restart").onclick = () => {
+    fetch("/restart?unit=stealthybot");
+  }
+  document.getElementById("dashboard-restart").onclick = () => {
+    fetch("/restart?unit=dashboard");
+  }
 
   </script>
   <!--   Core JS Files   -->
