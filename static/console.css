@@ -59,7 +59,7 @@ body, h1,h2,h3, p{
  
 #terminalReslutsCont{
 	width:100%;
-	height: 400px;
+	height: 600px;
 	padding: 12px;
 	overflow-y: auto;
 	resize: none;
@@ -109,7 +109,7 @@ body, h1,h2,h3, p{
     margin: 0 0 40px 0;
   }
   #terminalReslutsCont{
-    height: 100px;
+    height: 300px;
   }
 
 }
