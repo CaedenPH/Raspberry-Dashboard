@@ -132,18 +132,6 @@ app.get("/processes", async (req, res) => {
         var output = stdout.split('\n').map((value) => value.trim())
         const dashboardStatus = output[2].slice(output[2].indexOf("Active")).split(' ')[1];
         const dashboardDeployed = output[2].slice(output[2].indexOf("Active")).split(' ')[8];
-    // exec("systemctl status abrtd.service", (error, stdout, stderr) => {
-    //     var output = stdout.split('\n').map((value) => value.trim())
-    //     const jesterbotStatus = output[2].slice(output[2].indexOf("Active")).split(' ')[1];
-    //     const jesterbotDeployed = output[2].slice(output[2].indexOf("Active")).split(' ')[8];
-    // exec("systemctl status abrtd.service", (error, stdout, stderr) => {
-    //     var output = stdout.split('\n').map((value) => value.trim())
-    //     const stealthybotStatus = output[2].slice(output[2].indexOf("Active")).split(' ')[1];
-    //     const stealthybotDeployed = output[2].slice(output[2].indexOf("Active")).split(' ')[8];
-    // exec("systemctl status abrtd.service", (error, stdout, stderr) => {
-    //     var output = stdout.split('\n').map((value) => value.trim())
-    //     const dashboardStatus = output[2].slice(output[2].indexOf("Active")).split(' ')[1];
-    //     const dashboardDeployed = output[2].slice(output[2].indexOf("Active")).split(' ')[8];
     res.render('processes', {
         processes: {
             jesterbot: {

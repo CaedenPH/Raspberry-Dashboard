@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var checkWord = async() => {
     textInputValue = document.getElementById('terminalTextInput').value.trim();
     textInputValueLowerCase = textInputValue.toLowerCase();
+    console.log(textInputValueLowerCase)
  
     if (textInputValue != ""){
       addTextToResults("<p class='userEnteredText'>> " + textInputValue + "</p>");
