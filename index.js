@@ -201,7 +201,6 @@ app.get("/restart", async (req, res) => {
             if (error) {
                 console.error(error);
             }
-            res.redirect("/processes");
         });
     }
     
