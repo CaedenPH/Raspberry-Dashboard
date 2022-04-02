@@ -43,9 +43,9 @@ app.get('/', async (req, res) => {
         }
         var hourData = data.toString().trim().split("\n");
         
-        const upload = hourData.map((item, index) => Math.round(Number(hourData[index].split(" | ")[2]) / 100000)).slice(hourData.length - 7).reverse();
-        const download = hourData.map((item, index) => Math.round(Number(hourData[index].split(" | ")[1]) / 1000000)).slice(hourData.length - 7).reverse();
-        const ping = Math.round(Number(hourData[hourData.length - 1].split(" | ")[0]));
+        const upload = hourData.map((item, index) => Number(hourData[index].split(" | ")[2])* 10).slice(hourData.length - 7).reverse();
+        const download = hourData.map((item, index) => Number(hourData[index].split(" | ")[1])).slice(hourData.length - 7).reverse();
+        const ping = Number(hourData[hourData.length - 1].split(" | ")[0]);
         var pingDifference = String(Math.round((ping / Number(hourData[hourData.length - 2].split(" | ")[0]) * 100)) / 100);
         if (pingDifference >= 0) { pingDifference = "+" + pingDifference; }
         
@@ -169,7 +169,6 @@ app.get("/logout", async (req, res) => {
     res.redirect("/login");
 });
 
-
 app.post("/signin", async (req, res) => {
     if (req.body.password && req.body.password === password) {
         res.cookie("_ashoisdhiozvsb", jwt.sign({
@@ -220,9 +219,9 @@ app.get("/execute", async (req, res) => {
     res.status(200).json({message: await result + ""});
 });
 
-cron.schedule('0 * * * *', async () => {
+cron.schedule('* * * * *', async () => {
     console.log("Logging"); 
-    exec("speedtest --json", (error, stdout, stderr) => {
+    exec("speed-test --json", (error, stdout, stderr) => {
         if (error || stderr) {
             console.error(error)
             return
