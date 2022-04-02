@@ -219,7 +219,7 @@ app.get("/execute", async (req, res) => {
     res.status(200).json({message: await result + ""});
 });
 
-cron.schedule('* * * * *', async () => {
+cron.schedule('0 * * * *', async () => {
     console.log("Logging"); 
     exec("speed-test --json", (error, stdout, stderr) => {
         if (error || stderr) {
