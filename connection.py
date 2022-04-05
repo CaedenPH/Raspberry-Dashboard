@@ -22,7 +22,11 @@ class ResponseHandler:
     def generate_base(self) -> dict[any, any]:
         with open("logs.txt") as logs:
             lines = [
-                dict(zip(["ping", "download", "upload"], [line[0], line[1], line[2]]))
+                dict(
+                    zip(
+                        ["ping", "download", "upload"], [line[0], line[1], line[2] * 10]
+                    )
+                )
                 for line in [
                     [float(i) for i in l.strip().split(" | ")] for l in logs.readlines()
                 ]
@@ -48,14 +52,23 @@ class ResponseHandler:
             },
             "cpu": {
                 # "temp": [psutil.sensors_temperatures().get("cpu_thermal")[0].current],
-                "currentSpeed": subprocess.run(
-                    ["cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq"],
-                    stdout=subprocess.PIPE,
-                    shell=True,
+                "currentSpeed": json.dumps(
+                    list(
+                        map(
+                            lambda m: round(int(m) / 1000000),
+                            subprocess.run(
+                                [
+                                    "cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq"
+                                ],
+                                stdout=subprocess.PIPE,
+                                shell=True,
+                            )
+                            .stdout.decode("utf-8")
+                            .strip()
+                            .split("\n"),
+                        )
+                    )
                 )
-                .stdout.decode("utf-8")
-                .strip()
-                .split("\n")
             },
             "network": {
                 "ping": lines[-1].get("ping"),
@@ -66,9 +79,9 @@ class ResponseHandler:
                 "upload": [lines[-i].get("upload") for i in range(1, 8)],
             },
             "memory": {
-                "used": round(psutil.virtual_memory().used * (9.31 * 10 ** -10), 3),
+                "used": round(psutil.virtual_memory().used * (9.31 * 10 ** -10), 1),
                 "available": round(
-                    psutil.virtual_memory().available * (9.31 * 10 ** -10), 3
+                    psutil.virtual_memory().available * (9.31 * 10 ** -10), 1
                 ),
             },
         }
