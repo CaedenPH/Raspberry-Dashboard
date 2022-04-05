@@ -171,12 +171,12 @@
               </div>
               <div class="text-end pt-1">
                 <p class="text-sm mb-0 text-capitalize">Local time</p>
-                <h4 class="mb-0"><%= JSON.stringify(general.localTime.hourSeconds).replaceAll('"', ''); %></h4>
+                <h4 class="mb-0"><%= JSON.stringify(general.hourSeconds).replaceAll('"', ''); %></h4>
               </div>
             </div>
             <hr class="dark horizontal my-0">
             <div class="card-footer p-3">
-              <p class="mb-0"><%= JSON.stringify(general.localTime.Long).replaceAll('"', ''); %></p>
+              <p class="mb-0"><%= JSON.stringify(general.uptimeLong).replaceAll('"', ''); %></p>
             </div>
           </div>
         </div>
@@ -205,12 +205,12 @@
               </div>
               <div class="text-end pt-1">
                 <p class="text-sm mb-0 text-capitalize">Used memory</p>
-                <h4 class="mb-0"><%= Math.round(JSON.stringify(memory.used) * (9.31*10**-10) * 10) / 10; %>gb</h4>
+                <h4 class="mb-0"><%= JSON.stringify(memory.used); %>gb</h4>
               </div>
             </div>
             <hr class="dark horizontal my-0">
             <div class="card-footer p-3">
-              <p class="mb-0"><span class="text-success text-sm font-weight-bolder"><%= Math.round(JSON.stringify(memory.free) * (9.31*10**-10) * 10) / 10; %>gb</span> available</p>
+              <p class="mb-0"><span class="text-success text-sm font-weight-bolder"><%= JSON.stringify(memory.available); %>gb</span> available</p>
             </div>
           </div>
         </div>
@@ -763,8 +763,8 @@
     });
 
 
-    var perf = "<%= JSON.stringify(cpu.currentSpeed); %>";
-    var performance = perf.replace("[", "").replace("]", "").split(',').map(Number);
+    var perf = "<%= JSON.parse(cpu.currentSpeed); %>";
+    var performance = perf.split(',').map(Number);
     var cores = performance.map((item, index) => `Core ${index}`);
     var ctx2 = document.getElementById("chart-line").getContext("2d");
 
