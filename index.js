@@ -11,6 +11,7 @@ const jwt = require("jsonwebtoken");
 const password = require('./config.json').password;
 
 const fs = require('fs');
+const webSocket = require('ws');
 
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -19,6 +20,8 @@ app.use('/static', express.static(__dirname + '/static'));
 app.use('/assets', express.static(__dirname + '/assets'));
 app.use(auth);
 
+const server = require('http').createServer(app);
+const wss = new webSocket.Server({ server:server });
 
 app.get('/', async (req, res) => {
     const gen = sys.time();
@@ -238,7 +241,24 @@ cron.schedule('0 * * * *', async () => {
     
 });
 
-app.listen(8080, () => {
+wss.on('connection', function connection(ws) {
+    console.log('A new client Connected!');
+    ws.send('Welcome New Client!');
+  
+    ws.on('message', function incoming(message) {
+      console.log('received: %s', message);
+  
+      wss.clients.forEach(function each(client) {
+        if (client !== ws && client.readyState === WebSocket.OPEN) {
+          client.send(message);
+        }
+      });
+      
+    });
+});   
+
+server.listen(8080, () => {
     console.log("Listening at http://localhost:8080");
 }); 
+
 
