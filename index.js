@@ -24,94 +24,44 @@ app.use(auth);
 const server = require('http').createServer(app);
 const wss = new webSocket.Server({ server:server });
 
-app.get('/', async (req, res) => {
-    const gen = sys.time();
-    const cpu = await sys.cpu();
-    const mem = await sys.mem();
-    const os = await sys.osInfo();
-    const load = await sys.currentLoad();
-    const net = (await sys.networkInterfaces())[0];
-    const date = new Date(gen.current);
+const REQUEST = 0
+const RESPONSE = 1
+const IDENTIFY = 2
 
-    var minutes = date.getMinutes();
-    if ( 10 >= minutes ) {
-        minutes = "0" + minutes;
+wss.on('connection', function connection(ws) {
+    if (ws._socket.address().address !== '::1') {
+        ws.close();
     }
-    const [d, h, m, _] = [gen.uptime / (3600*24), gen.uptime % (3600*24) / 3600, gen.uptime % 3600 / 60, gen.uptime % 3600 / 60].map((i) => Math.floor(i));
-    const s = Math.round(gen.uptime % 60);
-    
-    fs.readFile('logs.txt', async(error, data) => {
-        if (error) {
-            console.error(error);
-            return
+    console.log('Client Connected!');
+  
+    ws.on('message', function incoming(message) {
+        data = JSON.parse(message);
+        if (data.op === IDENTIFY) {
+            if (data.token !== ws_token) {
+                ws.close();
+            }
         }
-        var hourData = data.toString().trim().split("\n");
-        
-        const upload = hourData.map((item, index) => Number(hourData[index].split(" | ")[2])* 10).slice(hourData.length - 7).reverse();
-        const download = hourData.map((item, index) => Number(hourData[index].split(" | ")[1])).slice(hourData.length - 7).reverse();
-        const ping = Number(hourData[hourData.length - 1].split(" | ")[0]);
-        var pingDifference = String(Math.round((ping / Number(hourData[hourData.length - 2].split(" | ")[0]) * 100)) / 100);
-        if (pingDifference >= 0) { pingDifference = "+" + pingDifference; }
-        
-        res.render('index', {
-            general: {
-                localTime: {
-                    Long: date.toLocaleString("en-US", {timeZoneName: "short"}),
-                    hourSeconds: date.getHours() + ":" + minutes,
-                },
-                uptimeHours: Math.round((gen.uptime / 3600) * 10, 2) / 10,
-                uptimeLong: `${d} days, ${h} hours, ${m} minutes and ${s} seconds.`,
-                timezone: {
-                    time: gen.timezone,
-                    name: gen.timezoneName
-                },
-            },
-            cpu: {
-                manufacturer: cpu.manufacturer,
-                brand: cpu.brand,
-                speedMin: cpu.speedMin,
-                speedMax: cpu.speedMax,
-                cores: cpu.cores,
-                socket: cpu.socket,
-                model: cpu.model,
-                volate: cpu.voltage,
-                cache: cpu.cache,
-                currentSpeed: (await sys.cpuCurrentSpeed()).cores,
-                temp: (await sys.cpuTemperature()).cores,
-            },
-            memory: {
-                total: mem.total,
-                free: mem.free,
-                used: mem.used,
-                active: mem.active,
-                available: mem.available,
-            },
-            os: {
-                platform: os.platform,
-                distro: os.distro,
-                kernel: os.kernel,
-                release: os.release,
-                arch: os.arch,
-            },
-            currentLoad: { // graph stuff
-                avgLoad: load.avgLoad,
-                currentLoad: load.currentLoad,
-                currentLoadUser: load.currentLoadUser,
-                currentLoadSystem: load.currentLoadSystem,
-                currentLoadIdle: load.currentLoadIdle,
-                cpus: load.cpus
-            },
-            network: {
-                ip4: net.ip4,
-                ip6: net.ip6,   
-                mac: net.mac,
-                upload: upload,
-                download: download,
-                ping: ping,
-                pingDifference: pingDifference
-            },
+    });
+});   
+
+app.get('/', async (req, res) => {
+    wss.clients.forEach(function each(client) {
+        client.send(JSON.stringify({
+            op: REQUEST,
+            d: "/"
+        }));
+
+        client.on("message", function incoming(message) {
+            data = JSON.parse(message);
+            console.log(data, typeof(data));
+            if (data.op !== RESPONSE) {
+                return
+            }
+            try {
+                res.render('index', data.d);
+            } catch (error) {}
         });
-    })
+    });
 });
 
 
@@ -241,28 +191,6 @@ cron.schedule('0 * * * *', async () => {
     });
     
 });
-
-const REQUEST = 0
-const RESPONSE = 1
-const IDENTIFY = 2
-
-wss.on('connection', function connection(ws) {
-    if (ws._socket.address().address !== '::1') {
-        ws.close();
-    }
-    console.log('A new client Connected!');
-    ws.send('Welcome New Client!');
-  
-    ws.on('message', function incoming(message) {
-        data = JSON.parse(message);
-        if (data.op === IDENTIFY) {
-            if (data.token !== ws_token) {
-                ws.close();
-                console.log("eee");
-            }
-        }
-    });
-});   
 
 server.listen(8080, () => {
     console.log("Listening at http://localhost:8080");
