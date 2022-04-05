@@ -49,7 +49,10 @@ document.addEventListener('DOMContentLoaded', function() {
       var msg = (await output.json()).message.trim()
       console.log(msg);
       if ( msg.endsWith("found") ) {
-        msg = "Command " + textInputValue + " not found"
+        msg = `Command ${textInputValue} not found`
+      }
+      if ( msg === "" ) {
+        msg = "..."
       }
       addTextToResults("<i>" + msg.replaceAll("\n", "<br>") + "<b>")
       clearInput();
