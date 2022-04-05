@@ -9,6 +9,7 @@ const auth = require('./auth.js');
 const cron = require('node-cron');
 const jwt = require("jsonwebtoken");
 const password = require('./config.json').password;
+const ws_token = require("./config.json").ws_token;
 
 const fs = require('fs');
 const webSocket = require('ws');
@@ -241,19 +242,25 @@ cron.schedule('0 * * * *', async () => {
     
 });
 
+const REQUEST = 0
+const RESPONSE = 1
+const IDENTIFY = 2
+
 wss.on('connection', function connection(ws) {
+    if (ws._socket.address().address !== '::1') {
+        ws.close();
+    }
     console.log('A new client Connected!');
     ws.send('Welcome New Client!');
   
     ws.on('message', function incoming(message) {
-      console.log('received: %s', message);
-  
-      wss.clients.forEach(function each(client) {
-        if (client !== ws && client.readyState === WebSocket.OPEN) {
-          client.send(message);
+        data = JSON.parse(message);
+        if (data.op === IDENTIFY) {
+            if (data.token !== ws_token) {
+                ws.close();
+                console.log("eee");
+            }
         }
-      });
-      
     });
 });   
 
