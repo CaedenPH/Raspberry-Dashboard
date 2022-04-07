@@ -23,9 +23,7 @@ class ResponseHandler:
         with open("logs.txt") as logs:
             lines = [
                 dict(
-                    zip(
-                        ["ping", "download", "upload"], [line[0], line[1], line[2] * 10]
-                    )
+                    zip(["ping", "download", "upload"], [line[0], line[1], line[2] * 10])
                 )
                 for line in [
                     [float(i) for i in l.strip().split(" | ")] for l in logs.readlines()
@@ -43,6 +41,17 @@ class ResponseHandler:
             ],
         )
 
+        stdout = (
+            subprocess.run(
+                ["cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq"],
+                stdout=subprocess.PIPE,
+                shell=True,
+            )
+            .stdout.decode("utf-8")
+            .strip()
+            .split("\n")
+        )
+
         response = {
             "general": {
                 "uptimeHours": round((uptime_seconds) / 3600, 2),
@@ -53,22 +62,8 @@ class ResponseHandler:
             "cpu": {
                 # "temp": [psutil.sensors_temperatures().get("cpu_thermal")[0].current],
                 "currentSpeed": json.dumps(
-                    list(
-                        map(
-                            lambda m: round(int(m) / 1000000),
-                            subprocess.run(
-                                [
-                                    "cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq"
-                                ],
-                                stdout=subprocess.PIPE,
-                                shell=True,
-                            )
-                            .stdout.decode("utf-8")
-                            .strip()
-                            .split("\n"),
-                        )
-                    )
-                )
+                    list(map(lambda m: round(int(m) / 1000000), stdout))
+                ),
             },
             "network": {
                 "ping": lines[-1].get("ping"),
@@ -109,9 +104,7 @@ class WebSocket:
         with open("config.json") as stream:
             data: dict = json.load(stream)
 
-        await self.socket.send_json(
-            {"op": self.IDENTIFY, "token": data.get("ws_token")}
-        )
+        await self.socket.send_json({"op": self.IDENTIFY, "token": data.get("ws_token")})
 
     async def listen(self) -> None:
         await self.identify()
@@ -121,7 +114,10 @@ class WebSocket:
 
     @classmethod
     async def connect(cls, client: Client) -> WebSocket:
-        ws = await client._session.ws_connect("ws://localhost:8080")
+        with open("config.json") as stream:
+            data: dict = json.load(stream)
+
+        ws = await client._session.ws_connect(f"ws://{data.get('ws_path')}")
         return cls(ws, client)
 
 
