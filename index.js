@@ -29,9 +29,6 @@ const RESPONSE = 1
 const IDENTIFY = 2
 
 wss.on('connection', function connection(ws) {
-    if (ws._socket.address().address !== '::1') {
-        ws.close();
-    }
     console.log('Client Connected!');
   
     ws.on('message', function incoming(message) {
