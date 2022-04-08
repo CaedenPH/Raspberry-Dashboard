@@ -16,10 +16,20 @@ class DisconnectError(Exception):
 
 
 class ResponseHandler:
-    def __init__(self) -> None:
-        pass
-
-    def generate_base(self) -> dict[any, any]:
+    """
+    Handles responses from the websocket
+    connection and generates system information 
+    related respponses. Also exeuctes commands 
+    in shell as a response
+    """
+    
+    @staticmethod
+    def base(self) -> dict[any, any]:
+        """
+        Generates the systeminformation 
+        required for the base / path
+        """
+        
         with open("logs.txt") as logs:
             lines = [
                 dict(
@@ -84,6 +94,24 @@ class ResponseHandler:
 
 
 class WebSocket:
+    """
+    Handles websocket responses
+    
+    
+    Attributes
+    ----------
+    REQUEST :receive:
+        OPCode indicating a response request
+    RESPONSE :deliver:
+        OPCode sent with a response
+    IDENTIFY :receive&deliver:
+        OPCode sent with the payload request/ack
+    ws: :class:`aiohttp.ClientWebSocketResponse`
+        The socket instance connected with the server
+    client: :class:`Client`
+        The client handling requests.
+    """
+    
     REQUEST = 0
     RESPONSE = 1
     IDENTIFY = 2
@@ -91,29 +119,38 @@ class WebSocket:
     def __init__(self, ws: aiohttp.ClientWebSocketResponse, client: Client) -> None:
         self.socket = ws
         self.client = client
-        self.response_handler = ResponseHandler()
 
     async def _parse_message(self, message: str) -> None:
         data: dict = json.loads(message)
         if data.get("op") == self.REQUEST:
-            __converter = {"/": self.response_handler.generate_base()}
-            response = __converter.get(data.get("d"))
+            __converter = {"/": self.ResponseHandler.base}
+            response = __converter.get(data.get("d"))()
             await self.socket.send_json({"op": self.RESPONSE, "d": response})
 
     async def identify(self) -> None:
+        """ Sends the identify payload """
+        
         with open("config.json") as stream:
             data: dict = json.load(stream)
-
         await self.socket.send_json({"op": self.IDENTIFY, "token": data.get("ws_token")})
 
     async def listen(self) -> None:
+        """ Listens for messages from the server"""
+       
         await self.identify()
         async for message in self.socket:
             await self._parse_message(message.data)
-        raise DisconnectError
+        raise DisconnectError # connection disconnected
 
     @classmethod
     async def connect(cls, client: Client) -> WebSocket:
+        """
+        Creates a connection between the client
+        and the server 
+        
+        Parameters
+        ----------
+        client :class:`Client
         with open("config.json") as stream:
             data: dict = json.load(stream)
 
