@@ -12,7 +12,7 @@ import subprocess
 
 
 class DisconnectError(Exception):
-    """Raised when the websocket is forcebly disconnected from the server."""
+    """ Raised when the websocket is forcebly disconnected from the server. """
 
 
 class ResponseHandler:
@@ -20,14 +20,14 @@ class ResponseHandler:
     Handles responses from the websocket
     connection and generates system information 
     related respponses. Also exeuctes commands 
-    in shell as a response
+    in shell as a response.
     """
     
     @staticmethod
     def base(self) -> dict[any, any]:
         """
         Generates the systeminformation 
-        required for the base / path
+        required for the base / path.
         """
         
         with open("logs.txt") as logs:
@@ -95,19 +95,18 @@ class ResponseHandler:
 
 class WebSocket:
     """
-    Handles websocket responses
-    
+    Handles websocket responses.
     
     Attributes
     ----------
     REQUEST :receive:
-        OPCode indicating a response request
+        OPCode indicating a response request.
     RESPONSE :deliver:
-        OPCode sent with a response
+        OPCode sent with a response.
     IDENTIFY :receive&deliver:
-        OPCode sent with the payload request/ack
+        OPCode sent with the payload request/ack.
     ws: :class:`aiohttp.ClientWebSocketResponse`
-        The socket instance connected with the server
+        The socket instance connected with the server.
     client: :class:`Client`
         The client handling requests.
     """
@@ -123,19 +122,19 @@ class WebSocket:
     async def _parse_message(self, message: str) -> None:
         data: dict = json.loads(message)
         if data.get("op") == self.REQUEST:
-            __converter = {"/": self.ResponseHandler.base}
+            __converter = {"/": ResponseHandler.base}
             response = __converter.get(data.get("d"))()
             await self.socket.send_json({"op": self.RESPONSE, "d": response})
 
     async def identify(self) -> None:
-        """ Sends the identify payload """
+        """ Sends the identify payload. """
         
         with open("config.json") as stream:
             data: dict = json.load(stream)
         await self.socket.send_json({"op": self.IDENTIFY, "token": data.get("ws_token")})
 
     async def listen(self) -> None:
-        """ Listens for messages from the server"""
+        """ Listens for messages from the server. """
        
         await self.identify()
         async for message in self.socket:
@@ -146,11 +145,15 @@ class WebSocket:
     async def connect(cls, client: Client) -> WebSocket:
         """
         Creates a connection between the client
-        and the server 
+        and the server.
         
         Parameters
         ----------
-        client :class:`Client
+        client :class:`Client`
+            The client that handles websocket
+            connection and interaction.
+        """
+
         with open("config.json") as stream:
             data: dict = json.load(stream)
 
@@ -159,10 +162,30 @@ class WebSocket:
 
 
 class Client:
+    """
+    Handles websocket creation
+    and connection.
+    
+    Attributes
+    ----------
+    _session: :class:`aiohttp.ClientSession`
+        The raw client session.
+    """
+
     def __init__(self) -> None:
         self._session = aiohttp.ClientSession()
 
     async def ws_connect(self) -> WebSocket | bool:
+        """
+        Creates the websocket connection.
+
+        Returns
+        -------
+        Union[Websocket, bool]
+            websocket instance or False
+            indicating a failed connection.
+        """
+
         try:
             self._ws = await WebSocket.connect(self)
             return self._ws
@@ -171,6 +194,13 @@ class Client:
 
 
 async def main() -> None:
+    """
+    Initiates the websocket and starts listening
+    to messages ensuring the websocket is connected.
+    If disconnected, a whle True loop checks consistently
+    for a reopened socket.
+    """
+    
     client = Client()
 
     while True:
