@@ -8,6 +8,7 @@ import math
 
 import time
 import psutil
+import speedtest
 import subprocess
 
 
@@ -211,5 +212,24 @@ async def main() -> None:
             except DisconnectError:
                 continue
 
+async def update_logs() -> None:
+    """
+    Simulates a crontab-like funcion
+    to update the logs.txt function every
+    hour with the latest network speeds.
+    """
 
+    while True:
+        network = speedtest.Speedtest()
+        upload: int = network.upload()
+        download: int = network.download()
+        ping: dict = network.get_best_server()
+
+        with open("logs.txt", "w") as logs:
+            logs.write(f"{ping.get('latency')} | {download} | {upload}")
+        await asyncio.sleep(3600)
+    
+
+
+asyncio.run(update_logs())
 asyncio.run(main())
