@@ -168,13 +168,13 @@ app.get("/restart", async (req, res) => {
 app.get("/execute", async (req, res) => {
     var { cmd } = req.query;
     const result = new Promise(resolve => {
-      exec(cmd, (error, stdout, stderr) => {
-        if (error) {
-          resolve(error.message);
+        var output = execute(cmd);
+
+        if (output.stderr) {
+          resolve(output.stderr);
         } else {
-          resolve(stdout);
+          resolve(output.stdout);
         }
-      });
     });
     res.status(200).json({message: await result + ""});
 });
