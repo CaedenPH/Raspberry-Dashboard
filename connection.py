@@ -90,7 +90,7 @@ class ResponseHandler:
                 if (diff := round(lines[-1].get("ping") / lines[-2].get("ping"), 2)) > 1
                 else f"-{round(lines[-2].get('ping') / lines[-1].get('ping'), 2)}",
                 "download": [
-                    round(lines[-i].get("download") / 100000) for i in range(1, 8)
+                    round(lines[-i].get("download") / 1000000) for i in range(1, 8)
                 ],
                 "upload": [
                     round(lines[-i].get("upload") / 1000000) for i in range(1, 8)
@@ -137,11 +137,17 @@ class WebSocket:
 
     async def _parse_message(self, message: str) -> None:
         data: dict = json.loads(message)
-        if data.get("op") == self.REQUEST:
+        op = data.get("op")
+
+        if op == self.IDENTIFY:
+            await self.identify()
+
+        if op == self.REQUEST:
             __converter = {"/": ResponseHandler.base}
             response = __converter.get(data.get("d"))()
             await self.send_json({"op": self.RESPONSE, "d": response})
-        elif data.get("op") == self.EXECUTE:
+
+        elif op == self.EXECUTE:
             command = data.get("d")
             execution = subprocess.run(
                 [command], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -180,7 +186,6 @@ class WebSocket:
     async def listen(self) -> None:
         """Listens for messages from the server."""
 
-        await self.identify()
         async for message in self.socket:
             await self._parse_message(message.data)
         raise DisconnectError  # connection disconnected
