@@ -50,13 +50,12 @@ class ResponseHandler:
             ]
 
         uptime_seconds = time.time() - psutil.boot_time()
-        d, h, m, s = map(
+        d, h, m = map(
             math.floor,
             [
                 uptime_seconds / 86400,
                 uptime_seconds % 86400 / 3600,
                 uptime_seconds % 3600 / 60,
-                uptime_seconds % 60,
             ],
         )
 
@@ -64,6 +63,7 @@ class ResponseHandler:
             subprocess.run(
                 ["cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq"],
                 stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
                 shell=True,
             )
             .stdout.decode("utf-8")
@@ -73,23 +73,28 @@ class ResponseHandler:
 
         response = {
             "general": {
-                "uptimeHours": round((uptime_seconds) / 3600, 2),
-                "uptimeLong": f"{d} days, {h} hours, {m} minutes and {s} seconds.",
+                "uptimeHours": round((uptime_seconds) / 3600),
+                "uptimeLong": f"{d} days, {h} hours and {m} minutes.",
                 "hourSeconds": datetime.datetime.now().strftime("%H:%M"),
                 "longDatetime": datetime.datetime.now().strftime("%c"),
             },
             "cpu": {
-                "temp": [psutil.sensors_temperatures().get("cpu_thermal")[0].current],
-                "currentSpeed":
-                list(map(lambda m: round(int(m) / 1000000), stdout))
+                # "temp": [psutil.sensors_temperatures().get("cpu_thermal")[0].current],
+                "currentSpeed": json.dumps(
+                    list(map(lambda m: round(int(m) / 1000000), stdout))
+                )
             },
             "network": {
-                "ping": lines[-1].get("ping"),
+                "ping": round(lines[-1].get("ping")),
                 "pingDifference": "+" + str(diff)
-                if (diff := round(lines[-1].get("ping") / lines[-2].get("ping"), 3)) > 1
-                else f"-{lines[-2].get('ping') / lines[-1].get('ping')}",
-                "download": [lines[-i].get("download") for i in range(1, 8)],
-                "upload": [lines[-i].get("upload") for i in range(1, 8)],
+                if (diff := round(lines[-1].get("ping") / lines[-2].get("ping"), 2)) > 1
+                else f"-{round(lines[-2].get('ping') / lines[-1].get('ping'), 2)}",
+                "download": [
+                    round(lines[-i].get("download") / 100000) for i in range(1, 8)
+                ],
+                "upload": [
+                    round(lines[-i].get("upload") / 1000000) for i in range(1, 8)
+                ],
             },
             "memory": {
                 "used": round(psutil.virtual_memory().used * (9.31 * 10**-10), 1),
@@ -161,7 +166,7 @@ class WebSocket:
             The data to send.
         """
         try:
-            await self.socket.send_json(json.dumps(data))
+            await self.socket.send_json(data)
         except Exception as err:
             logging.debug(err)
 
