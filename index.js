@@ -1,12 +1,9 @@
 const cookieParser = require('cookie-parser');
-const exec = require('child_process').exec;
 const express = require('express');
 
-const sys = require('systeminformation');
 const bodyParser = require('body-parser');
 const app = express();
 const auth = require('./auth.js');
-const cron = require('node-cron');
 const jwt = require("jsonwebtoken");
 const password = require('./config.json').password;
 const ws_token = require("./config.json").ws_token;
@@ -36,7 +33,9 @@ function execute (command) {
             d: command
         }));
         client.on("message", function incoming(message) {
-            data = JSON.parse(message);
+            console.log(message);
+            let data = JSON.parse(message);
+            console.log(data);
             if (data.op !== EXECUTE) {
                 return;
             }
@@ -49,7 +48,7 @@ wss.on('connection', function connection(ws) {
     console.log('Client Connected!');
   
     ws.on('message', function incoming(message) {
-        data = JSON.parse(message);
+        let data = JSON.parse(message);
         if (data.op === IDENTIFY) {
             if (data.token !== ws_token) {
                 ws.close();
@@ -66,8 +65,7 @@ app.get('/', async (req, res) => {
         }));
 
         client.on("message", function incoming(message) {
-            data = JSON.parse(message);
-            console.log(data, typeof(data));
+            let data = JSON.parse(message);
             if (data.op !== RESPONSE) {
                 return
             }
@@ -88,18 +86,18 @@ app.get("/console", async (req, res) => {
 });
 
 app.get("/processes", async (req, res) => {
-    exec("systemctl status jesterbot.service", (error, stdout, stderr) => {
-        var output = stdout.split('\n').map((value) => value.trim())
-        const jesterbotStatus = output[2].slice(output[2].indexOf("Active")).split(' ')[1];
-        const jesterbotDeployed = output[2].slice(output[2].indexOf("Active")).split(' ')[8];
-    exec("systemctl status stealthybot.service", (error, stdout, stderr) => {
-        var output = stdout.split('\n').map((value) => value.trim())
-        const stealthybotStatus = output[2].slice(output[2].indexOf("Active")).split(' ')[1];
-        const stealthybotDeployed = output[2].slice(output[2].indexOf("Active")).split(' ')[8];
-    exec("systemctl status dashboard.service", (error, stdout, stderr) => {
-        var output = stdout.split('\n').map((value) => value.trim())
-        const dashboardStatus = output[2].slice(output[2].indexOf("Active")).split(' ')[1];
-        const dashboardDeployed = output[2].slice(output[2].indexOf("Active")).split(' ')[8];
+    var jesterbotStdout = execute("systemctl status jesterbot.service").stdout;
+    const jesterbotStatus = jesterbotStdout[2].slice(jesterbotStdout[2].indexOf("Active")).split(' ')[1];
+    const jesterbotDeployed = jesterbotStdout[2].slice(jesterbotStdout[2].indexOf("Active")).split(' ')[8];
+    
+    var stealthybotStdout = execute("systemctl status stealthybot.service").stdout;
+    const stealthybotStatus = stealthybotStdout[2].slice(stealthybotStdout[2].indexOf("Active")).split(' ')[1];
+    const stealthybotDeployed = stealthybotStdout[2].slice(stealthybotStdout[2].indexOf("Active")).split(' ')[8];
+    
+    var dashboardStdout = execute("systemctl status dashboard.service").stdout;
+    const dashboardStatus = dashboardStdout[2].slice(dashboardStdout[2].indexOf("Active")).split(' ')[1];
+    const dashboardDeployed = dashboardStdout[2].slice(dashboardStdout[2].indexOf("Active")).split(' ')[8];
+    
     res.render('processes', {
         processes: {
             jesterbot: {
@@ -119,9 +117,6 @@ app.get("/processes", async (req, res) => {
             }
         }
     });
-});
-});
-});
 });
 
 app.get("/statistics", async (req, res) => {
@@ -167,9 +162,10 @@ app.get("/restart", async (req, res) => {
 
 app.get("/execute", async (req, res) => {
     var { cmd } = req.query;
+
     const result = new Promise(resolve => {
         var output = execute(cmd);
-
+        console.log(output);
         if (output.stderr) {
           resolve(output.stderr);
         } else {
