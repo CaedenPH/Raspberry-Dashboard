@@ -79,10 +79,9 @@ class ResponseHandler:
             },
             "cpu": {
                 # "temp": [psutil.sensors_temperatures().get("cpu_thermal")[0].current],
-                "currentSpeed": json.dumps(
+                "currentSpeed":
                     # list(map(lambda m: round(int(m) / 1000000), stdout))
                     (1, 2, 3, 4, 5, 6)
-                ),
             },
             "network": {
                 "ping": lines[-1].get("ping"),
@@ -136,7 +135,7 @@ class WebSocket:
         if data.get("op") == self.REQUEST:
             __converter = {"/": ResponseHandler.base}
             response = __converter.get(data.get("d"))()
-            await self.socket.send_json({"op": self.RESPONSE, "d": response})
+            await self.send_json({"op": self.RESPONSE, "d": response})
         elif data.get("op") == self.EXECUTE:
             command = data.get("d")
             execution = subprocess.run(
@@ -146,16 +145,32 @@ class WebSocket:
                 lambda m: m.decode("utf-8").strip(),
                 (execution.stdout, execution.stderr),
             )
-            await self.socket.send_json(
+            await self.send_json(
                 {"op": self.EXECUTE, "d": {"stdout": stdout, "stderr": stderr}}
             )
+    
+    async def send_json(self, data) -> None:
+        """
+        Sends a json payload to the socket
+        with an error handler and dumping
+        into json format.
+        
+        Parameters
+        ----------
+        data
+            The data to send.
+        """
+        try:
+            await self.socket.send_json(json.dumps(data))
+        except Exception as err:
+            logging.debug(err)
 
     async def identify(self) -> None:
         """Sends the identify payload."""
 
         with open("config.json") as stream:
             data: dict = json.load(stream)
-        await self.socket.send_json(
+        await self.send_json(
             {"op": self.IDENTIFY, "token": data.get("ws_token")}
         )
 
