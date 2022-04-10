@@ -10,6 +10,7 @@ const ws_token = require("./config.json").ws_token;
 
 const fs = require('fs');
 const webSocket = require('ws');
+const e = require('express');
 
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -26,53 +27,55 @@ const RESPONSE = 1
 const IDENTIFY = 2
 const EXECUTE = 3
 
-function execute (command) {
-    wss.clients.forEach(function each(client) {
-        client.send(JSON.stringify({
-            op: EXECUTE,
-            d: command
-        }));
+async function execute (command) {
+    const [ client ] = wss.clients;
+    client.send(JSON.stringify({
+        op: EXECUTE,
+        d: command
+    }));    
+        
+    result = new Promise(resolve => {
         client.on("message", function incoming(message) {
-            console.log(message);
             let data = JSON.parse(message);
-            console.log(data);
             if (data.op !== EXECUTE) {
                 return;
             }
-            return data.d;
+            resolve(data.d);
         });
     });
+    return await result;
 }
 
-wss.on('connection', function connection(ws) {
+wss.on('connection', function connection(client) {
     console.log('Client Connected!');
-  
-    ws.on('message', function incoming(message) {
+    
+    client.send(JSON.stringify({op: IDENTIFY}));
+    client.on('message', function incoming(message) {
+        
         let data = JSON.parse(message);
         if (data.op === IDENTIFY) {
-            if (data.token !== ws_token) {
-                ws.close();
-            }
+            if (data.token === ws_token) {
+                
+            } else { client.close(); }
         }
     });
 });   
 
 app.get('/', async (req, res) => {
-    wss.clients.forEach(function each(client) {
-        client.send(JSON.stringify({
-            op: REQUEST,
-            d: "/"
-        }));
-
-        client.on("message", function incoming(message) {
-            let data = JSON.parse(message);
-            if (data.op !== RESPONSE) {
-                return
-            }
-            try {
-                res.render('index', data.d);
-            } catch (error) {}
-        });
+    const [ client ] = wss.clients;
+    
+    client.send(JSON.stringify({
+        op: REQUEST,
+        d: "/"
+    }));
+    client.on("message", function incoming(message) {
+        let data = JSON.parse(message);
+        if (data.op !== RESPONSE) {
+            return
+        }
+        try {
+            res.render('index', data.d);
+        } catch (error) {}
     });
 });
 
@@ -85,16 +88,37 @@ app.get("/console", async (req, res) => {
     res.render('console');
 });
 
+app.get("/statistics", async (req, res) => {
+    res.render('statistics');
+});
+
+app.get("/logs", async (req, res) => {
+    res.render('logs');
+});
+
+app.get("/editor", async (req, res) => {
+    res.render('editor');
+});
+
+app.get("/protocols", async (req, res) => {
+    res.render('protocols');
+})
+
+app.get("/logout", async (req, res) => {
+    res.clearCookie("_ashoisdhiozvsb");
+    res.redirect("/login");
+});
+
 app.get("/processes", async (req, res) => {
-    var jesterbotStdout = execute("systemctl status jesterbot.service").stdout;
+    var jesterbotStdout = await execute("systemctl status jesterbot.service").stdout;
     const jesterbotStatus = jesterbotStdout[2].slice(jesterbotStdout[2].indexOf("Active")).split(' ')[1];
     const jesterbotDeployed = jesterbotStdout[2].slice(jesterbotStdout[2].indexOf("Active")).split(' ')[8];
     
-    var stealthybotStdout = execute("systemctl status stealthybot.service").stdout;
+    var stealthybotStdout = await execute("systemctl status stealthybot.service").stdout;
     const stealthybotStatus = stealthybotStdout[2].slice(stealthybotStdout[2].indexOf("Active")).split(' ')[1];
     const stealthybotDeployed = stealthybotStdout[2].slice(stealthybotStdout[2].indexOf("Active")).split(' ')[8];
     
-    var dashboardStdout = execute("systemctl status dashboard.service").stdout;
+    var dashboardStdout = await execute("systemctl status dashboard.service").stdout;
     const dashboardStatus = dashboardStdout[2].slice(dashboardStdout[2].indexOf("Active")).split(' ')[1];
     const dashboardDeployed = dashboardStdout[2].slice(dashboardStdout[2].indexOf("Active")).split(' ')[8];
     
@@ -119,17 +143,29 @@ app.get("/processes", async (req, res) => {
     });
 });
 
-app.get("/statistics", async (req, res) => {
-    res.render('statistics');
-});
+app.get("/restart", async (req, res) => {
+    var { unit } = req.query;
+    if (!unit) {
+        await execute('sudo /sbin/reboot');
+    }
+    else {
+        await execute(`sudo systemctl restart ${unit}.service`);
+        res.redirect("/processes");
+    }
+}); 
 
-app.get("/logs", async (req, res) => {
-    res.render('logs');
-});
+app.get("/execute", async (req, res) => {
+    var { cmd } = req.query;
 
-app.get("/logout", async (req, res) => {
-    res.clearCookie("_ashoisdhiozvsb");
-    res.redirect("/login");
+    var output = await execute(cmd);
+    const result = new Promise(resolve => {
+        if (output.stderr) {
+          resolve(output.stderr);
+        } else {
+          resolve(output.stdout);
+        }
+    });
+    res.status(200).json({message: await result + ""});
 });
 
 app.post("/signin", async (req, res) => {
@@ -147,34 +183,6 @@ app.post("/signin", async (req, res) => {
         res.status(400).json({ message: "Bad Argument" });
     }
 });
-
-app.get("/restart", async (req, res) => {
-    var { unit } = req.query;
-    if (!unit) {
-        execute('sudo /sbin/reboot');
-    }
-    else {
-        execute(`sudo systemctl restart ${unit}.service`);
-        res.redirect("/processes");
-    }
-    
-}); 
-
-app.get("/execute", async (req, res) => {
-    var { cmd } = req.query;
-
-    const result = new Promise(resolve => {
-        var output = execute(cmd);
-        console.log(output);
-        if (output.stderr) {
-          resolve(output.stderr);
-        } else {
-          resolve(output.stdout);
-        }
-    });
-    res.status(200).json({message: await result + ""});
-});
-
 
 server.listen(8080, () => {
     console.log("Listening at http://localhost:8080");
