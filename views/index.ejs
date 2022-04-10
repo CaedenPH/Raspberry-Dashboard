@@ -842,20 +842,7 @@
       type: "line",
       data: {
         labels: ["1 hour ago", "2 hours ago", "3 hours ago", "4 hours ago", "5 hours ago", "6 hours ago", "7 hours ago"],
-        datasets: [{
-          label: "Upload",
-          tension: 0,
-          borderWidth: 0,
-          pointRadius: 5,
-          pointBackgroundColor: "#d63384",
-          pointBorderColor: "transparent",
-          borderColor: "#d63384",
-          borderWidth: 4,
-          backgroundColor: "transparent",
-          fill: true,
-          data: upload,
-          maxBarThickness: 6
-        },
+        datasets: [
         {
           label: "Download",
           tension: 0,
@@ -869,8 +856,21 @@
           fill: true,
           data: download,
           maxBarThickness: 6
-
         },
+        {
+          label: "Upload",
+          tension: 0,
+          borderWidth: 0,
+          pointRadius: 5,
+          pointBackgroundColor: "#d63384",
+          pointBorderColor: "transparent",
+          borderColor: "#d63384",
+          borderWidth: 4,
+          backgroundColor: "transparent",
+          fill: true,
+          data: upload,
+          maxBarThickness: 6
+        }
       ],
       },
       options: {
@@ -944,7 +944,7 @@
   </script>
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
-  <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
+  
   <script src="assets/js/material-dashboard.min.js?v=3.0.2"></script>
 </body>
 
