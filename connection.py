@@ -44,7 +44,8 @@ class ResponseHandler:
                     )
                 )
                 for line in [
-                    [float(i) for i in l.strip().split(" | ")] for l in logs.readlines()
+                    [float(i) for i in _line.strip().split(" | ")]
+                    for _line in logs.readlines()
                 ]
             ]
 
@@ -78,10 +79,9 @@ class ResponseHandler:
                 "longDatetime": datetime.datetime.now().strftime("%c"),
             },
             "cpu": {
-                # "temp": [psutil.sensors_temperatures().get("cpu_thermal")[0].current],
+                "temp": [psutil.sensors_temperatures().get("cpu_thermal")[0].current],
                 "currentSpeed":
-                # list(map(lambda m: round(int(m) / 1000000), stdout))
-                (1, 2, 3, 4, 5, 6)
+                list(map(lambda m: round(int(m) / 1000000), stdout))
             },
             "network": {
                 "ping": lines[-1].get("ping"),
