@@ -149,7 +149,7 @@ class WebSocket:
                 {"op": self.EXECUTE, "d": {"stdout": stdout, "stderr": stderr}}
             )
     
-    async def send_json(self, data) -> None:
+    async def send_json(self, data: any) -> None:
         """
         Sends a json payload to the socket
         with an error handler and dumping
@@ -157,7 +157,7 @@ class WebSocket:
         
         Parameters
         ----------
-        data
+        data: :class:`Any`
             The data to send.
         """
         try:
