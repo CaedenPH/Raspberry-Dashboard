@@ -140,12 +140,12 @@
               </div>
               <div class="text-end pt-1">
                 <p class="text-sm mb-0 text-capitalize">Uptime</p>
-                <h4 class="mb-0"><%= JSON.stringify(general.uptimeHours); %> hours</h4>
+                <h4 class="mb-0"><%= general.uptimeHours; %> hours</h4>
               </div>
             </div>
             <hr class="dark horizontal my-0">
             <div class="card-footer p-3">
-              <p class="mb-0"><%= JSON.stringify(general.uptimeLong).replaceAll('"', ''); %></p>
+              <p class="mb-0"><%= general.uptimeLong; %></p>
             </div>
           </div>
         </div>
@@ -157,12 +157,12 @@
               </div>
               <div class="text-end pt-1">
                 <p class="text-sm mb-0 text-capitalize">Local time</p>
-                <h4 class="mb-0"><%= JSON.stringify(general.hourSeconds).replaceAll('"', ''); %></h4>
+                <h4 class="mb-0"><%= general.hourSeconds; %></h4>
               </div>
             </div>
             <hr class="dark horizontal my-0">
             <div class="card-footer p-3">
-              <p class="mb-0"><%= JSON.stringify(general.uptimeLong).replaceAll('"', ''); %></p>
+              <p class="mb-0"><%= general.longDatetime; %></p>
             </div>
           </div>
         </div>
@@ -174,12 +174,12 @@
               </div>
               <div class="text-end pt-1">
                 <p class="text-sm mb-0 text-capitalize">Network ping</p>
-                <h4 class="mb-0"><%= JSON.stringify(network.ping); %>ms</h4>
+                <h4 class="mb-0"><%= network.ping; %>ms</h4>
               </div>
             </div>
             <hr class="dark horizontal my-0">
             <div class="card-footer p-3">
-              <p class="mb-0"><span class="text-danger text-sm font-weight-bolder"><%= JSON.stringify(network.pingDifference).replaceAll('"', ''); %>%</span> from an hour ago.</p>
+              <p class="mb-0"><span class="text-danger text-sm font-weight-bolder"><%= network.pingDifference; %>%</span> from an hour ago.</p>
             </div>
           </div>
         </div>
@@ -191,12 +191,12 @@
               </div>
               <div class="text-end pt-1">
                 <p class="text-sm mb-0 text-capitalize">Used memory</p>
-                <h4 class="mb-0"><%= JSON.stringify(memory.used); %>gb</h4>
+                <h4 class="mb-0"><%= memory.used; %>gb</h4>
               </div>
             </div>
             <hr class="dark horizontal my-0">
             <div class="card-footer p-3">
-              <p class="mb-0"><span class="text-success text-sm font-weight-bolder"><%= JSON.stringify(memory.available); %>gb</span> available</p>
+              <p class="mb-0"><span class="text-success text-sm font-weight-bolder"><%= memory.available; %>gb</span> available</p>
             </div>
           </div>
         </div>
@@ -665,7 +665,7 @@
   <script src="assets/js/plugins/smooth-scrollbar.min.js"></script>
   <script src="assets/js/plugins/chartjs.min.js"></script>
   <script>
-    var temp = "<%= JSON.stringify(cpu.temp); %>";
+    var temp = "<%= cpu.temp; %>";
     var temperature = temp.replace("[", "").replace("]", "").split(',').map(Number);
     var cores = temperature.map((item, index) => `Core ${index}`);
     var ctx = document.getElementById("chart-bars").getContext("2d");
@@ -832,8 +832,8 @@
       },
     });
 
-    var up = "<%= JSON.stringify(network.upload); %>";
-    var down = "<%= JSON.stringify(network.download); %>";
+    var up = "<%= network.upload; %>";
+    var down = "<%= network.download; %>";
     const upload = up.replace("[", "").replace("]", "").split(',').map(Number);
     const download = down.replace("[", "").replace("]", "").split(',').map(Number);
     var ctx3 = document.getElementById("chart-line-tasks").getContext("2d");
