@@ -27,6 +27,23 @@ const wss = new webSocket.Server({ server:server });
 const REQUEST = 0
 const RESPONSE = 1
 const IDENTIFY = 2
+const EXECUTE = 3
+
+function execute (command) {
+    wss.clients.forEach(function each(client) {
+        client.send(JSON.stringify({
+            op: EXECUTE,
+            d: command
+        }));
+        client.on("message", function incoming(message) {
+            data = JSON.parse(message);
+            if (data.op !== EXECUTE) {
+                return;
+            }
+            return data.d;
+        });
+    });
+}
 
 wss.on('connection', function connection(ws) {
     console.log('Client Connected!');
@@ -139,19 +156,11 @@ app.post("/signin", async (req, res) => {
 app.get("/restart", async (req, res) => {
     var { unit } = req.query;
     if (!unit) {
-        exec('sudo /sbin/reboot', (error, stdout, stderr) => {
-            if (error) {
-                console.error(error);
-            }
-        });
+        execute('sudo /sbin/reboot');
     }
     else {
-        exec(`sudo systemctl restart ${unit}.service`, (error, stdout, stderr) => {
-            if (error) {
-                console.error(error);
-            }
-            res.redirect("/processes");
-        });
+        execute(`sudo systemctl restart ${unit}.service`);
+        res.redirect("/processes");
     }
     
 }); 
@@ -170,24 +179,6 @@ app.get("/execute", async (req, res) => {
     res.status(200).json({message: await result + ""});
 });
 
-cron.schedule('0 * * * *', async () => {
-    console.log("Logging"); 
-    exec("speed-test --json", (error, stdout, stderr) => {
-        if (error || stderr) {
-            console.error(error)
-            return
-        }
-        const speed = JSON.parse(stdout);
-        console.log(speed);
-        fs.appendFile('logs.txt', `${speed.ping} | ${speed.download} | ${speed.upload}\n`, error => {
-            if (error) {
-                console.error(error);
-                return
-            }
-        });
-    });
-    
-});
 
 server.listen(8080, () => {
     console.log("Listening at http://localhost:8080");
