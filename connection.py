@@ -80,8 +80,8 @@ class ResponseHandler:
             "cpu": {
                 # "temp": [psutil.sensors_temperatures().get("cpu_thermal")[0].current],
                 "currentSpeed":
-                    # list(map(lambda m: round(int(m) / 1000000), stdout))
-                    (1, 2, 3, 4, 5, 6)
+                # list(map(lambda m: round(int(m) / 1000000), stdout))
+                (1, 2, 3, 4, 5, 6)
             },
             "network": {
                 "ping": lines[-1].get("ping"),
@@ -148,13 +148,13 @@ class WebSocket:
             await self.send_json(
                 {"op": self.EXECUTE, "d": {"stdout": stdout, "stderr": stderr}}
             )
-    
+
     async def send_json(self, data: any) -> None:
         """
         Sends a json payload to the socket
         with an error handler and dumping
         into json format.
-        
+
         Parameters
         ----------
         data: :class:`Any`
@@ -170,9 +170,7 @@ class WebSocket:
 
         with open("config.json") as stream:
             data: dict = json.load(stream)
-        await self.send_json(
-            {"op": self.IDENTIFY, "token": data.get("ws_token")}
-        )
+        await self.send_json({"op": self.IDENTIFY, "token": data.get("ws_token")})
 
     async def listen(self) -> None:
         """Listens for messages from the server."""
