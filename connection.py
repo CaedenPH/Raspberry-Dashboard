@@ -250,10 +250,13 @@ async def update_logs() -> None:
     """
 
     while True:
-        network = speedtest.Speedtest()
-        upload: int = network.upload()
-        download: int = network.download()
-        ping: dict = network.get_best_server()
+        try:
+            network = speedtest.Speedtest()
+            upload: int = network.upload()
+            download: int = network.download()
+            ping: dict = network.get_best_server()
+        except Exception:
+            continue
 
         with open("logs.txt", "a") as logs:
             logs.write(f"{ping.get('latency')} | {download} | {upload}\n")
