@@ -62,21 +62,24 @@ wss.on('connection', function connection(client) {
 });   
 
 app.get('/', async (req, res) => {
-    const [ client ] = wss.clients;
+    try {
+        const [ client ] = wss.clients;
     
-    client.send(JSON.stringify({
-        op: REQUEST,
-        d: "/"
-    }));
-    client.on("message", function incoming(message) {
-        let data = JSON.parse(message);
-        if (data.op !== RESPONSE) {
-            return
-        }
-        try {
-            res.render('index', data.d);
-        } catch (error) {}
-    });
+        client.send(JSON.stringify({
+            op: REQUEST,
+            d: "/"
+        }));
+        client.on("message", function incoming(message) {
+            let data = JSON.parse(message);
+            if (data.op !== RESPONSE) {
+                return
+            }
+            try {
+                res.render('index', data.d);
+            } catch (error) {}
+        });
+    }
+    catch (error) {}
 });
 
 
