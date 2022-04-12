@@ -10,7 +10,6 @@ const ws_token = require("./config.json").ws_token;
 
 const fs = require('fs');
 const webSocket = require('ws');
-const e = require('express');
 
 app.use(bodyParser.json());
 app.use(cookieParser());
