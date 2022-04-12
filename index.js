@@ -116,15 +116,15 @@ app.get("/logout", async (req, res) => {
 });
 
 app.get("/processes", async (req, res) => {
-    var jesterbotStdout = await execute("systemctl status jesterbot.service").stdout;
+    var jesterbotStdout = ((await execute("systemctl status jesterbot.service")).stdout).split('\n');
     const jesterbotStatus = jesterbotStdout[2].slice(jesterbotStdout[2].indexOf("Active")).split(' ')[1];
     const jesterbotDeployed = jesterbotStdout[2].slice(jesterbotStdout[2].indexOf("Active")).split(' ')[8];
     
-    var stealthybotStdout = await execute("systemctl status stealthybot.service").stdout;
+    var stealthybotStdout = ((await execute("systemctl status stealthybot.service")).stdout).split('\n');
     const stealthybotStatus = stealthybotStdout[2].slice(stealthybotStdout[2].indexOf("Active")).split(' ')[1];
     const stealthybotDeployed = stealthybotStdout[2].slice(stealthybotStdout[2].indexOf("Active")).split(' ')[8];
     
-    var dashboardStdout = await execute("systemctl status dashboard.service").stdout;
+    var dashboardStdout = ((await execute("systemctl status dashboard.service")).stdout).split('\n');
     const dashboardStatus = dashboardStdout[2].slice(dashboardStdout[2].indexOf("Active")).split(' ')[1];
     const dashboardDeployed = dashboardStdout[2].slice(dashboardStdout[2].indexOf("Active")).split(' ')[8];
     
