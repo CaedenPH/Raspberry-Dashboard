@@ -35,7 +35,7 @@ async function execute (command) {
     }));    
         
     result = new Promise(resolve => {
-        client.on("message", function incoming(message) {
+        client.on("message", (message) => {
             let data = JSON.parse(message);
             if (data.op !== EXECUTE) {
                 return;
@@ -46,12 +46,11 @@ async function execute (command) {
     return await result;
 }
 
-wss.on('connection', function connection(client) {
+wss.on('connection', (client) => {
     console.log('Client Connected!');
     
     client.send(JSON.stringify({op: IDENTIFY}));
-    client.on('message', function(message) {
-        
+    client.on('message', (message) => {
         let data = JSON.parse(message);
         if (data.op === IDENTIFY) {
             if (data.token === ws_token) {
@@ -59,10 +58,11 @@ wss.on('connection', function connection(client) {
             } else { client.close(); }
         }
     });
-    client.on('disconnect', function(data) {
-        console.log('Client disconnected!');
+    client.on('close', (reasonCode, description) => {
+        console.log('Client Disconnected!');
     });
 });   
+
 
 app.get('/', async (req, res) => {
     try {
@@ -72,7 +72,7 @@ app.get('/', async (req, res) => {
             op: REQUEST,
             d: "/"
         }));
-        client.on("message", function (message) {
+        client.on("message", (message) => {
             let data = JSON.parse(message);
             if (data.op !== RESPONSE) {
                 return
