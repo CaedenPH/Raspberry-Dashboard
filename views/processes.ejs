@@ -185,10 +185,10 @@
                         <p class="text-xs text-secondary mb-0">Host jesterbot</p>
                       </td>
                       <td class="align-middle text-center text-sm">
-                        <span id="jesterbot"><%= JSON.stringify(processes.jesterbot.status).replaceAll('"', ''); %></span>
+                        <span id="jesterbot"><%= processes.jesterbot.status; %></span>
                       </td>
                       <td class="align-middle text-center">
-                        <span class="text-secondary text-xs font-weight-bold"><%= JSON.stringify(processes.jesterbot.since).replaceAll('"', ''); %> ago</span>
+                        <span class="text-secondary text-xs font-weight-bold"><%= processes.jesterbot.since; %> ago</span>
                       </td>
                       <td class="align-middle">
                         <a id="jesterbot-restart" href="/processes" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
@@ -212,10 +212,10 @@
                         <p class="text-xs text-secondary mb-0">Host stealthybot</p>
                       </td>
                       <td class="align-middle text-center text-sm">
-                        <span id="stealthybot"><%= JSON.stringify(processes.stealthybot.status).replaceAll('"', ''); %></span>
+                        <span id="stealthybot"><%= processes.stealthybot.status; %></span>
                       </td>
                       <td class="align-middle text-center">
-                        <span class="text-secondary text-xs font-weight-bold"><%= JSON.stringify(processes.stealthybot.since).replaceAll('"', ''); %> ago</span>
+                        <span class="text-secondary text-xs font-weight-bold"><%= processes.stealthybot.since; %> ago</span>
                       </td>
                       <td class="align-middle">
                         <a id="stealthybot-restart" href="/processes" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
@@ -239,10 +239,10 @@
                         <p class="text-xs text-secondary mb-0">Manage local processes</p>
                       </td>
                       <td class="align-middle text-center text-sm">
-                        <span id="dashboard"><%= JSON.stringify(processes.dashboard.status).replaceAll('"', ''); %></span>
+                        <span id="dashboard"><%= processes.dashboard.status; %></span>
                       </td>
                       <td class="align-middle text-center">
-                        <span class="text-secondary text-xs font-weight-bold"><%= JSON.stringify(processes.dashboard.since).replaceAll('"', ''); %> ago</span>
+                        <span class="text-secondary text-xs font-weight-bold"><%= processes.dashboard.since; %> ago</span>
                       </td>
                       <td class="align-middle">
                         <a id="dashboard-restart" href="/processes" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
@@ -321,7 +321,7 @@
   </div>
   </script>
   <script>
-    var stealthybot = "<%= JSON.stringify(processes.stealthybot.gradient); %>";
+    var stealthybot = "<%= processes.stealthybot.gradient; %>";
     if (stealthybot === "true") {
       document.getElementById("stealthybot").className = `badge badge-sm bg-gradient-success`;
     }
@@ -329,7 +329,7 @@
       document.getElementById("stealthybot").className = `badge badge-sm bg-gradient-secondary`;
     }
 
-    var jesterbot = "<%= JSON.stringify(processes.jesterbot.gradient); %>";
+    var jesterbot = "<%= processes.jesterbot.gradient; %>";
     if (jesterbot === "true") {
       document.getElementById("jesterbot").className = `badge badge-sm bg-gradient-success`;
     }
@@ -337,7 +337,7 @@
       document.getElementById("jesterbot").className = `badge badge-sm bg-gradient-secondary`;
     }
     
-    var dashboard = "<%= JSON.stringify(processes.dashboard.gradient); %>";
+    var dashboard = "<%= processes.dashboard.gradient; %>";
     if (dashboard === "true") {
       document.getElementById("dashboard").className = `badge badge-sm bg-gradient-success`;
     }
