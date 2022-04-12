@@ -6,7 +6,7 @@ const auth = require('./auth.js');
 const jwt = require("jsonwebtoken");
 const bodyParser = require('body-parser');
 const password = require('./config.json').password;
-const wsToken = require("./config.json").wsToken;
+const wsToken = require("./config.json").ws_token;
 
 const webSocket = require('ws');
 const fs = require('fs');
