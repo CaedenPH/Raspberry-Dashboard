@@ -123,7 +123,7 @@ app.get("/processes", async (req, res) => {
     const stealthybotStatus = stealthybotStdout[2].slice(stealthybotStdout[2].indexOf("Active")).split(' ')[1];
     const stealthybotDeployed = stealthybotStdout[2].slice(stealthybotStdout[2].indexOf("Active")).split(' ')[8];
     
-    var dashboardStdout = ((await execute("systemctl status dashboard.service")).stdout).split('\n');
+    var dashboardStdout = ((await execute("systemctl status raspberry-dashboard.service")).stdout).split('\n');
     const dashboardStatus = dashboardStdout[2].slice(dashboardStdout[2].indexOf("Active")).split(' ')[1];
     const dashboardDeployed = dashboardStdout[2].slice(dashboardStdout[2].indexOf("Active")).split(' ')[8];
     
