@@ -131,6 +131,7 @@ class WebSocket:
         self.socket = ws
         self.client = client
         self.loop = client.loop
+        self.is_closed = False
 
     async def _parse_message(self, message: str) -> None:
         data: dict = json.loads(message)
@@ -183,7 +184,7 @@ class WebSocket:
     async def send_heartbeats(self) -> None:
         """Sends the heartbeats to keep the ws alive."""
 
-        while True:
+        while not self.is_closed:
             await self.send_json({"op": self.HEARTBEAT})
             print("Heartbeat sent")
             await asyncio.sleep(30)
@@ -194,6 +195,8 @@ class WebSocket:
         self.loop.create_task(self.send_heartbeats())
         async for message in self.socket:
             await self._parse_message(message.data)
+
+        self.is_closed = True
         raise DisconnectError  # connection disconnected
 
     @classmethod
