@@ -53,7 +53,7 @@ wss.on('connection', (client) => {
         let data = JSON.parse(message);
         if (data.op === IDENTIFY) {
             if (data.token === wsToken) {
-                
+                client.setMaxListeners(0);
             } else { client.close(); }
         }
     });
@@ -152,7 +152,7 @@ app.get("/restart", async (req, res) => {
     var { unit } = req.query;
     if (!unit) {
         dirs = ["raspberry-dashboard", "stealthybot", "jesterbot"]
-        dirs.forEach((dir) => {
+        dirs.forEach(async (dir) => {
             await execute(`cd ${dir} && git stash && git pull`);
         })
         await execute('sudo /sbin/reboot');
