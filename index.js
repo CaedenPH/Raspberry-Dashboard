@@ -1,15 +1,15 @@
 const cookieParser = require('cookie-parser');
 const express = require('express');
 
-const bodyParser = require('body-parser');
 const app = express();
 const auth = require('./auth.js');
 const jwt = require("jsonwebtoken");
+const bodyParser = require('body-parser');
 const password = require('./config.json').password;
-const ws_token = require("./config.json").ws_token;
+const wsToken = require("./config.json").wsToken;
 
-const fs = require('fs');
 const webSocket = require('ws');
+const fs = require('fs');
 
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -52,7 +52,7 @@ wss.on('connection', (client) => {
     client.on('message', (message) => {
         let data = JSON.parse(message);
         if (data.op === IDENTIFY) {
-            if (data.token === ws_token) {
+            if (data.token === wsToken) {
                 
             } else { client.close(); }
         }
@@ -151,9 +151,14 @@ app.get("/processes", async (req, res) => {
 app.get("/restart", async (req, res) => {
     var { unit } = req.query;
     if (!unit) {
+        dirs = ["raspberry-dashboard", "stealthybot", "jesterbot"]
+        dirs.forEach((dir) => {
+            await execute(`cd ${dir} && git stash && git pull`);
+        })
         await execute('sudo /sbin/reboot');
     }
     else {
+        await execute(`cd ${unit} && git stash && git pull`);
         await execute(`sudo systemctl restart ${unit}.service`);
         res.redirect("/processes");
     }
