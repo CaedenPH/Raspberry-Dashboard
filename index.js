@@ -50,7 +50,7 @@ wss.on('connection', function connection(client) {
     console.log('Client Connected!');
     
     client.send(JSON.stringify({op: IDENTIFY}));
-    client.on('message', function incoming(message) {
+    client.on('message', function(message) {
         
         let data = JSON.parse(message);
         if (data.op === IDENTIFY) {
@@ -58,6 +58,9 @@ wss.on('connection', function connection(client) {
                 
             } else { client.close(); }
         }
+    });
+    client.on('disconnect', function(data) {
+        console.log('Client disconnected!');
     });
 });   
 
@@ -69,7 +72,7 @@ app.get('/', async (req, res) => {
             op: REQUEST,
             d: "/"
         }));
-        client.on("message", function incoming(message) {
+        client.on("message", function (message) {
             let data = JSON.parse(message);
             if (data.op !== RESPONSE) {
                 return
@@ -79,7 +82,7 @@ app.get('/', async (req, res) => {
             } catch (error) {}
         });
     }
-    catch (error) {}
+    catch (error) { console.log(error); }
 });
 
 
