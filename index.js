@@ -151,14 +151,9 @@ app.get("/processes", async (req, res) => {
 app.get("/restart", async (req, res) => {
     var { unit } = req.query;
     if (!unit) {
-        dirs = ["raspberry-dashboard", "stealthybot", "jesterbot"]
-        dirs.forEach(async (dir) => {
-            await execute(`cd ${dir} && git stash && git pull`);
-        })
         await execute('sudo /sbin/reboot');
     }
     else {
-        await execute(`cd ${unit} && git stash && git pull`);
         await execute(`sudo systemctl restart ${unit}.service`);
         res.redirect("/processes");
     }
