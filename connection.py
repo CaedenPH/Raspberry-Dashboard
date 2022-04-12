@@ -281,6 +281,7 @@ async def main() -> None:
             try:
                 await connection.listen()
             except DisconnectError:
+                logging.debug("Websocket disconnected")
                 continue
 
 
