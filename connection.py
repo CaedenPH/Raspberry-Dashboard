@@ -4,17 +4,12 @@ import aiohttp
 import asyncio
 import datetime
 import json
-import logging
 import math
 
 import time
 import psutil
 import speedtest
 import subprocess
-
-format = "%(asctime)s: %(message)s"
-datefmt = "%d-%b-%y %H:%M:%S"
-logging.basicConfig(level=logging.DEBUG, format=format, datefmt=datefmt)
 
 
 class DisconnectError(Exception):
@@ -130,10 +125,12 @@ class WebSocket:
     RESPONSE = 1
     IDENTIFY = 2
     EXECUTE = 3
+    HEARTBEAT = 4
 
     def __init__(self, ws: aiohttp.ClientWebSocketResponse, client: Client) -> None:
         self.socket = ws
         self.client = client
+        self.loop = client.loop
 
     async def _parse_message(self, message: str) -> None:
         data: dict = json.loads(message)
@@ -174,7 +171,7 @@ class WebSocket:
         try:
             await self.socket.send_json(data)
         except Exception as err:
-            logging.debug(err)
+            print(err)
 
     async def identify(self) -> None:
         """Sends the identify payload."""
@@ -183,9 +180,18 @@ class WebSocket:
             data: dict = json.load(stream)
         await self.send_json({"op": self.IDENTIFY, "token": data.get("ws_token")})
 
+    async def send_heartbeats(self) -> None:
+        """Sends the heartbeats to keep the ws alive."""
+
+        while True:
+            await self.send_json({"op": self.HEARTBEAT})
+            print("Heartbeat sent")
+            await asyncio.sleep(30)
+
     async def listen(self) -> None:
         """Listens for messages from the server."""
 
+        self.loop.create_task(self.send_heartbeats())
         async for message in self.socket:
             await self._parse_message(message.data)
         raise DisconnectError  # connection disconnected
@@ -222,6 +228,7 @@ class Client:
     """
 
     def __init__(self) -> None:
+        self.loop = asyncio.get_running_loop()
         self._session = aiohttp.ClientSession()
 
     async def ws_connect(self) -> WebSocket | bool:
@@ -272,17 +279,16 @@ async def main() -> None:
     """
 
     client = Client()
-    asyncio.create_task(update_logs())
+    client.loop.create_task(update_logs())
 
     while True:
         connection = await client.ws_connect()
         if connection is not False:
-            logging.debug("Websocket connected")
+            print("Websocket connected")
             try:
                 await connection.listen()
             except DisconnectError:
-                logging.debug("Websocket disconnected")
+                print("Websocket disconnected")
                 continue
-
 
 asyncio.run(main())
