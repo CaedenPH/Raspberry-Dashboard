@@ -206,7 +206,6 @@ class WebSocket:
 
         while not self.is_closed:
             await self.send_json({"op": self.HEARTBEAT})
-            print("Heartbeat sent")
             await asyncio.sleep(30)
 
     async def listen(self) -> None:
@@ -302,7 +301,7 @@ async def main() -> None:
     """
 
     client = Client()
-    # client.loop.create_task(update_logs())
+    client.loop.create_task(update_logs())
 
     while True:
         connection = await client.ws_connect()
