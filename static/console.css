@@ -57,7 +57,7 @@ body, h1,h2,h3, p{
   display: inline-block;
 }
  
-#terminalReslutsCont{
+#terminalResultsCont{
 	width:100%;
 	height: 600px;
 	padding: 12px;
@@ -71,12 +71,12 @@ body, h1,h2,h3, p{
 }
  
  
-#terminalReslutsCont a{
+#terminalResultsCont a{
   color: rgba(255,255,255,0.9);
   text-decoration: none;
 }
  
-#terminalReslutsCont a:hover{
+#terminalResultsCont a:hover{
   text-decoration: underline;
 }
  
@@ -108,7 +108,7 @@ body, h1,h2,h3, p{
     font-size: 16px;
     margin: 0 0 40px 0;
   }
-  #terminalReslutsCont{
+  #terminalResultsCont{
     height: 300px;
   }
 
