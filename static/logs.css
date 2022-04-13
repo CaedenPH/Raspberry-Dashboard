@@ -1,0 +1,121 @@
+html {
+  box-sizing: border-box;
+}
+ 
+body{
+  font-family: 'Roboto','Helvetica Neue', 'Lucida Grande', sans-serif;
+}
+ 
+body, h1,h2,h3, p{
+    margin:0;
+    padding:0;
+}
+ 
+.mainCont{
+  padding-top: 100px;
+  width:1000px;
+  margin: 0 auto;
+  padding-bottom: 100px;
+}
+ 
+.mainCont h2{
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  font-weight: 300;
+  font-size: 48px;
+  margin: 60px 0 0 0;
+  color: white;
+  opacity: 1;
+}
+
+.mainCont .editorCont #editorResultsCont #editor {
+  width: 100%;
+  font-size: 100%;
+  font-family:'Roboto Mono', monospace;
+  background: #000000;
+  border: none;
+  color: white;
+  resize: none;
+  text-indent: 2%;
+  padding-top: 2%;
+}
+
+.mainCont .editorCont #editorResultsCont #editor:focus {
+  outline: 0;
+}
+
+.mainCont h3{
+  text-align: center;
+  font-weight: 400;
+  font-size: 18px;
+  color: rgba(255,255,255,0.75);
+  margin: 0 0 60px 0;
+  opacity: 1;
+}
+ 
+.editorCont{
+  background: black;
+  width: 100%;
+  border-radius: 4px;
+  padding:12px 0 0 0;
+  margin-top: -20px;
+  font-family: 'Roboto Mono', monospace;
+  opacity: 1;
+}
+
+.editorCont h4 {
+  margin-bottom: 1%;
+}
+
+.userEnteredText{
+  color: rgba(255,255,255,0.5);
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+}
+ 
+#editorResultsCont{
+  width: 100%;
+  height: 450px;
+  padding: 12px;
+  font-size: 100%;
+  line-height: 150%;
+  display: block;
+  color: rgba(255,255,255,0.9);
+}
+
+#editorResultsCont textarea {
+  height: 90%;
+}
+
+#editorResultsCont h4 {
+  color: white;
+  font-size: 120%;
+  margin-bottom: 2%;
+}
+
+#editorResultsCont a{
+  color: rgba(255,255,255,0.9);
+  text-decoration: none;
+}
+ 
+#editorResultsCont a:hover{
+  text-decoration: underline;
+}
+ 
+@media screen and (max-width: 1000px){
+  .mainCont{
+    margin-top: 50px;
+    width: 100%;
+    padding: 0 12px;
+  }
+  .mainCont h2{
+    font-size: 32px;
+    margin: 40px 0 0 0;
+  }
+  .mainCont h3{
+    font-size: 16px;
+    margin: 0 0 40px 0;
+  }
+}
