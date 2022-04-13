@@ -95,8 +95,26 @@ app.get("/console", async (req, res) => {
 });
 
 app.get("/statistics", async (req, res) => {
-    res.render('statistics', {
-        
+    try {
+        jwt.verify(req.cookies._ashoisdhiozvsb || "", "aoihfisoduhgoiahusSECRET_KEY");
+        var verified = true
+    } catch (error) { let verified = false }
+
+    const [ client ] = wss.clients;
+    
+    client.send(JSON.stringify({
+        op: REQUEST,
+        d: "/statistics",
+        v: verified
+    }));
+    client.on("message", (message) => {
+        let data = JSON.parse(message);
+        if (data.op !== RESPONSE) {
+            return
+        }
+        try {
+            res.render('statistics', data.d);
+        } catch (error) {}
     });
 });
 
