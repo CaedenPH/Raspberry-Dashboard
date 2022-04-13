@@ -1,7 +1,8 @@
+const e = require("express");
 const jwt = require("jsonwebtoken");
 
 module.exports = (request, response, next) => {
-    if (request.path === "/signin") {
+    if (["/", "/statistics", "/logs", "/signin"].includes(request.path)) {
         next();
     } else {
         try {
