@@ -6,11 +6,21 @@ import datetime
 import json
 import math
 
-import time
+import cpuinfo
+import distro
 import psutil
+import time
 import speedtest
 import subprocess
 
+
+def execute(command: str) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        [command],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        shell=True,
+)
 
 class DisconnectError(Exception):
     """Raised when the websocket is forcebly disconnected from the server."""
@@ -25,7 +35,7 @@ class ResponseHandler:
     """
 
     @staticmethod
-    def base() -> dict[any, any]:
+    def base(verified: bool) -> dict[any, any]:
         """
         Generates the systeminformation
         required for the base / path.
@@ -55,12 +65,7 @@ class ResponseHandler:
         )
 
         stdout = (
-            subprocess.run(
-                ["cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq"],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                shell=True,
-            )
+            execute("cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq")
             .stdout.decode("utf-8")
             .strip()
             .split("\n")
@@ -97,6 +102,23 @@ class ResponseHandler:
                     psutil.virtual_memory().available * (9.31 * 10**-10), 1
                 ),
             },
+        }
+        return response
+
+    @staticmethod
+    def statistics(verified: bool) -> dict[any, any]:
+        cpu = cpuinfo.get_cpu_info()
+
+        response = {
+            "cpu": cpu,
+            "os": {
+                "name": distro.id().capitalize(),
+                "processes": execute("ps aux | wc -l").stdout.decode("utf-8")
+            },
+            "internet": {
+                "private": execute("hostname -I | awk '{print $1}'").stdout.decode("utf-8"),
+                "public": execute("curl ifconfig.me.").stdout.decode("utf-8") if verified else "*** *** ***"
+            }
         }
         return response
 
@@ -141,15 +163,13 @@ class WebSocket:
             await self.identify()
 
         if op == self.REQUEST:
-            __converter = {"/": ResponseHandler.base}
-            response = __converter.get(data.get("d"))()
+            __converter = {"/": ResponseHandler.base, "/statistics": ResponseHandler.statistics}
+            response = __converter.get(data.get("d"))(data.get("v"))
             await self.send_json({"op": self.RESPONSE, "d": response})
 
         elif op == self.EXECUTE:
             command = data.get("d")
-            execution = subprocess.run(
-                [command], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-            )
+            execution = execute(command)
             stdout, stderr = map(
                 lambda m: m.decode("utf-8").strip(),
                 (execution.stdout, execution.stderr),
@@ -282,7 +302,7 @@ async def main() -> None:
     """
 
     client = Client()
-    client.loop.create_task(update_logs())
+    # client.loop.create_task(update_logs())
 
     while True:
         connection = await client.ws_connect()
