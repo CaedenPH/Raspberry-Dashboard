@@ -1,4 +1,5 @@
 const cookieParser = require('cookie-parser');
+const exec = require('child_process').exec;
 const express = require('express');
 
 const app = express();
@@ -81,7 +82,7 @@ app.get('/', async (req, res) => {
             } catch (error) {}
         });
     }
-    catch (error) { console.log(error); }
+    catch (error) {}
 });
 
 
@@ -94,7 +95,9 @@ app.get("/console", async (req, res) => {
 });
 
 app.get("/statistics", async (req, res) => {
-    res.render('statistics');
+    res.render('statistics', {
+        
+    });
 });
 
 app.get("/logs", async (req, res) => {
@@ -158,9 +161,15 @@ app.get("/processes", async (req, res) => {
     });
 });
 
+app.get("/pull", async(req, res) => {
+    res.redirect("/");
+    exec("git stash && git pull");
+})
+
 app.get("/restart", async (req, res) => {
     var { unit } = req.query;
     if (!unit) {
+        res.redirect("/");
         await execute('sudo /sbin/reboot');
     }
     else {
