@@ -98,7 +98,17 @@ app.get("/statistics", async (req, res) => {
 });
 
 app.get("/logs", async (req, res) => {
-    res.render('logs');
+    jesterbotLogs = (await execute("journalctl -b -u jesterbot.service")).stdout;
+    stealthybotLogs = (await execute("journalctl -b -u stealthybot.service")).stdout;
+    dashboardLogs = (await execute("journalctl -b -u raspberry-dashboard.service")).stdout;
+
+    res.render('logs', {
+        processes: {
+            jesterbot: jesterbotLogs,
+            stealthybot: stealthybotLogs,
+            dashboard: dashboardLogs
+        }
+    });
 });
 
 app.get("/editor", async (req, res) => {
