@@ -6,10 +6,10 @@ const app = express();
 const auth = require('./auth.js');
 const jwt = require("jsonwebtoken");
 const bodyParser = require('body-parser');
-const password = require('./config.json').password;
-const wsToken = require("./config.json").ws_token;
+const { password, explicit_password, ws_token, cookie_value } = require('./config.json');
 
 const webSocket = require('ws');
+const crypto = require("crypto");
 const fs = require('fs');
 
 app.use(bodyParser.json());
@@ -61,7 +61,7 @@ wss.on('connection', (client) => {
     client.on('message', (message) => {
         let data = JSON.parse(message);
         if (data.op === IDENTIFY) {
-            if (data.token === wsToken) {
+            if (data.token === ws_token) {
                 client.setMaxListeners(0);
             } else { client.close(); }
         }
@@ -145,8 +145,12 @@ app.get("/editor", async (req, res) => {
     res.render('editor');
 });
 
+app.get("/explicit", async (req, res) => {
+    res.render('explicit');
+})
+
 app.get("/protocols", async (req, res) => {
-    res.render('protocols');
+    res.render('protocols');    
 })
 
 app.get("/logout", async (req, res) => {
@@ -199,6 +203,17 @@ app.get("/pull", async(req, res) => {
     exec("git stash && git pull");
 })
 
+app.get("/reset", async (req, res) => {
+    var { password } = req.query;
+
+    var cookieValue = crypto.randomBytes(20).toString('hex');
+    var fileContent = JSON.parse(fs.readFileSync("./config.json"));
+    fileContent.cookie_value = cookieValue;
+    fileContent.password = password;
+    
+    fs.writeFileSync("./config.json", JSON.stringify(fileContent, null, 4));
+});
+
 app.get("/restart", async (req, res) => {
     var { unit } = req.query;
     if (!unit) {
@@ -226,8 +241,24 @@ app.get("/execute", async (req, res) => {
 
 app.post("/signin", async (req, res) => {
     if (req.body.password && req.body.password === password) {
-        res.cookie("_ashoisdhiozvsb", jwt.sign({
-            username: "test123"
+        res.cookie(cookie_value, jwt.sign({
+            username: "username"
+        }, "aoihfisoduhgoiahusSECRET_KEY", {
+            expiresIn: 10800
+        }), {
+            httpOnly: true,
+            expiresIn: 10800
+        });
+        res.status(200).json({ message: "s" });
+    } else {    
+        res.status(400).json({ message: "Bad Argument" });
+    }
+});
+
+app.post("/explicit", async (req, res) => {
+    if (req.body.password && req.body.password === explicit_password) {
+        res.cookie("_fiojoweonfwouinwiunfuiw", jwt.sign({
+            username: "explicit_username"
         }, "aoihfisoduhgoiahusSECRET_KEY", {
             expiresIn: 10800
         }), {
