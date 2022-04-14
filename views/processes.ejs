@@ -353,14 +353,14 @@
       document.getElementById("dashboard").className = `badge badge-sm bg-gradient-secondary`;
     }
 
-  document.getElementById("jesterbot-restart").onclick = () => {
-    fetch("/restart?unit=jesterbot");
+  document.getElementById("jesterbot-restart").onclick = async () => {
+    await fetch("/restart?unit=jesterbot");
   }
-  document.getElementById("stealthybot-restart").onclick = () => {
-    fetch("/restart?unit=stealthybot");
+  document.getElementById("stealthybot-restart").onclick = async () => {
+    await fetch("/restart?unit=stealthybot");
   }
-  document.getElementById("dashboard-restart").onclick = () => {
-    fetch("/restart?unit=dashboard");
+  document.getElementById("dashboard-restart").onclick = async () => {
+    await fetch("/restart?unit=dashboard");
   }
 
   </script>
