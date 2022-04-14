@@ -1,0 +1,13 @@
+html {
+    box-sizing: border-box;
+}
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+body{
+    font-family: 'Roboto','Helvetica Neue', 'Lucida Grande', sans-serif;
+}
+.buttons {
+    margin-top: 5%;
+    margin-left: 5%;
+}
