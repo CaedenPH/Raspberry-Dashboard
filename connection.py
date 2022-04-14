@@ -60,9 +60,9 @@ class ResponseHandler:
             ],
         )
 
-        stdout = await execute(
+        stdout = (await execute(
             "cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq"
-        )[0].split("\n")
+        ))[0].split("\n")
 
         response = {
             "general": {
@@ -104,11 +104,11 @@ class ResponseHandler:
             "cpu": cpu,
             "os": {
                 "name": distro.id().capitalize(),
-                "processes": await execute("ps aux | wc -l")[0],
+                "processes": (await execute("ps aux | wc -l"))[0],
             },
             "internet": {
-                "private": await execute("hostname -I | awk '{print $1}'")[0],
-                "public": await execute("curl ifconfig.me.")[0]
+                "private": (await execute("hostname -I | awk '{print $1}'"))[0],
+                "public": (await execute("curl ifconfig.me."))[0]
                 if verified
                 else "*** *** ***",
             },
