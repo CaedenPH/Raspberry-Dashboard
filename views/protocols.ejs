@@ -173,6 +173,7 @@
         <input id="inp" type="text" placeholder="New password...">
         <button type="submit">Reset password</button>
     </form>
+    <button id="websocket-close">Close websocket</button>
     </div>
   </main>
   <div class="fixed-plugin">
@@ -239,11 +240,16 @@
   <!--   Core JS Files   -->
   <script>
     document.getElementById("frm").onsubmit = async (e) => {
-        e.preventDefault();
-        var password = document.getElementById("inp").value;
-        await fetch(`/reset?password=${password}`, {
-          method: "HEAD",
-        }); 
+      e.preventDefault();
+      var password = document.getElementById("inp").value;
+      await fetch(`/reset?password=${password}`, {
+        method: "HEAD",
+      }); 
+    }
+    document.getElementById("websocket-close").onclick = async() => {
+      await fetch("/execute?cmd=sudo systemctl stop raspberry-dashboard.service", {
+        method: "HEAD",
+      });
     }
   </script>
   <script src="assets/js/core/popper.min.js"></script>
