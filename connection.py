@@ -11,16 +11,16 @@ import distro
 import psutil
 import time
 import speedtest
-import subprocess
 
 
-def execute(command: str) -> subprocess.CompletedProcess:
-    return subprocess.run(
-        [command],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        shell=True,
-)
+async def execute(command: str) -> asyncio.subprocess.Process:
+    proc = await asyncio.create_subprocess_exec(
+        command,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
+    )
+    return tuple(map(lambda m: m.decode("utf-8").strip(), await proc.communicate()))
+ 
 
 class DisconnectError(Exception):
     """Raised when the websocket is forcebly disconnected from the server."""
@@ -35,7 +35,7 @@ class ResponseHandler:
     """
 
     @staticmethod
-    def base(verified: bool) -> dict[any, any]:
+    async def base(verified: bool) -> dict[any, any]:
         """
         Generates the systeminformation
         required for the base / path.
@@ -65,9 +65,7 @@ class ResponseHandler:
         )
 
         stdout = (
-            execute("cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq")
-            .stdout.decode("utf-8")
-            .strip()
+            await execute("cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq")[0]
             .split("\n")
         )
 
@@ -106,18 +104,18 @@ class ResponseHandler:
         return response
 
     @staticmethod
-    def statistics(verified: bool) -> dict[any, any]:
+    async def statistics(verified: bool) -> dict[any, any]:
         cpu = cpuinfo.get_cpu_info()
 
         response = {
             "cpu": cpu,
             "os": {
                 "name": distro.id().capitalize(),
-                "processes": execute("ps aux | wc -l").stdout.decode("utf-8")
+                "processes": await execute("ps aux | wc -l")[0]
             },
             "internet": {
-                "private": execute("hostname -I | awk '{print $1}'").stdout.decode("utf-8"),
-                "public": execute("curl ifconfig.me.").stdout.decode("utf-8") if verified else "*** *** ***"
+                "private": await execute("hostname -I | awk '{print $1}'")[0],
+                "public": await execute("curl ifconfig.me.")[0] if verified else "*** *** ***"
             }
         }
         return response
@@ -164,16 +162,12 @@ class WebSocket:
 
         if op == self.REQUEST:
             __converter = {"/": ResponseHandler.base, "/statistics": ResponseHandler.statistics}
-            response = __converter.get(data.get("d"))(data.get("v"))
+            response = await (__converter.get(data.get("d")))(data.get("v"))
             await self.send_json({"op": self.RESPONSE, "d": response})
 
         elif op == self.EXECUTE:
             command = data.get("d")
-            execution = execute(command)
-            stdout, stderr = map(
-                lambda m: m.decode("utf-8").strip(),
-                (execution.stdout, execution.stderr),
-            )
+            stdout, stderr = await execute(command)
             await self.send_json(
                 {"op": self.EXECUTE, "d": {"stdout": stdout, "stderr": stderr}}
             )
