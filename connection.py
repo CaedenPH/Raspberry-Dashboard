@@ -107,7 +107,7 @@ class ResponseHandler:
                 "processes": (await execute("ps aux | wc -l"))[0],
             },
             "internet": {
-                "private": (await execute("hostname -I | awk '{print $1}'"))[0],
+                "private": (await execute("hostname -i"))[0],
                 "public": (await execute("curl ifconfig.me."))[0]
                 if verified
                 else "*** *** ***",
