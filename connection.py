@@ -295,7 +295,7 @@ async def main() -> None:
     """
 
     client = Client()
-    # client.loop.create_task(update_logs())
+    client.loop.create_task(update_logs())
 
     while True:
         connection = await client.ws_connect()
