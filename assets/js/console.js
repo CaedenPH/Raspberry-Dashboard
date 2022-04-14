@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var textInputValue = document.getElementById('terminalTextInput').value.trim();
  
   //Getting the text from the results div
-  var textResultsValue = document.getElementById('terminalReslutsCont').innerHTML;
+  var textResultsValue = document.getElementById('terminalResultsCont').innerHTML;
   
   // Clear text input
   var clearInput = function(){
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Scrtoll to the bottom of the results div
   var scrollToBottomOfResults = function(){
-    var terminalResultsDiv = document.getElementById('terminalReslutsCont');
+    var terminalResultsDiv = document.getElementById('terminalResultsCont');
     terminalResultsDiv.scrollTop = terminalResultsDiv.scrollHeight;
   }
  
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
  
   // Add text to the results div
   var addTextToResults = function(textToAdd){
-    document.getElementById('terminalReslutsCont').innerHTML += "<p>" + textToAdd + "</p>";
+    document.getElementById('terminalResultsCont').innerHTML += "<p>" + textToAdd + "</p>";
     scrollToBottomOfResults();
   }
  
