@@ -42,6 +42,7 @@ async function execute (command) {
             }
             resolve(data.d);
         });
+        client.removeEventListener("message");
     });
     return await result;
 }
@@ -81,6 +82,7 @@ app.get('/', async (req, res) => {
                 res.render('index', data.d);
             } catch (error) {}
         });
+        client.removeEventListener("message");
     }
     catch (error) {}
 });
@@ -116,6 +118,7 @@ app.get("/statistics", async (req, res) => {
             res.render('statistics', data.d);
         } catch (error) {}
     });
+    client.removeEventListener("message");
 });
 
 app.get("/logs", async (req, res) => {
