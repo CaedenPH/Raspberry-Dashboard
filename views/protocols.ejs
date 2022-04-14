@@ -14,6 +14,7 @@
   <!-- Nucleo Icons -->
   <link href="static/nucleo-icons.css" rel="stylesheet" />
   <link href="static/nucleo-svg.css" rel="stylesheet" />
+  <link href="static/protocols.css" rel="stylesheet" />
 
   <!-- Font Awesome Icons -->
   <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
@@ -167,6 +168,12 @@
         </div>
       </div>
     </nav>
+    <div class="buttons">
+      <form id="frm">
+        <input id="inp" type="text" placeholder="New password...">
+        <button type="submit">Reset password</button>
+    </form>
+    </div>
   </main>
   <div class="fixed-plugin">
     <a class="fixed-plugin-button text-dark position-fixed px-3 py-2">
@@ -230,6 +237,15 @@
     </div>
   </div>
   <!--   Core JS Files   -->
+  <script>
+    document.getElementById("frm").onsubmit = async (e) => {
+        e.preventDefault();
+        var password = document.getElementById("inp").value;
+        await fetch(`/reset?password=${password}`, {
+          method: "HEAD",
+        }); 
+    }
+  </script>
   <script src="assets/js/core/popper.min.js"></script>
   <script src="assets/js/core/bootstrap.min.js"></script>
   <script src="assets/js/plugins/perfect-scrollbar.min.js"></script>
