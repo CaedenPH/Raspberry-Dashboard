@@ -13,9 +13,9 @@ import time
 import speedtest
 
 
-async def execute(command: str) -> asyncio.subprocess.Process:
-    proc = await asyncio.create_subprocess_exec(
-        *command.split(), stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+async def execute(command: str) -> tuple[str]:
+    proc = await asyncio.create_subprocess_shell(
+        command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
     return tuple(map(lambda m: m.decode("utf-8").strip(), await proc.communicate()))
 
