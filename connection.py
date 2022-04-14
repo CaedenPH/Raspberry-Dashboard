@@ -15,7 +15,7 @@ import speedtest
 
 async def execute(command: str) -> asyncio.subprocess.Process:
     proc = await asyncio.create_subprocess_exec(
-        command,
+        *command.split(),
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE
     )
@@ -295,7 +295,7 @@ async def main() -> None:
     """
 
     client = Client()
-    client.loop.create_task(update_logs())
+    # client.loop.create_task(update_logs())
 
     while True:
         connection = await client.ws_connect()
