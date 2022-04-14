@@ -29,22 +29,29 @@ const EXECUTE = 3
 
 async function execute (command) {
     const [ client ] = wss.clients;
-    client.send(JSON.stringify({
-        op: EXECUTE,
-        d: command
-    }));    
-        
-    result = new Promise(resolve => {
-        client.on("message", (message) => {
-            let data = JSON.parse(message);
-            if (data.op !== EXECUTE) {
-                return;
-            }
-            resolve(data.d);
+    if (client === undefined) {
+        result = new Promise(resolve => {
+            resolve({stdout: undefined, stderr: undefined});
         });
-        client.removeEventListener("message");
-    });
-    return await result;
+        return await result;
+    } else {
+        client.send(JSON.stringify({
+            op: EXECUTE,
+            d: command
+        }));
+            
+        result = new Promise(resolve => {
+            client.on("message", (message) => {
+                let data = JSON.parse(message);
+                if (data.op !== EXECUTE) {
+                    return;
+                }
+                resolve(data.d);
+            });
+            client.removeEventListener("message");
+        });
+        return await result;
+    }
 }
 
 wss.on('connection', (client) => {
@@ -148,6 +155,12 @@ app.get("/logout", async (req, res) => {
 });
 
 app.get("/processes", async (req, res) => {
+    const [ client ] = wss.clients;
+    if (client === undefined) {
+        res.render('offline');
+        return;
+    } 
+    
     var jesterbotStdout = ((await execute("systemctl status jesterbot.service")).stdout).split('\n');
     const jesterbotStatus = jesterbotStdout[2].slice(jesterbotStdout[2].indexOf("Active")).split(' ')[1];
     const jesterbotDeployed = jesterbotStdout[2].slice(jesterbotStdout[2].indexOf("Active")).split(' ')[8];
