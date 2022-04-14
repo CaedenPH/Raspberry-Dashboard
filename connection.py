@@ -15,12 +15,10 @@ import speedtest
 
 async def execute(command: str) -> asyncio.subprocess.Process:
     proc = await asyncio.create_subprocess_exec(
-        *command.split(),
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
+        *command.split(), stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
     return tuple(map(lambda m: m.decode("utf-8").strip(), await proc.communicate()))
- 
+
 
 class DisconnectError(Exception):
     """Raised when the websocket is forcebly disconnected from the server."""
@@ -44,9 +42,7 @@ class ResponseHandler:
         with open("logs.txt") as logs:
             lines = [
                 dict(
-                    zip(
-                        ["ping", "download", "upload"], [line[0], line[1], line[2] * 10]
-                    )
+                    zip(["ping", "download", "upload"], [line[0], line[1], line[2] * 10])
                 )
                 for line in [
                     [float(i) for i in _line.strip().split(" | ")]
@@ -64,10 +60,9 @@ class ResponseHandler:
             ],
         )
 
-        stdout = (
-            await execute("cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq")[0]
-            .split("\n")
-        )
+        stdout = await execute(
+            "cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq"
+        )[0].split("\n")
 
         response = {
             "general": {
@@ -90,14 +85,12 @@ class ResponseHandler:
                 "download": [
                     round(lines[-i].get("download") / 1000000) for i in range(1, 8)
                 ],
-                "upload": [
-                    round(lines[-i].get("upload") / 1000000) for i in range(1, 8)
-                ],
+                "upload": [round(lines[-i].get("upload") / 1000000) for i in range(1, 8)],
             },
             "memory": {
-                "used": round(psutil.virtual_memory().used * (9.31 * 10**-10), 1),
+                "used": round(psutil.virtual_memory().used * (9.31 * 10 ** -10), 1),
                 "available": round(
-                    psutil.virtual_memory().available * (9.31 * 10**-10), 1
+                    psutil.virtual_memory().available * (9.31 * 10 ** -10), 1
                 ),
             },
         }
@@ -111,12 +104,14 @@ class ResponseHandler:
             "cpu": cpu,
             "os": {
                 "name": distro.id().capitalize(),
-                "processes": await execute("ps aux | wc -l")[0]
+                "processes": await execute("ps aux | wc -l")[0],
             },
             "internet": {
                 "private": await execute("hostname -I | awk '{print $1}'")[0],
-                "public": await execute("curl ifconfig.me.")[0] if verified else "*** *** ***"
-            }
+                "public": await execute("curl ifconfig.me.")[0]
+                if verified
+                else "*** *** ***",
+            },
         }
         return response
 
@@ -161,7 +156,10 @@ class WebSocket:
             await self.identify()
 
         if op == self.REQUEST:
-            __converter = {"/": ResponseHandler.base, "/statistics": ResponseHandler.statistics}
+            __converter = {
+                "/": ResponseHandler.base,
+                "/statistics": ResponseHandler.statistics,
+            }
             response = await (__converter.get(data.get("d")))(data.get("v"))
             await self.send_json({"op": self.RESPONSE, "d": response})
 
@@ -185,8 +183,8 @@ class WebSocket:
         """
         try:
             await self.socket.send_json(data)
-        except Exception as err:
-            print(err)
+        except Exception:
+            raise DisconnectError
 
     async def identify(self) -> None:
         """Sends the identify payload."""
@@ -306,5 +304,6 @@ async def main() -> None:
             except DisconnectError:
                 print("Websocket disconnected")
                 continue
+
 
 asyncio.run(main())
