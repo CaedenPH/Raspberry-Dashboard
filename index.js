@@ -66,9 +66,10 @@ wss.on('connection', (client) => {
 
 
 app.get('/', async (req, res) => {
-    try {
-        const [ client ] = wss.clients;
-    
+    const [ client ] = wss.clients;
+    if (client === undefined) {
+        res.render('offline');
+    } else {
         client.send(JSON.stringify({
             op: REQUEST,
             d: "/"
@@ -78,13 +79,10 @@ app.get('/', async (req, res) => {
             if (data.op !== RESPONSE) {
                 return
             }
-            try {
-                res.render('index', data.d);
-            } catch (error) {}
+            res.render('index', data.d);
         });
         client.removeEventListener("message");
     }
-    catch (error) {}
 });
 
 
@@ -103,22 +101,23 @@ app.get("/statistics", async (req, res) => {
     } catch (error) { let verified = false }
 
     const [ client ] = wss.clients;
-    
-    client.send(JSON.stringify({
-        op: REQUEST,
-        d: "/statistics",
-        v: verified
-    }));
-    client.on("message", (message) => {
-        let data = JSON.parse(message);
-        if (data.op !== RESPONSE) {
-            return
-        }
-        try {
+    if (client === undefined) {
+        res.render('offline');
+    } else {
+        client.send(JSON.stringify({
+            op: REQUEST,
+            d: "/statistics",
+            v: verified
+        }));
+        client.on("message", (message) => {
+            let data = JSON.parse(message);
+            if (data.op !== RESPONSE) {
+                return
+            }
             res.render('statistics', data.d);
-        } catch (error) {}
-    });
-    client.removeEventListener("message");
+        });
+        client.removeEventListener("message");
+    }
 });
 
 app.get("/logs", async (req, res) => {
