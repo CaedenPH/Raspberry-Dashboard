@@ -144,44 +144,30 @@ app.get("/logout", async (req, res) => {
     res.redirect("/signin");
 });
 
-app.get("/processes", async (req, res) => {
+app.get("/statistics", async (req, res) => {
+    try {
+        jwt.verify(req.cookies._ashoisdhiozvsb || "", "aoihfisoduhgoiahusSECRET_KEY");
+        var verified = true
+    } catch (error) { let verified = false }
+
     const [ client ] = wss.clients;
     if (client === undefined) {
         res.render('offline');
-        return;
-    } 
-    
-    var jesterbotStdout = ((await execute("systemctl status jesterbot.service")).stdout).split('\n');
-    const jesterbotStatus = jesterbotStdout[2].slice(jesterbotStdout[2].indexOf("Active")).split(' ')[1];
-    const jesterbotDeployed = jesterbotStdout[2].slice(jesterbotStdout[2].indexOf("Active")).split(' ')[8];
-    
-    var stealthybotStdout = ((await execute("systemctl status stealthybot.service")).stdout).split('\n');
-    const stealthybotStatus = stealthybotStdout[2].slice(stealthybotStdout[2].indexOf("Active")).split(' ')[1];
-    const stealthybotDeployed = stealthybotStdout[2].slice(stealthybotStdout[2].indexOf("Active")).split(' ')[8];
-    
-    var dashboardStdout = ((await execute("systemctl status raspberry-dashboard.service")).stdout).split('\n');
-    const dashboardStatus = dashboardStdout[2].slice(dashboardStdout[2].indexOf("Active")).split(' ')[1];
-    const dashboardDeployed = dashboardStdout[2].slice(dashboardStdout[2].indexOf("Active")).split(' ')[8];
-    
-    res.render('processes', {
-        processes: {
-            jesterbot: {
-                status: jesterbotStatus,
-                since: jesterbotDeployed,
-                gradient: true ? jesterbotStatus === "active": false
-            },
-            stealthybot: {
-                status: stealthybotStatus,
-                since: stealthybotDeployed,
-                gradient: true ? stealthybotStatus === "active": false
-            },
-            dashboard: {
-                status: dashboardStatus,
-                since: dashboardDeployed,
-                gradient: true ? dashboardStatus === "active": false
+    } else {
+        client.send(JSON.stringify({
+            op: REQUEST,
+            d: "/statistics",
+            v: verified
+        }));
+        client.on("message", (message) => {
+            let data = JSON.parse(message);
+            if (data.op !== RESPONSE) {
+                return
             }
-        }
-    });
+            res.render('statistics', data.d);
+        });
+        client.removeEventListener("message");
+    }
 });
 
 app.get("/pull", async(req, res) => {
