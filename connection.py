@@ -158,7 +158,7 @@ class ResponseHandler:
             logged in.
         """
         db = await aiosqlite.connect(JESTERBOT_DATABASE_PATH)
-        total_commands = (await db.execute("SELECT score FROM overall_score")).fetchone()
+        total_commands = await (await db.execute("SELECT score FROM overall_score")).fetchone()
 
         return {
             "commands": {
