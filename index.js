@@ -102,16 +102,32 @@ app.get("/console", async (req, res) => {
 });
 
 app.get("/jesterbot", async (req, res) => {
-    res.render('jesterbot');
-})
+    const [ client ] = wss.clients;
+
+    if (client === undefined) {
+        res.render('offline');
+    } else {
+        client.send(JSON.stringify({
+            op: REQUEST,
+            d: "/jesterbot",
+        }));
+        client.on("message", (message) => {
+            let data = JSON.parse(message);
+            if (data.op !== RESPONSE) {
+                return
+            }
+            res.render('jesterbot', data.d);
+        });
+    }
+});
 
 app.get("/stealthybot", async (req, res) => {
     res.render('stealthybot');
-})
+});
 
 app.get("/dashboard", async (req, res) => {
     res.render('dashboard');
-})
+});
 
 app.get("/logs", async (req, res) => {
     jesterbotLogs = (await execute("journalctl -b -u jesterbot.service")).stdout;
