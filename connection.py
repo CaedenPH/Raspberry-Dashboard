@@ -6,12 +6,18 @@ import datetime
 import json
 import math
 
+import aiosqlite
 import cpuinfo  # type: ignore
 import distro  # type: ignore
 import psutil
 import time
 import speedtest
 
+from typing import Any 
+
+with open("config.json") as config:
+    data: dict[Any, Any] = json.load(config)
+    JESTERBOT_DATABASE_PATH = data.get("jesterbot_path", "/home/pi/jesterbot/db/database.db")
 
 async def execute(command: str) -> tuple[str]:
     proc = await asyncio.create_subprocess_shell(
@@ -33,10 +39,16 @@ class ResponseHandler:
     """
 
     @staticmethod
-    async def base(verified: bool) -> dict[any, any]:
+    async def base(verified: bool) -> dict[Any, Any]:
         """
         Generates the systeminformation
         required for the base / path.
+
+        Parameters
+        ----------
+        verified: :class:`bool`
+            Whether or not the user is
+            logged in.
         """
 
         with open("logs.txt") as logs:
@@ -80,7 +92,7 @@ class ResponseHandler:
                 "longDatetime": datetime.datetime.now().strftime("%c"),
             },
             "cpu": {
-                "temp": [psutil.sensors_temperatures().get("cpu_thermal")[0].current],
+                "temp": [psutil.sensors_temperatures().get("cpu_thermal")[0].current],  # type: ignore
                 "currentSpeed": json.dumps(
                     list(map(lambda m: round(int(m) / 1000000), stdout))
                 ),
@@ -105,7 +117,17 @@ class ResponseHandler:
         return response
 
     @staticmethod
-    async def statistics(verified: bool) -> dict[any, any]:
+    async def statistics(verified: bool) -> dict[Any, Any]:
+        """
+        Generates a response for the 
+        statistics endpoint.
+
+        Parameters
+        ----------
+        verified: :class:`bool`
+            Whether or not the user is
+            logged in.
+        """
         cpu = cpuinfo.get_cpu_info()
 
         response = {
@@ -122,6 +144,28 @@ class ResponseHandler:
             },
         }
         return response
+
+    @staticmethod
+    async def jesterbot(verified: bool) -> dict[Any, Any]:
+        """
+        Generates a response for  the
+        jesterbot endpoint.
+
+        Parameters
+        ----------
+        verified: :class:`bool`
+            Whether or not the user is
+            logged in.
+        """
+        db = await aiosqlite.connect(JESTERBOT_DATABASE_PATH)
+        total_commands = (await db.execute("SELECT score FROM overall_score")).fetchone()
+
+        return {
+            "commands": {
+                "total": total_commands
+            }
+        }
+
 
 
 class WebSocket:
@@ -167,6 +211,7 @@ class WebSocket:
             __converter = {
                 "/": ResponseHandler.base,
                 "/statistics": ResponseHandler.statistics,
+                "/jesterbot": ResponseHandler.jesterbot
             }
             response = await (__converter.get(data.get("d")))(data.get("v"))
             await self.send_json({"op": self.RESPONSE, "d": response})
@@ -178,7 +223,7 @@ class WebSocket:
                 {"op": self.EXECUTE, "d": {"stdout": stdout, "stderr": stderr}}
             )
 
-    async def send_json(self, data: any) -> None:
+    async def send_json(self, data: Any) -> None:
         """
         Sends a json payload to the socket
         with an error handler and dumping
