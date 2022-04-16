@@ -5035,6 +5035,11 @@ fieldset:disabled .btn {
   list-style: none;
 }
 
+#sidenav-collapse-main {
+  z-index: 1002;
+  height: 85%
+}
+
 .navbar-nav .nav-link {
   padding-right: 0;
   padding-left: 0;
