@@ -68,14 +68,14 @@ class ResponseHandler:
             "general": {
                 "uptimeHours": round((uptime_seconds) / 3600),
                 "uptimeLong": f"{d} days, {h} hours and {m} minutes.",
-                "labels": list(
+                "labels": json.dumps(list(
                     map(
                         lambda i: (
                             datetime.datetime.utcnow() - datetime.timedelta(hours=i)
                         ).strftime("%H:%M"),
                         range(7),
                     )
-                ),
+                )),
                 "hourSeconds": datetime.datetime.now().strftime("%H:%M"),
                 "longDatetime": datetime.datetime.now().strftime("%c"),
             },
