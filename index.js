@@ -155,7 +155,7 @@ app.get("/protocols", async (req, res) => {
 
 app.get("/logout", async (req, res) => {
     res.clearCookie("_ashoisdhiozvsb");
-    res.redirect("/login");
+    res.redirect("/signin");
 });
 
 app.get("/processes", async (req, res) => {

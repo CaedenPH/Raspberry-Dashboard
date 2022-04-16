@@ -872,6 +872,9 @@
 
     var up = "<%= network.upload; %>";
     var down = "<%= network.download; %>";
+    var lab = "<%= JSON.parse(general.labels); %>";
+    
+    const labels = lab.replace("]", "").replace("]", "").split(",");
     const upload = up.replace("[", "").replace("]", "").split(',').map(Number);
     const download = down.replace("[", "").replace("]", "").split(',').map(Number);
     var ctx3 = document.getElementById("chart-line-tasks").getContext("2d");
@@ -879,7 +882,7 @@
     new Chart(ctx3, {
       type: "line",
       data: {
-        labels: ["1 hour ago", "2 hours ago", "3 hours ago", "4 hours ago", "5 hours ago", "6 hours ago", "7 hours ago"],
+        labels: labels,
         datasets: [
         {
           label: "Download",

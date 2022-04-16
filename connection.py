@@ -6,8 +6,8 @@ import datetime
 import json
 import math
 
-import cpuinfo
-import distro
+import cpuinfo  # type: ignore
+import distro  # type: ignore
 import psutil
 import time
 import speedtest
@@ -60,22 +60,30 @@ class ResponseHandler:
             ],
         )
 
-        stdout = (await execute(
-            "cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq"
-        ))[0].split("\n")
+        stdout = (
+            await execute("cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq")
+        )[0].split("\n")
 
         response = {
             "general": {
                 "uptimeHours": round((uptime_seconds) / 3600),
                 "uptimeLong": f"{d} days, {h} hours and {m} minutes.",
+                "labels": list(
+                    map(
+                        lambda i: (
+                            datetime.datetime.utcnow() - datetime.timedelta(hours=i)
+                        ).strftime("%H:%M"),
+                        range(7),
+                    )
+                ),
                 "hourSeconds": datetime.datetime.now().strftime("%H:%M"),
                 "longDatetime": datetime.datetime.now().strftime("%c"),
             },
             "cpu": {
-                # "temp": [psutil.sensors_temperatures().get("cpu_thermal")[0].current],
+                "temp": [psutil.sensors_temperatures().get("cpu_thermal")[0].current],
                 "currentSpeed": json.dumps(
                     list(map(lambda m: round(int(m) / 1000000), stdout))
-                )
+                ),
             },
             "network": {
                 "ping": round(lines[-1].get("ping")),
@@ -88,9 +96,9 @@ class ResponseHandler:
                 "upload": [round(lines[-i].get("upload") / 1000000) for i in range(1, 8)],
             },
             "memory": {
-                "used": round(psutil.virtual_memory().used * (9.31 * 10 ** -10), 1),
+                "used": round(psutil.virtual_memory().used * (9.31 * 10**-10), 1),
                 "available": round(
-                    psutil.virtual_memory().available * (9.31 * 10 ** -10), 1
+                    psutil.virtual_memory().available * (9.31 * 10**-10), 1
                 ),
             },
         }
@@ -291,19 +299,19 @@ async def main() -> None:
     If disconnected, a whle True loop checks consistently
     for a reopened socket.
     """
-
     client = Client()
     client.loop.create_task(update_logs())
 
     while True:
         connection = await client.ws_connect()
-        if connection is not False:
-            print("Websocket connected")
-            try:
-                await connection.listen()
-            except DisconnectError:
-                print("Websocket disconnected")
-                continue
+        if connection is False:
+            continue
+
+        print("Websocket connected")
+        try:
+            await connection.listen()
+        except DisconnectError:
+            print("Websocket disconnected")
 
 
 asyncio.run(main())
