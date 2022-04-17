@@ -91,7 +91,10 @@ class ResponseHandler:
             .split()[8]
             .capitalize()
         )
-        jesterbot_cpu_usage = round(float((await execute(f"ps --noheader -p {jesterbot_systemctl[6][jesterbot_systemctl[6].index('Main') :].split()[2]} -o %cpu"))[0]))
+        try:
+            jesterbot_cpu_usage = round(float((await execute(f"ps --noheader -p {jesterbot_systemctl[6][jesterbot_systemctl[6].index('Main') :].split()[2]} -o %cpu"))[0]))
+        except ValueError:
+            jesterbot_cpu_usage = 0
 
         stealthybot_systemctl = (
             await execute("systemctl status stealthybot.service")
@@ -106,7 +109,10 @@ class ResponseHandler:
             .split()[8]
             .capitalize()
         )
-        stealthybot_cpu_usage = round(float((await execute(f"ps --noheader -p {stealthybot_systemctl[6][stealthybot_systemctl[6].index('Main') :].split()[2]} -o %cpu"))[0]))
+        try:
+            stealthybot_cpu_usage = round(float((await execute(f"ps --noheader -p {stealthybot_systemctl[6][stealthybot_systemctl[6].index('Main') :].split()[2]} -o %cpu"))[0]))
+        except ValueError:
+            stealthybot_cpu_usage = 0
 
         dashboard_systemctl = (
             await execute("systemctl status raspberry-dashboard.service")
@@ -121,8 +127,11 @@ class ResponseHandler:
             .split()[8]
             .capitalize()
         )
-        dashboard_cpu_usage = round(float((await execute(f"ps --noheader -p {dashboard_systemctl[6][dashboard_systemctl[6].index('Main') :].split()[2]} -o %cpu"))[0]))
-    
+        try:
+            dashboard_cpu_usage = round(float((await execute(f"ps --noheader -p {dashboard_systemctl[6][dashboard_systemctl[6].index('Main') :].split()[2]} -o %cpu"))[0]))
+        except ValueError:
+            dashboard_cpu_usage = 0
+            
         response = {
             "general": {
                 "uptimeHours": round((uptime_seconds) / 3600),
