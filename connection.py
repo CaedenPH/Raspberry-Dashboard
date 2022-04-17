@@ -13,11 +13,12 @@ import psutil
 import time
 import speedtest
 
-from typing import Any 
+from typing import Any, Awaitable
 
 with open("config.json") as config:
     data: dict[Any, Any] = json.load(config)
-    JESTERBOT_DATABASE_PATH = data.get("jesterbot_path", "/home/pi/jesterbot/db/database.db")
+    JESTERBOT_PATH = data.get("jesterbot_path", "/home/pi/jesterbot/")
+
 
 async def execute(command: str) -> tuple[str]:
     proc = await asyncio.create_subprocess_shell(
@@ -80,14 +81,16 @@ class ResponseHandler:
             "general": {
                 "uptimeHours": round((uptime_seconds) / 3600),
                 "uptimeLong": f"{d} days, {h} hours and {m} minutes.",
-                "labels": json.dumps(list(
-                    map(
-                        lambda i: (
-                            datetime.datetime.utcnow() - datetime.timedelta(hours=i)
-                        ).strftime("%H:%M"),
-                        range(7),
+                "labels": json.dumps(
+                    list(
+                        map(
+                            lambda i: (
+                                datetime.datetime.utcnow() - datetime.timedelta(hours=i)
+                            ).strftime("%H:%M"),
+                            range(7),
+                        )
                     )
-                )),
+                ),
                 "hourSeconds": datetime.datetime.now().strftime("%H:%M"),
                 "longDatetime": datetime.datetime.now().strftime("%c"),
             },
@@ -119,7 +122,7 @@ class ResponseHandler:
     @staticmethod
     async def statistics(verified: bool) -> dict[Any, Any]:
         """
-        Generates a response for the 
+        Generates a response for the
         statistics endpoint.
 
         Parameters
@@ -157,15 +160,64 @@ class ResponseHandler:
             Whether or not the user is
             logged in.
         """
-        db = await aiosqlite.connect(JESTERBOT_DATABASE_PATH)
-        total_commands = await (await db.execute("SELECT score FROM overall_score")).fetchone()
+        db = await aiosqlite.connect(JESTERBOT_PATH + "/db/database.db")
+        total_commands = await (
+            await db.execute("SELECT score FROM overall_score")
+        ).fetchone()
+        date, ping, bot_users, guilds, channels, disnake_version = (
+            await (await db.execute("SELECT * FROM general_data")).fetchall()
+        )[-1]
+
+        jesterbot_status = (
+            await execute("systemctl status raspberry-dashboard.serivce")
+        )[0].split("\n")
+        status = (
+            jesterbot_status[2][jesterbot_status[2].index("Active") :]
+            .split()[1]
+            .capitalize()
+        )
+        uptime = (
+            jesterbot_status[2][jesterbot_status[2].index("Active") :]
+            .split()[8]
+            .capitalize()
+        )
+
+        with open(JESTERBOT_PATH + "/dicts/score.json") as stream:
+            data = json.load(stream)
+            users = sorted(data, key=lambda k: data[k]["score"])
 
         return {
+            "general": {"uptime": uptime, "status": status},
+            "stats": {
+                "create_epoch": datetime.datetime.fromisoformat(date).strftime("%c"),
+                "ping": round(ping),
+                "users": bot_users,
+                "guilds": guilds,
+                "channels": channels,
+                "disnake_version": disnake_version,
+            },
             "commands": {
-                "total": total_commands
-            }
+                "total": total_commands,
+                "top_one": data[users[-1]]["score"],
+                "bottom_decile": sum([data[u]["score"] for u in users[:-11]]),
+                "top_ten_names": [data[u]["name"] for u in users[-11:-1]],
+                "top_ten_scores": json.dumps([data[u]["score"] for u in users[-11:-1]]),
+            },
         }
 
+    @staticmethod
+    async def stealthybot(verified: bool) -> dict[Any, Any]:
+        """
+        Generates a response for  the
+        stealthybot endpoint.
+
+        Parameters
+        ----------
+        verified: :class:`bool`
+            Whether or not the user is
+            logged in.
+        """
+        return {}
 
 
 class WebSocket:
@@ -208,12 +260,9 @@ class WebSocket:
             await self.identify()
 
         if op == self.REQUEST:
-            __converter = {
-                "/": ResponseHandler.base,
-                "/statistics": ResponseHandler.statistics,
-                "/jesterbot": ResponseHandler.jesterbot
-            }
-            response = await (__converter.get(data.get("d")))(data.get("v"))
+            generator: Awaitable = getattr(ResponseHandler, data["d"])
+            verified = data.get("v", False)
+            response = await generator(verified)
             await self.send_json({"op": self.RESPONSE, "d": response})
 
         elif op == self.EXECUTE:
