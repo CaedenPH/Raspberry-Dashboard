@@ -27,6 +27,22 @@ const RESPONSE = 1
 const IDENTIFY = 2
 const EXECUTE = 3
 
+async function request (client, outgoingData) {
+    client.send(JSON.stringify(outgoingData));
+        
+    result = new Promise(resolve => {
+        client.on("message", (message) => {
+            let data = JSON.parse(message);
+            if (data.op !== RESPONSE) {
+                return;
+            }
+            resolve(data.d);
+        });
+        client.removeEventListener("message");
+    });
+    return await result;
+}
+
 async function execute (command) {
     const [ client ] = wss.clients;
     if (client === undefined) {
@@ -74,21 +90,15 @@ wss.on('connection', (client) => {
 
 app.get('/', async (req, res) => {
     const [ client ] = wss.clients;
+
     if (client === undefined) {
         res.render('offline');
     } else {
-        client.send(JSON.stringify({
+        data = await request(client, {
             op: REQUEST,
-            d: "/"
-        }));
-        client.on("message", (message) => {
-            let data = JSON.parse(message);
-            if (data.op !== RESPONSE) {
-                return
-            }
-            res.render('index', data.d);
+            d: "base"
         });
-        client.removeEventListener("message");
+        res.render('index', data);
     }
 });
 
@@ -107,26 +117,41 @@ app.get("/jesterbot", async (req, res) => {
     if (client === undefined) {
         res.render('offline');
     } else {
-        client.send(JSON.stringify({
+        data = await request(client, {
             op: REQUEST,
-            d: "/jesterbot",
-        }));
-        client.on("message", (message) => {
-            let data = JSON.parse(message);
-            if (data.op !== RESPONSE) {
-                return
-            }
-            res.render('jesterbot', data.d);
+            d: "jesterbot"
         });
+        res.render('jesterbot', data);
     }
 });
 
 app.get("/stealthybot", async (req, res) => {
-    res.render('stealthybot');
+    const [ client ] = wss.clients;
+
+    if (client === undefined) {
+        res.render('offline');
+    } else {
+        data = await request(client, {
+            op: REQUEST,
+            d: "stealthybot"
+        });
+        res.render('stealthybot', data);
+    }
 });
 
 app.get("/dashboard", async (req, res) => {
-    res.render('dashboard');
+    const [ client ] = wss.clients;
+
+    if (client === undefined) {
+        res.render('offline');
+    } else {
+        data = await request(client, {
+            op: REQUEST,
+            d: "dashboard"
+        });
+        console.log(data);
+        res.render('dashboard', data);
+    }
 });
 
 app.get("/logs", async (req, res) => {
@@ -167,22 +192,16 @@ app.get("/statistics", async (req, res) => {
     } catch (error) { let verified = false }
 
     const [ client ] = wss.clients;
+
     if (client === undefined) {
         res.render('offline');
     } else {
-        client.send(JSON.stringify({
+        data = await request(client, {
             op: REQUEST,
-            d: "/statistics",
+            d: "statistics",
             v: verified
-        }));
-        client.on("message", (message) => {
-            let data = JSON.parse(message);
-            if (data.op !== RESPONSE) {
-                return
-            }
-            res.render('statistics', data.d);
         });
-        client.removeEventListener("message");
+        res.render('statistics', data);
     }
 });
 
