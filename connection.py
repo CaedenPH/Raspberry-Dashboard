@@ -169,7 +169,7 @@ class ResponseHandler:
         )[-1]
 
         jesterbot_status = (
-            await execute("systemctl status raspberry-dashboard.serivce")
+            await execute("systemctl status raspberry-dashboard.service")
         )[0].split("\n")
         status = (
             jesterbot_status[2][jesterbot_status[2].index("Active") :]

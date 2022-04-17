@@ -228,6 +228,7 @@ app.get("/restart", async (req, res) => {
         await execute('sudo /sbin/reboot');
     }
     else {
+        res.redirect("/" + unit);
         await execute(`sudo systemctl restart ${unit}.service`);
     }
 }); 
