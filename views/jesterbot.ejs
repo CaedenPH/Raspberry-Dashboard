@@ -350,8 +350,8 @@
               </div>
             </div>
             <div class="card-body">
-              <h6 class="mb-0 "></h6>
-              <p class="text-sm "></p>
+              <h6 class="mb-0 ">Invokes by command</h6>
+              <p class="text-sm ">Top 10 commands</p>
               <hr class="dark horizontal">
             </div>
           </div>
@@ -517,6 +517,93 @@
               display: true,
               color: '#f8f9fa',
               padding: 0,
+              font: {
+                size: 14,
+                weight: 300,
+                family: "Roboto",
+                style: 'normal',
+                lineHeight: 2
+              },
+            }
+          },
+        },
+      },
+    });
+
+    var topCommandNames = "<%= commands.top_ten_command_names; %>";
+    var topCommandScores = "<%= JSON.parse(commands.top_ten_command_uses); %>";
+
+    const topTenCommandNames = topCommandNames.replace("[", "").replace("]", "").split(',');
+    const topTenCommandScores = topCommandScores.replace("[", "").replace("]", "").split(',');
+
+    console.log(topCommandScores);
+    var ctx2 = document.getElementById("chart-line").getContext("2d");
+
+    new Chart(ctx2, {
+      type: "bar",
+      data: {
+        labels: topTenCommandNames,
+        datasets: [{
+          label: "Invoke count",
+          tension: 0.4,
+          borderWidth: 0,
+          borderRadius: 4,
+          borderSkipped: false,
+          backgroundColor: "rgba(255, 255, 255, .8)",
+          data: topTenCommandScores,
+          maxBarThickness: 6
+        }, ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false,
+          }
+        },
+        interaction: {
+          intersect: false,
+          mode: 'index',
+        },
+        scales: {
+          y: {
+            grid: {
+              drawBorder: false,
+              display: true,
+              drawOnChartArea: true,
+              drawTicks: false,
+              borderDash: [5, 5],
+              color: 'rgba(255, 255, 255, .2)'
+            },
+            ticks: {
+              suggestedMin: 0,
+              suggestedMax: 500,
+              beginAtZero: true,
+              padding: 10,
+              font: {
+                size: 14,
+                weight: 300,
+                family: "Roboto",
+                style: 'normal',
+                lineHeight: 2
+              },
+              color: "#fff"
+            },
+          },
+          x: {
+            grid: {
+              drawBorder: false,
+              display: true,
+              drawOnChartArea: true,
+              drawTicks: false,
+              borderDash: [5, 5],
+              color: 'rgba(255, 255, 255, .2)'
+            },
+            ticks: {
+              display: true,
+              color: '#f8f9fa',
+              padding: 10,
               font: {
                 size: 14,
                 weight: 300,
