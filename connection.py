@@ -77,6 +77,52 @@ class ResponseHandler:
             await execute("cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq")
         )[0].split("\n")
 
+
+        jesterbot_systemctl = (
+            await execute("systemctl status raspberry-dashboard.service")
+        )[0].split("\n")
+        jesterbot_status = (
+            jesterbot_systemctl[2][jesterbot_systemctl[2].index("Active") :]
+            .split()[1]
+            .capitalize()
+        )
+        jesterbot_uptime = (
+            jesterbot_systemctl[2][jesterbot_systemctl[2].index("Active") :]
+            .split()[8]
+            .capitalize()
+        )
+        jesterbot_cpu_usage = (await execute(f"ps --noheader -p {jesterbot_systemctl[6][jesterbot_systemctl[6].index('Main') :].split()[2]} -o %cpu"))
+
+        stealthybot_systemctl = (
+            await execute("systemctl status raspberry-dashboard.service")
+        )[0].split("\n")
+        stealthybot_status = (
+            stealthybot_systemctl[2][stealthybot_systemctl[2].index("Active"): ]
+            .split()[1]
+            .capitalize()
+        )
+        stealthybot_uptime = (
+            stealthybot_systemctl[2][stealthybot_systemctl[2].index("Active") :]
+            .split()[8]
+            .capitalize()
+        )
+        stealthybot_cpu_usage = (await execute(f"ps --noheader -p {stealthybot_systemctl[6][stealthybot_systemctl[6].index('Main') :].split()[2]} -o %cpu"))
+
+        dashboard_systemctl = (
+            await execute("systemctl status raspberry-dashboard.service")
+        )[0].split("\n")
+        dashboard_status = (
+            dashboard_systemctl[2][dashboard_systemctl[2].index("Active") :]
+            .split()[1]
+            .capitalize()
+        )
+        dashboard_uptime = (
+            dashboard_systemctl[2][dashboard_systemctl[2].index("Active") :]
+            .split()[8]
+            .capitalize()
+        )
+        dashboard_cpu_usage = (await execute(f"ps --noheader -p {dashboard_systemctl[6][dashboard_systemctl[6].index('Main') :].split()[2]} -o %cpu"))
+    
         response = {
             "general": {
                 "uptimeHours": round((uptime_seconds) / 3600),
@@ -98,7 +144,7 @@ class ResponseHandler:
                 "temp": [psutil.sensors_temperatures().get("cpu_thermal")[0].current],  # type: ignore
                 "currentSpeed": json.dumps(
                     list(map(lambda m: round(int(m) / 1000000), stdout))
-                ),
+                )
             },
             "network": {
                 "ping": round(lines[-1].get("ping")),
@@ -116,35 +162,21 @@ class ResponseHandler:
                     psutil.virtual_memory().available * (9.31 * 10**-10), 1
                 ),
             },
-        }
-        return response
-
-    @staticmethod
-    async def statistics(verified: bool) -> dict[Any, Any]:
-        """
-        Generates a response for the
-        statistics endpoint.
-
-        Parameters
-        ----------
-        verified: :class:`bool`
-            Whether or not the user is
-            logged in.
-        """
-        cpu = cpuinfo.get_cpu_info()
-
-        response = {
-            "cpu": cpu,
-            "os": {
-                "name": distro.id().capitalize(),
-                "processes": (await execute("ps aux | wc -l"))[0],
+            "jesterbot": {
+                "status": jesterbot_status,
+                "uptime": jesterbot_uptime,
+                "cpu_usage": jesterbot_cpu_usage
             },
-            "internet": {
-                "private": (await execute("hostname -i"))[0],
-                "public": (await execute("curl ifconfig.me."))[0]
-                if verified
-                else "*** *** ***",
+            "stealthybot": {
+                "status": stealthybot_status,
+                "uptime": stealthybot_uptime,
+                "cpu_usage": stealthybot_cpu_usage
             },
+            "dashboard": {
+                "status": dashboard_status,
+                "uptime": dashboard_uptime,
+                "cpu_usage": dashboard_cpu_usage
+            }
         }
         return response
 
