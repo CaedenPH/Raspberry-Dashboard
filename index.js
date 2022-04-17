@@ -181,7 +181,7 @@ app.get("/protocols", async (req, res) => {
 })
 
 app.get("/logout", async (req, res) => {
-    res.clearCookie("_ashoisdhiozvsb");
+    res.clearCookie(cookie_value);
     res.redirect("/signin");
 });
 
