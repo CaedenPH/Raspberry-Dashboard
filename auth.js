@@ -2,7 +2,7 @@ const cookie_value = require("./config.json").cookie_value;
 const jwt = require("jsonwebtoken");
 
 module.exports = (request, response, next) => {
-    if (["/", "/statistics", "/logs", "/signin"].includes(request.path)) {
+    if (["/", "/statistics", "/logs", "/signin", "/jesterbot", "/stealthybot", "/dashboard"].includes(request.path)) {
         next();
     } else if (["/protocols", "/reset"].includes(request.path)) {
         try {
