@@ -79,7 +79,7 @@ class ResponseHandler:
 
 
         jesterbot_systemctl = (
-            await execute("systemctl status raspberry-dashboard.service")
+            await execute("systemctl status jesterbot.service")
         )[0].split("\n")
         jesterbot_status = (
             jesterbot_systemctl[2][jesterbot_systemctl[2].index("Active") :]
@@ -91,10 +91,10 @@ class ResponseHandler:
             .split()[8]
             .capitalize()
         )
-        jesterbot_cpu_usage = (await execute(f"ps --noheader -p {jesterbot_systemctl[6][jesterbot_systemctl[6].index('Main') :].split()[2]} -o %cpu"))
+        jesterbot_cpu_usage = round(float((await execute(f"ps --noheader -p {jesterbot_systemctl[6][jesterbot_systemctl[6].index('Main') :].split()[2]} -o %cpu"))))
 
         stealthybot_systemctl = (
-            await execute("systemctl status raspberry-dashboard.service")
+            await execute("systemctl status stealthybot.service")
         )[0].split("\n")
         stealthybot_status = (
             stealthybot_systemctl[2][stealthybot_systemctl[2].index("Active"): ]
@@ -106,7 +106,7 @@ class ResponseHandler:
             .split()[8]
             .capitalize()
         )
-        stealthybot_cpu_usage = (await execute(f"ps --noheader -p {stealthybot_systemctl[6][stealthybot_systemctl[6].index('Main') :].split()[2]} -o %cpu"))
+        stealthybot_cpu_usage = round(float((await execute(f"ps --noheader -p {stealthybot_systemctl[6][stealthybot_systemctl[6].index('Main') :].split()[2]} -o %cpu"))))
 
         dashboard_systemctl = (
             await execute("systemctl status raspberry-dashboard.service")
@@ -121,7 +121,7 @@ class ResponseHandler:
             .split()[8]
             .capitalize()
         )
-        dashboard_cpu_usage = (await execute(f"ps --noheader -p {dashboard_systemctl[6][dashboard_systemctl[6].index('Main') :].split()[2]} -o %cpu"))
+        dashboard_cpu_usage = round(float((await execute(f"ps --noheader -p {dashboard_systemctl[6][dashboard_systemctl[6].index('Main') :].split()[2]} -o %cpu"))))
     
         response = {
             "general": {
