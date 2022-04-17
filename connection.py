@@ -184,7 +184,11 @@ class ResponseHandler:
 
         with open(JESTERBOT_PATH + "/dicts/score.json") as stream:
             data = json.load(stream)
-            users = sorted(data, key=lambda k: data[k]["score"])
+            users = sorted(data, key=lambda u: data[u]["score"])
+
+        with open(JESTERBOT_PATH + "/dicts/commands_used.json") as stream:
+            commands_data = json.load(stream)
+            commands = sorted(commands_data, key=lambda c: commands_data[c]["score"])
 
         return {
             "general": {"uptime": uptime, "status": status},
@@ -202,6 +206,8 @@ class ResponseHandler:
                 "bottom_decile": sum([data[u]["score"] for u in users[:-11]]),
                 "top_ten_names": [data[u]["name"] for u in users[-11:-1]],
                 "top_ten_scores": json.dumps([data[u]["score"] for u in users[-11:-1]]),
+                "top_ten_command_names": commands[-10:],
+                "top_ten_command_uses": json.dumps([commands_data[c]["score"] for c in commands[-10:]])
             },
         }
 
