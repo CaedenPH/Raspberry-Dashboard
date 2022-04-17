@@ -91,7 +91,7 @@ class ResponseHandler:
             .split()[8]
             .capitalize()
         )
-        jesterbot_cpu_usage = round(float((await execute(f"ps --noheader -p {jesterbot_systemctl[6][jesterbot_systemctl[6].index('Main') :].split()[2]} -o %cpu")[0])))
+        jesterbot_cpu_usage = round(float((await execute(f"ps --noheader -p {jesterbot_systemctl[6][jesterbot_systemctl[6].index('Main') :].split()[2]} -o %cpu"))[0]))
 
         stealthybot_systemctl = (
             await execute("systemctl status stealthybot.service")
