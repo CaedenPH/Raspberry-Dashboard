@@ -98,7 +98,7 @@ app.get('/', async (req, res) => {
             op: REQUEST,
             d: "base"
         });
-        res.render('index', data);
+        res.render('home', data);
     }
 });
 
