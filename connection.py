@@ -110,7 +110,7 @@ class ResponseHandler:
             .capitalize()
         )
         try:
-            stealthybot_cpu_usage = round(float((await execute(f"ps --noheader -p {stealthybot_systemctl[6][stealthybot_systemctl[6].index('Main') :].split()[2]} -o %cpu"))[0]))
+            stealthybot_cpu_usage = round(float((await execute(f"ps --noheader -p {stealthybot_systemctl[5][stealthybot_systemctl[5].index('Main') :].split()[2]} -o %cpu"))[0]))
         except ValueError:
             stealthybot_cpu_usage = 0
 
@@ -131,7 +131,7 @@ class ResponseHandler:
             dashboard_cpu_usage = round(float((await execute(f"ps --noheader -p {dashboard_systemctl[6][dashboard_systemctl[6].index('Main') :].split()[2]} -o %cpu"))[0]))
         except ValueError:
             dashboard_cpu_usage = 0
-            
+
         response = {
             "general": {
                 "uptimeHours": round((uptime_seconds) / 3600),
