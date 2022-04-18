@@ -40,7 +40,7 @@ class ResponseHandler:
     """
     async def get_cpu_usage(self, status: str) -> float:
         try:
-            main_pid = (status[5][status[5].index('Main') :] if "stealthybot" in status else status[6][status[6].index('Main') :])[2]
+            main_pid = (status[status.index("PID: ") +1])
             return round(float((await execute(f"ps --noheader -p {main_pid} -o %cpu"))[0]))
         except ValueError:
             return 0
@@ -80,12 +80,12 @@ class ResponseHandler:
 
         processes = {}
         for unit in ["jesterbot", "stealthybot", "raspberry-dashboard"]:
-            status = (
+            status: str = (
                 await execute(f"systemctl status {unit}.service")
-            )[0].split("\n")
+            )[0].split()
             processes[unit.replace("raspberry-", "")] = {
-                "status": status[2][status[2].index("Active") :].split()[1].capitalize(),
-                "uptime": status[2][status[2].index("Active") :].split()[8],
+                "status": status[status.index("Active:") +1:].capitalize(),
+                "uptime": " ".join(status[(i:=status.index("Active:"))+8:i+11]),
                 "cpu_usage": await self.get_cpu_usage(status)
             }
 
