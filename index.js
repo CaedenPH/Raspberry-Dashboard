@@ -192,7 +192,7 @@ app.get("/logout", async (req, res) => {
 app.get("/statistics", async (req, res) => {
     var verified = false;
     try {
-        jwt.verify(req.cookies._ashoisdhiozvsb || "", "aoihfisoduhgoiahusSECRET_KEY");
+        jwt.verify(req.cookies[cookie_value] || "", "aoihfisoduhgoiahusSECRET_KEY");
         verified = true;
     } catch (error) {}
 
