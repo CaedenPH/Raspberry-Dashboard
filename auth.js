@@ -2,7 +2,7 @@ const cookie_value = require("./config.json").cookie_value;
 const jwt = require("jsonwebtoken");
 
 module.exports = (request, response, next) => {
-    if (["/", "/statistics", "/logs", "/signin", "/jesterbot", "/stealthybot", "/dashboard", "storage"].includes(request.path)) {
+    if (["/", "/statistics", "/logs", "/login", "/jesterbot", "/stealthybot", "/dashboard", "storage"].includes(request.path)) {
         next();
     } else if (["/protocols", "/reset"].includes(request.path)) {
         try {
@@ -16,7 +16,7 @@ module.exports = (request, response, next) => {
             jwt.verify(request.cookies[cookie_value] || "", "aoihfisoduhgoiahusSECRET_KEY");
             next();
         } catch (err) {
-            response.redirect("/signin");
+            response.redirect("/login");
         }
     }
 }

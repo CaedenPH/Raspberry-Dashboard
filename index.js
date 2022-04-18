@@ -103,8 +103,8 @@ app.get('/', async (req, res) => {
 });
 
 
-app.get("/signin", async (req, res) => {
-    res.render('signin');
+app.get("/login", async (req, res) => {
+    res.render('login');
 });
 
 app.get("/console", async (req, res) => {
@@ -186,7 +186,7 @@ app.get("/protocols", async (req, res) => {
 
 app.get("/logout", async (req, res) => {
     res.clearCookie(cookie_value);
-    res.redirect("/signin");
+    res.redirect("/login");
 });
 
 app.get("/statistics", async (req, res) => {
@@ -252,7 +252,7 @@ app.get("/execute", async (req, res) => {
     res.status(200).json({message: await result + ""});
 });
 
-app.post("/signin", async (req, res) => {
+app.post("/login", async (req, res) => {
     if (req.body.password && req.body.password === password) {
         res.cookie(cookie_value, jwt.sign({
             username: "username"
