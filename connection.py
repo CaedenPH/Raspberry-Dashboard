@@ -85,7 +85,7 @@ class ResponseHandler:
             )[0].split()
             processes[unit.replace("raspberry-", "")] = {
                 "status": status[status.index("Active:") +1].capitalize(),
-                "uptime": " ".join(status[(i:=status.index("Active:"))+8:]).split("\n")[0],
+                "uptime": " ".join(status[status.index("Active:")+8:status.index("Process")-1]),
                 "cpu_usage": await self.get_cpu_usage(status)
             }
 
