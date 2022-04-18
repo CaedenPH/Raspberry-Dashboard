@@ -40,7 +40,7 @@ class ResponseHandler:
     """
     async def get_cpu_usage(self, status: str) -> float:
         try:
-            main_pid = (status[status.index("PID: ") +1])
+            main_pid = (status[status.index("PID:") +1])
             return round(float((await execute(f"ps --noheader -p {main_pid} -o %cpu"))[0]))
         except ValueError:
             return 0
@@ -84,7 +84,7 @@ class ResponseHandler:
                 await execute(f"systemctl status {unit}.service")
             )[0].split()
             processes[unit.replace("raspberry-", "")] = {
-                "status": status[status.index("Active:") +1:].capitalize(),
+                "status": status[status.index("Active:") +1].capitalize(),
                 "uptime": " ".join(status[(i:=status.index("Active:"))+8:i+11]),
                 "cpu_usage": await self.get_cpu_usage(status)
             }
