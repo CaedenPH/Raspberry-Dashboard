@@ -38,9 +38,14 @@ class ResponseHandler:
     related respponses. Also exeuctes commands
     in shell as a response.
     """
+    async def get_cpu_usage(self, status: str) -> float:
+        try:
+            main_pid = (status[5][status[5].index('Main') :] if "stealthybot" in status else status[6][status[6].index('Main') :])[2]
+            return round(float((await execute(f"ps --noheader -p {main_pid} -o %cpu"))[0]))
+        except ValueError:
+            return 0
 
-    @staticmethod
-    async def base(verified: bool) -> dict[Any, Any]:
+    async def base(self, verified: bool) -> dict[Any, Any]:
         """
         Generates the systeminformation
         required for the base / path.
@@ -73,64 +78,16 @@ class ResponseHandler:
             ],
         )
 
-        stdout = (
-            await execute("cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq")
-        )[0].split("\n")
-
-
-        jesterbot_systemctl = (
-            await execute("systemctl status jesterbot.service")
-        )[0].split("\n")
-        jesterbot_status = (
-            jesterbot_systemctl[2][jesterbot_systemctl[2].index("Active") :]
-            .split()[1]
-            .capitalize()
-        )
-        jesterbot_uptime = (
-            jesterbot_systemctl[2][jesterbot_systemctl[2].index("Active") :]
-            .split()[8]
-            .capitalize()
-        )
-        try:
-            jesterbot_cpu_usage = round(float((await execute(f"ps --noheader -p {jesterbot_systemctl[6][jesterbot_systemctl[6].index('Main') :].split()[2]} -o %cpu"))[0]))
-        except ValueError:
-            jesterbot_cpu_usage = 0
-
-        stealthybot_systemctl = (
-            await execute("systemctl status stealthybot.service")
-        )[0].split("\n")
-        stealthybot_status = (
-            stealthybot_systemctl[2][stealthybot_systemctl[2].index("Active"): ]
-            .split()[1]
-            .capitalize()
-        )
-        stealthybot_uptime = (
-            stealthybot_systemctl[2][stealthybot_systemctl[2].index("Active") :]
-            .split()[8]
-            .capitalize()
-        )
-        try:
-            stealthybot_cpu_usage = round(float((await execute(f"ps --noheader -p {stealthybot_systemctl[5][stealthybot_systemctl[5].index('Main') :].split()[2]} -o %cpu"))[0]))
-        except ValueError:
-            stealthybot_cpu_usage = 0
-
-        dashboard_systemctl = (
-            await execute("systemctl status raspberry-dashboard.service")
-        )[0].split("\n")
-        dashboard_status = (
-            dashboard_systemctl[2][dashboard_systemctl[2].index("Active") :]
-            .split()[1]
-            .capitalize()
-        )
-        dashboard_uptime = (
-            dashboard_systemctl[2][dashboard_systemctl[2].index("Active") :]
-            .split()[8]
-            .capitalize()
-        )
-        try:
-            dashboard_cpu_usage = round(float((await execute(f"ps --noheader -p {dashboard_systemctl[6][dashboard_systemctl[6].index('Main') :].split()[2]} -o %cpu"))[0]))
-        except ValueError:
-            dashboard_cpu_usage = 0
+        processes = {}
+        for unit in ["jesterbot", "stealthybot", "raspberry-dashbboard"]:
+            status = (
+                await execute(f"systemctl status {unit}.service")
+            )[0].split("\n")
+            processes[unit] = {
+                "status": status[2][status[2].index("Active") :].split()[1].capitalize(),
+                "uptime": status[2][status[2].index("Active") :].split()[8],
+                "cpu_usage": self.get_cpu_usage(status)
+            }
 
         response = {
             "general": {
@@ -152,7 +109,10 @@ class ResponseHandler:
             "cpu": {
                 "temp": [psutil.sensors_temperatures().get("cpu_thermal")[0].current],  # type: ignore
                 "currentSpeed": json.dumps(
-                    list(map(lambda m: round(int(m) / 1000000), stdout))
+                    list(map(lambda m: round(int(m) / 1000000), (
+                            await execute("cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq")
+                        )[0].split("\n")
+                    ))
                 )
             },
             "network": {
@@ -171,26 +131,11 @@ class ResponseHandler:
                     psutil.virtual_memory().available * (9.31 * 10**-10), 1
                 ),
             },
-            "jesterbot": {
-                "status": jesterbot_status,
-                "uptime": jesterbot_uptime,
-                "cpu_usage": jesterbot_cpu_usage
-            },
-            "stealthybot": {
-                "status": stealthybot_status,
-                "uptime": stealthybot_uptime,
-                "cpu_usage": stealthybot_cpu_usage
-            },
-            "dashboard": {
-                "status": dashboard_status,
-                "uptime": dashboard_uptime,
-                "cpu_usage": dashboard_cpu_usage
-            }
+            **processes
         }
         return response
 
-    @staticmethod
-    async def jesterbot(verified: bool) -> dict[Any, Any]:
+    async def jesterbot(self, verified: bool) -> dict[Any, Any]:
         """
         Generates a response for  the
         jesterbot endpoint.
@@ -252,8 +197,7 @@ class ResponseHandler:
             },
         }
 
-    @staticmethod
-    async def stealthybot(verified: bool) -> dict[Any, Any]:
+    async def stealthybot(self, verified: bool) -> dict[Any, Any]:
         """
         Generates a response for  the
         stealthybot endpoint.
@@ -298,6 +242,7 @@ class WebSocket:
         self.client = client
         self.loop = client.loop
         self.is_closed = False
+        self.response_handler = ResponseHandler()
 
     async def _parse_message(self, message: str) -> None:
         data: dict = json.loads(message)
@@ -307,7 +252,7 @@ class WebSocket:
             await self.identify()
 
         if op == self.REQUEST:
-            generator: Awaitable = getattr(ResponseHandler, data["d"])
+            generator: Awaitable = getattr(self.response_handler, data["d"])
             verified = data.get("v", False)
             response = await generator(verified)
             await self.send_json({"op": self.RESPONSE, "d": response})
