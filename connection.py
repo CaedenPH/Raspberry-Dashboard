@@ -79,11 +79,11 @@ class ResponseHandler:
         )
 
         processes = {}
-        for unit in ["jesterbot", "stealthybot", "raspberry-dashbboard"]:
+        for unit in ["jesterbot", "stealthybot", "raspberry-dashboard"]:
             status = (
                 await execute(f"systemctl status {unit}.service")
             )[0].split("\n")
-            processes[unit] = {
+            processes[unit.replace("raspberry-", "")] = {
                 "status": status[2][status[2].index("Active") :].split()[1].capitalize(),
                 "uptime": status[2][status[2].index("Active") :].split()[8],
                 "cpu_usage": self.get_cpu_usage(status)
