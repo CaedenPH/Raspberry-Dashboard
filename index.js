@@ -96,7 +96,7 @@ app.get('/', async (req, res) => {
     } else {
         data = await request(client, {
             op: REQUEST,
-            d: "base"
+            d: "home"
         });
         res.render('home', data);
     }
@@ -110,6 +110,10 @@ app.get("/signin", async (req, res) => {
 app.get("/console", async (req, res) => {
     res.render('console');
 });
+
+app.get("/storage", async (req, res) =>{
+    res.render('storage');
+})
 
 app.get("/jesterbot", async (req, res) => {
     const [ client ] = wss.clients;
