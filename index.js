@@ -190,10 +190,11 @@ app.get("/logout", async (req, res) => {
 });
 
 app.get("/statistics", async (req, res) => {
+    var verified = false;
     try {
         jwt.verify(req.cookies._ashoisdhiozvsb || "", "aoihfisoduhgoiahusSECRET_KEY");
-        var verified = true
-    } catch (error) { let verified = false }
+        verified = true;
+    } catch (error) {}
 
     const [ client ] = wss.clients;
 
