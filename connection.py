@@ -45,7 +45,7 @@ class ResponseHandler:
         except ValueError:
             return 0
 
-    async def base(self, verified: bool) -> dict[Any, Any]:
+    async def home(self, verified: bool) -> dict[Any, Any]:
         """
         Generates the systeminformation
         required for the base / path.
@@ -132,6 +132,34 @@ class ResponseHandler:
                 ),
             },
             **processes
+        }
+        return response
+
+    async def statistics(self, verified: bool) -> dict[Any, Any]:
+        """
+        Generates a response for the
+        statistics endpoint.
+
+        Parameters
+        ----------
+        verified: :class:`bool`
+            Whether or not the user is
+            logged in.
+        """
+        cpu = cpuinfo.get_cpu_info()
+
+        response = {
+            "cpu": cpu,
+            "os": {
+                "name": distro.id().capitalize(),
+                "processes": (await execute("ps aux | wc -l"))[0],
+            },
+            "internet": {
+                "private": (await execute("hostname -i"))[0],
+                "public": (await execute("curl ifconfig.me."))[0]
+                if verified
+                else "*** *** ***",
+            },
         }
         return response
 
