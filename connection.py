@@ -1,5 +1,4 @@
 from __future__ import annotations
-from concurrent.futures import process
 
 import aiohttp
 import asyncio
@@ -28,6 +27,7 @@ CRITICAL_LOG = """\
 CRITICAL ERROR
 --------------
 TIME : {time}
+NETWORK_ONLINE : {network}
 ERROR : {error}
 TYPE : {error_type}
 TRACRBACK : {traceback}
@@ -378,6 +378,7 @@ class Client:
 
     def __init__(self) -> None:
         self.loop = asyncio.get_running_loop()
+        self.loop.create_task(update_logs())
         self._session = aiohttp.ClientSession()
 
     async def ws_connect(self) -> WebSocket | bool:
@@ -401,16 +402,22 @@ class Client:
         return self
     
     async def __aexit__(self, error_type, error, tb) -> None:
-        print(f"CRITICAL: process shutdown, initiating backup")
+        await self._session.close()
 
+        if error_type is asyncio.CancelledError:
+            return
+
+        ping = (await execute("ping -c 1 google.com"))[0]
         with open("CRITICAL.txt", "a") as critical:
             critical.write(CRITICAL_LOG.format(
                 time=datetime.datetime.now(),
+                network="bytes from" in ping,
                 error=error,
                 error_type=error_type,
                 traceback="\n".join(traceback.format_exception(error))
             ))
-        await self._session.close()
+        print(f"CRITICAL: process shutdown, initiating backup")
+        
         
 
 async def update_logs() -> None:
@@ -443,8 +450,6 @@ async def main() -> None:
     """
 
     async with Client() as client:
-        client.loop.create_task(update_logs())
-
         while True:
             connection = await client.ws_connect()
             if connection is False:
@@ -457,5 +462,5 @@ async def main() -> None:
                 print("Websocket disconnected")
             except Exception as err:
                 print(f"SUBCRITICAL: {err}")
-    
+
 asyncio.run(main())
