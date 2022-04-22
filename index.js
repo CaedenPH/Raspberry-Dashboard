@@ -112,7 +112,17 @@ app.get("/console", async (req, res) => {
 });
 
 app.get("/storage", async (req, res) =>{
-    res.render('storage');
+    const [ client ] = wss.clients;
+
+    if (client === undefined) {
+        res.render('offline');
+    } else {
+        data = await request(client, {
+            op: REQUEST,
+            d: "storage"
+        });
+        res.render('storage', data);
+    }
 })
 
 app.get("/jesterbot", async (req, res) => {
