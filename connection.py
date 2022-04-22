@@ -6,6 +6,7 @@ import asyncio
 import datetime
 import json
 import math
+import traceback
 
 import aiosqlite
 import cpuinfo  # type: ignore
@@ -16,12 +17,23 @@ import speedtest
 
 from typing import Any, Awaitable
 
+
 with open("config.json") as config:
     data: dict[Any, Any] = json.load(config)
 
 JESTERBOT_PATH = data.get("jesterbot_path", "/home/pi/jesterbot/")
 DISK_PATH = data.get("disk_path", "/dev/mmcblk0p2")
 PROCESSES = ["jesterbot", "stealthybot", "raspberry-dashboard"]
+CRITICAL_LOG = """\
+CRITICAL ERROR
+--------------
+TIME : {time}
+ERROR : {error}
+TYPE : {error_type}
+TRACRBACK : {traceback}
+---------------
+BACKUP INITIATED
+"""
 
 
 async def execute(command: str) -> tuple[str]:
@@ -385,6 +397,21 @@ class Client:
         except aiohttp.ClientConnectionError:
             return False
 
+    async def __aenter__(self) -> Client:
+        return self
+    
+    async def __aexit__(self, error_type, error, tb) -> None:
+        print(f"CRITICAL: process shutdown, initiating backup")
+
+        with open("CRITICAL.txt", "a") as critical:
+            critical.write(CRITICAL_LOG.format(
+                time=datetime.datetime.now(),
+                error=error,
+                error_type=error_type,
+                traceback="\n".join(traceback.format_exception(error))
+            ))
+        await self._session.close()
+        
 
 async def update_logs() -> None:
     """
@@ -414,19 +441,21 @@ async def main() -> None:
     If disconnected, a whle True loop checks consistently
     for a reopened socket.
     """
-    client = Client()
-    client.loop.create_task(update_logs())
 
-    while True:
-        connection = await client.ws_connect()
-        if connection is False:
-            continue
+    async with Client() as client:
+        client.loop.create_task(update_logs())
 
-        print("Websocket connected")
-        try:
-            await connection.listen()
-        except DisconnectError:
-            print("Websocket disconnected")
+        while True:
+            connection = await client.ws_connect()
+            if connection is False:
+                continue
 
-
+            print("Websocket connected")
+            try:
+                await connection.listen()
+            except DisconnectError:
+                print("Websocket disconnected")
+            except Exception as err:
+                print(f"SUBCRITICAL: {err}")
+    
 asyncio.run(main())
