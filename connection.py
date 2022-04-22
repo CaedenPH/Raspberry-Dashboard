@@ -1,4 +1,5 @@
 from __future__ import annotations
+from concurrent.futures import process
 
 import aiohttp
 import asyncio
@@ -17,7 +18,10 @@ from typing import Any, Awaitable
 
 with open("config.json") as config:
     data: dict[Any, Any] = json.load(config)
-    JESTERBOT_PATH = data.get("jesterbot_path", "/home/pi/jesterbot/")
+
+JESTERBOT_PATH = data.get("jesterbot_path", "/home/pi/jesterbot/")
+DISK_PATH = data.get("disk_path", "/dev/mmcblk0p2")
+PROCESSES = ["jesterbot", "stealthybot", "raspberry-dashboard"]
 
 
 async def execute(command: str) -> tuple[str]:
@@ -70,7 +74,7 @@ class ResponseHandler:
         )
 
         processes = {}
-        for unit in ["jesterbot", "stealthybot", "raspberry-dashboard"]:
+        for unit in PROCESSES:
             status: str = (await execute(f"systemctl status {unit}.service"))[0].split()
             processes[unit.replace("raspberry-", "")] = {
                 "status": status[status.index("Active:") + 1].capitalize(),
@@ -209,6 +213,33 @@ class ResponseHandler:
             logged in.
         """
         return {}
+
+    async def storage(self, verified: bool) -> dict[Any, Any]: 
+        """
+        Generates a response for  the
+        storage endpoint.
+
+        Parameters
+        ----------
+        verified: :class:`bool`
+            Whether or not the user is
+            logged in.
+        """
+
+        processes = {}
+        for process in PROCESSES:
+            output = (await execute(f"du -s -h ../{process}"))[0]
+            processes[process.replace("raspberry-", "")] = float(output.split()[0][:-1])
+
+        storage = (await execute(f"df -h {DISK_PATH}"))[0].split("\n")[1].split()
+        total = dict(zip(["size", "used", "available", "use"], [
+            (s:=storage[m]) + ("B" if s.endswith("G") else "") for m in range(1, 5)
+        ]))
+
+        return {
+            "total": {**total},
+            **processes
+        }
 
 
 class WebSocket:
