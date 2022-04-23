@@ -293,7 +293,7 @@ class ResponseHandler:
             The response generated.
         """
 
-        process_status = await self.fetch_process_status("abrtd")
+        process_status = await self.fetch_process_status("dashoard")
         status = process_status["status"]
         uptime = process_status["uptime"]
 
@@ -370,7 +370,13 @@ class WebSocket:
         self.is_closed = False
         self.response_handler = ResponseHandler()
 
+    async def _log_message(self, message: str) -> None:
+        with open("logs/messages.txt", "a") as messages:
+            messages.write(message + "\n")
+
     async def _parse_message(self, message: str) -> None:
+        await self._log_message(message)
+
         data: dict = json.loads(message)
         op = data.get("op")
 

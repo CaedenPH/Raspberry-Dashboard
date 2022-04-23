@@ -27,9 +27,10 @@ const RESPONSE = 1
 const IDENTIFY = 2
 const EXECUTE = 3
 
-async function request (client, outgoingData) {
+async function request (req, client, outgoingData) {
+    outgoingData.ipFrom = req.ip;
+
     client.send(JSON.stringify(outgoingData));
-        
     result = new Promise(resolve => {
         client.on("message", (message) => {
             let data = JSON.parse(message);
@@ -43,7 +44,7 @@ async function request (client, outgoingData) {
     return await result;
 }
 
-async function execute (command) {
+async function execute (req, command) {
     const [ client ] = wss.clients;
     if (client === undefined) {
         result = new Promise(resolve => {
@@ -53,7 +54,8 @@ async function execute (command) {
     } else {
         client.send(JSON.stringify({
             op: EXECUTE,
-            d: command
+            d: command,
+            ipFrom: req.ip
         }));
             
         result = new Promise(resolve => {
@@ -100,7 +102,7 @@ app.get('/', async (req, res) => {
     if (client === undefined) {
         res.render('offline');
     } else {
-        data = await request(client, {
+        data = await request(req, client, {
             op: REQUEST,
             d: "home"
         });
@@ -123,7 +125,7 @@ app.get("/storage", async (req, res) =>{
     if (client === undefined) {
         res.render('offline');
     } else {
-        data = await request(client, {
+        data = await request(req, client, {
             op: REQUEST,
             d: "storage"
         });
@@ -137,7 +139,7 @@ app.get("/jesterbot", async (req, res) => {
     if (client === undefined) {
         res.render('offline');
     } else {
-        data = await request(client, {
+        data = await request(req, client, {
             op: REQUEST,
             d: "jesterbot"
         });
@@ -151,7 +153,7 @@ app.get("/stealthybot", async (req, res) => {
     if (client === undefined) {
         res.render('offline');
     } else {
-        data = await request(client, {
+        data = await request(req, client, {
             op: REQUEST,
             d: "stealthybot"
         });
@@ -165,7 +167,7 @@ app.get("/dashboard", async (req, res) => {
     if (client === undefined) {
         res.render('offline');
     } else {
-        data = await request(client, {
+        data = await request(req, client, {
             op: REQUEST,
             d: "dashboard"
         });
@@ -174,9 +176,9 @@ app.get("/dashboard", async (req, res) => {
 });
 
 app.get("/logs", async (req, res) => {
-    jesterbotLogs = (await execute("journalctl -b -u jesterbot.service")).stdout;
-    stealthybotLogs = (await execute("journalctl -b -u stealthybot.service")).stdout;
-    dashboardLogs = (await execute("journalctl -b -u raspberry-dashboard.service")).stdout;
+    jesterbotLogs = (await execute(req, "journalctl -b -u jesterbot.service")).stdout;
+    stealthybotLogs = (await execute(req, "journalctl -b -u stealthybot.service")).stdout;
+    dashboardLogs = (await execute(req, "journalctl -b -u raspberry-dashboard.service")).stdout;
 
     res.render('logs', {
         processes: {
@@ -216,7 +218,7 @@ app.get("/statistics", async (req, res) => {
     if (client === undefined) {
         res.render('offline');
     } else {
-        data = await request(client, {
+        data = await request(req, client, {
             op: REQUEST,
             d: "statistics",
             v: verified
@@ -245,18 +247,18 @@ app.get("/restart", async (req, res) => {
     var { unit } = req.query;
     if (!unit) {
         res.redirect("/");
-        await execute('sudo /sbin/reboot');
+        await execute(req, 'sudo /sbin/reboot');
     }
     else {
         res.redirect("/" + unit);
-        await execute(`sudo systemctl restart ${unit}.service`);
+        await execute(req, `sudo systemctl restart ${unit}.service`);
     }
 }); 
 
 app.get("/execute", async (req, res) => {
     var { cmd } = req.query;
-
-    var output = await execute(cmd);
+    
+    var output = await execute(req, cmd);
     const result = new Promise(resolve => {
         if (output.stderr) {
           resolve(output.stderr);
