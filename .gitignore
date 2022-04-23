@@ -1,4 +1,4 @@
 config.json
 node_modules
-logs.txt
+logs
 test.py
