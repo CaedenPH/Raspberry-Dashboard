@@ -39,14 +39,14 @@ BACKUP INITIATED
 
 async def execute(command: str) -> tuple[str]:
     """
-    Asynchronously executes a command as a 
+    Asynchronously executes a command as a
     subprocess shell.
-    
+
     Parameters
     ----------
     command: :class:`str`
         The command to execute
-    
+
     Returns
     -------
     `tuple[str]`
@@ -74,9 +74,7 @@ class ResponseHandler:
     async def get_cpu_usage(self, status: str) -> float:
         try:
             main_pid = status[status.index("PID:") + 1]
-            return round(
-                float((await execute(f"ps --noheader -p {main_pid} -o %cpu"))[0])
-            )
+            return round(float((await execute(f"ps --noheader -p {main_pid} -o %cpu"))[0]))
         except ValueError:
             return 0
 
@@ -99,13 +97,8 @@ class ResponseHandler:
 
         with open("logs.txt") as logs:
             lines = [
-                dict(
-                    zip(["ping", "download", "upload"], [line[0], line[1], line[2] * 10])
-                )
-                for line in [
-                    [float(i) for i in _line.strip().split(" | ")]
-                    for _line in logs.readlines()
-                ]
+                dict(zip(["ping", "download", "upload"], [line[0], line[1], line[2] * 10]))
+                for line in [[float(i) for i in _line.strip().split(" | ")] for _line in logs.readlines()]
             ]
 
         uptime_seconds = time.time() - psutil.boot_time()
@@ -123,9 +116,7 @@ class ResponseHandler:
             status: str = (await execute(f"systemctl status {unit}.service"))[0].split()
             processes[unit.replace("raspberry-", "")] = {
                 "status": status[status.index("Active:") + 1].capitalize(),
-                "uptime": " ".join(
-                    status[status.index("Active:") + 8 : status.index("Process:") - 1]
-                ),
+                "uptime": " ".join(status[status.index("Active:") + 8 : status.index("Process:") - 1]),
                 "cpu_usage": await self.get_cpu_usage(status),
             }
 
@@ -136,9 +127,7 @@ class ResponseHandler:
                 "labels": json.dumps(
                     list(
                         map(
-                            lambda i: (
-                                datetime.datetime.utcnow() - datetime.timedelta(hours=i)
-                            ).strftime("%H:%M"),
+                            lambda i: (datetime.datetime.utcnow() - datetime.timedelta(hours=i)).strftime("%H:%M"),
                             range(7),
                         )
                     )
@@ -152,11 +141,7 @@ class ResponseHandler:
                     list(
                         map(
                             lambda m: round(int(m) / 1000000),
-                            (
-                                await execute(
-                                    "cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq"
-                                )
-                            )[0].split("\n"),
+                            (await execute("cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq"))[0].split("\n"),
                         )
                     )
                 ),
@@ -166,16 +151,12 @@ class ResponseHandler:
                 "pingDifference": "+" + str(diff)
                 if (diff := round(lines[-1].get("ping") / lines[-2].get("ping"), 2)) > 1
                 else f"-{round(lines[-2].get('ping') / lines[-1].get('ping'), 2)}",
-                "download": [
-                    round(lines[-i].get("download") / 1000000) for i in range(1, 8)
-                ],
+                "download": [round(lines[-i].get("download") / 1000000) for i in range(1, 8)],
                 "upload": [round(lines[-i].get("upload") / 1000000) for i in range(1, 8)],
             },
             "memory": {
                 "used": round(psutil.virtual_memory().used * (9.31 * 10 ** -10), 1),
-                "available": round(
-                    psutil.virtual_memory().available * (9.31 * 10 ** -10), 1
-                ),
+                "available": round(psutil.virtual_memory().available * (9.31 * 10 ** -10), 1),
             },
             **processes,
         }
@@ -207,9 +188,7 @@ class ResponseHandler:
             },
             "internet": {
                 "private": (await execute("hostname -i"))[0],
-                "public": (await execute("curl ifconfig.me."))[0]
-                if verified
-                else "*** *** ***",
+                "public": (await execute("curl ifconfig.me."))[0] if verified else "*** *** ***",
             },
         }
         return response
@@ -232,26 +211,14 @@ class ResponseHandler:
         """
 
         async with aiosqlite.connect(JESTERBOT_PATH + "/db/database.db") as db:
-            total_commands = await (
-                await db.execute("SELECT score FROM overall_score")
-            ).fetchone()
+            total_commands = await (await db.execute("SELECT score FROM overall_score")).fetchone()
             date, ping, bot_users, guilds, channels, disnake_version = (
                 await (await db.execute("SELECT * FROM general_data")).fetchall()
             )[-1]
 
-        jesterbot_status = (
-            await execute("systemctl status raspberry-dashboard.service")
-        )[0].split("\n")
-        status = (
-            jesterbot_status[2][jesterbot_status[2].index("Active") :]
-            .split()[1]
-            .capitalize()
-        )
-        uptime = (
-            jesterbot_status[2][jesterbot_status[2].index("Active") :]
-            .split()[8]
-            .capitalize()
-        )
+        jesterbot_status = (await execute("systemctl status raspberry-dashboard.service"))[0].split("\n")
+        status = jesterbot_status[2][jesterbot_status[2].index("Active") :].split()[1].capitalize()
+        uptime = jesterbot_status[2][jesterbot_status[2].index("Active") :].split()[8].capitalize()
 
         with open(JESTERBOT_PATH + "/dicts/score.json") as stream:
             data = json.load(stream)
@@ -278,9 +245,7 @@ class ResponseHandler:
                 "top_ten_names": [data[u]["name"] for u in users[-11:-1]],
                 "top_ten_scores": json.dumps([data[u]["score"] for u in users[-11:-1]]),
                 "top_ten_command_names": commands[-10:],
-                "top_ten_command_uses": json.dumps(
-                    [commands_data[c]["score"] for c in commands[-10:]]
-                ),
+                "top_ten_command_uses": json.dumps([commands_data[c]["score"] for c in commands[-10:]]),
             },
         }
 
@@ -328,10 +293,7 @@ class ResponseHandler:
         total = dict(
             zip(
                 ["size", "used", "available", "use"],
-                [
-                    (s := storage[m]) + ("B" if s.endswith("G") else "")
-                    for m in range(1, 5)
-                ],
+                [(s := storage[m]) + ("B" if s.endswith("G") else "") for m in range(1, 5)],
             )
         )
         return {"total": {**total}, **processes}
@@ -388,9 +350,7 @@ class WebSocket:
         elif op == self.EXECUTE:
             command = data.get("d")
             stdout, stderr = await execute(command)
-            await self.send_json(
-                {"op": self.EXECUTE, "d": {"stdout": stdout, "stderr": stderr}}
-            )
+            await self.send_json({"op": self.EXECUTE, "d": {"stdout": stdout, "stderr": stderr}})
 
     async def send_json(self, data: Any) -> None:
         """
@@ -469,7 +429,7 @@ class Client:
     Parameters
     ----------
     args: :class:`list[str]`
-        The args passed when running to allow 
+        The args passed when running to allow
         for debug setting.
     """
 
@@ -477,7 +437,7 @@ class Client:
         self._session = aiohttp.ClientSession()
         self.loop = asyncio.get_running_loop()
 
-        if 'debug' not in args:
+        if "debug" not in args:
             self.loop.create_task(update_logs())
 
     async def ws_connect(self) -> WebSocket | bool:
