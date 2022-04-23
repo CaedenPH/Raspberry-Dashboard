@@ -131,7 +131,7 @@ app.get("/storage", async (req, res) =>{
         });
         res.render('storage', data);
     }
-})
+});
 
 app.get("/jesterbot", async (req, res) => {
     const [ client ] = wss.clients;
@@ -195,11 +195,15 @@ app.get("/editor", async (req, res) => {
 
 app.get("/explicit", async (req, res) => {
     res.render('explicit');
-})
+});
 
 app.get("/protocols", async (req, res) => {
     res.render('protocols');    
-})
+});
+
+app.get("/usage", async (req, res) => {
+    res.render('usage');
+});
 
 app.get("/logout", async (req, res) => {
     res.clearCookie(cookie_value);
@@ -230,7 +234,7 @@ app.get("/statistics", async (req, res) => {
 app.get("/pull", async(req, res) => {
     res.redirect("/");
     exec("git stash && git pull");
-})
+});
 
 app.get("/reset", async (req, res) => {
     var { password } = req.query;
