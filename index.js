@@ -72,12 +72,18 @@ async function execute (command) {
 
 wss.on('connection', (client) => {
     console.log('Client Connected!');
-    
+
+    const t = setTimeout(() => {
+        console.log('Client force kicked!');
+        client.close();
+    }, 30000);
+
     client.send(JSON.stringify({op: IDENTIFY}));
     client.on('message', (message) => {
         let data = JSON.parse(message);
         if (data.op === IDENTIFY) {
             if (data.token === ws_token) {
+                clearTimeout(t);
                 client.setMaxListeners(0);
             } else { client.close(); }
         }
@@ -85,7 +91,7 @@ wss.on('connection', (client) => {
     client.on('close', (reasonCode, description) => {
         console.log('Client Disconnected!');
     });
-});   
+});  
 
 
 app.get('/', async (req, res) => {
