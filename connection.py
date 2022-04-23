@@ -58,7 +58,9 @@ class ResponseHandler:
     async def get_cpu_usage(self, status: str) -> float:
         try:
             main_pid = status[status.index("PID:") + 1]
-            return round(float((await execute(f"ps --noheader -p {main_pid} -o %cpu"))[0]))
+            return round(
+                float((await execute(f"ps --noheader -p {main_pid} -o %cpu"))[0])
+            )
         except ValueError:
             return 0
 
@@ -76,13 +78,23 @@ class ResponseHandler:
 
         with open("logs.txt") as logs:
             lines = [
-                dict(zip(["ping", "download", "upload"], [line[0], line[1], line[2] * 10]))
-                for line in [[float(i) for i in _line.strip().split(" | ")] for _line in logs.readlines()]
+                dict(
+                    zip(["ping", "download", "upload"], [line[0], line[1], line[2] * 10])
+                )
+                for line in [
+                    [float(i) for i in _line.strip().split(" | ")]
+                    for _line in logs.readlines()
+                ]
             ]
 
         uptime_seconds = time.time() - psutil.boot_time()
         d, h, m = map(
-            math.floor, [uptime_seconds / 86400, uptime_seconds % 86400 / 3600, uptime_seconds % 3600 / 60]
+            math.floor,
+            [
+                uptime_seconds / 86400,
+                uptime_seconds % 86400 / 3600,
+                uptime_seconds % 3600 / 60,
+            ],
         )
 
         processes = {}
@@ -90,7 +102,9 @@ class ResponseHandler:
             status: str = (await execute(f"systemctl status {unit}.service"))[0].split()
             processes[unit.replace("raspberry-", "")] = {
                 "status": status[status.index("Active:") + 1].capitalize(),
-                "uptime": " ".join(status[status.index("Active:") + 8 : status.index("Process:") - 1]),
+                "uptime": " ".join(
+                    status[status.index("Active:") + 8 : status.index("Process:") - 1]
+                ),
                 "cpu_usage": await self.get_cpu_usage(status),
             }
 
@@ -101,9 +115,9 @@ class ResponseHandler:
                 "labels": json.dumps(
                     list(
                         map(
-                            lambda i: (datetime.datetime.utcnow() - datetime.timedelta(hours=i)).strftime(
-                                "%H:%M"
-                            ),
+                            lambda i: (
+                                datetime.datetime.utcnow() - datetime.timedelta(hours=i)
+                            ).strftime("%H:%M"),
                             range(7),
                         )
                     )
@@ -117,9 +131,11 @@ class ResponseHandler:
                     list(
                         map(
                             lambda m: round(int(m) / 1000000),
-                            (await execute("cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq"))[
-                                0
-                            ].split("\n"),
+                            (
+                                await execute(
+                                    "cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq"
+                                )
+                            )[0].split("\n"),
                         )
                     )
                 ),
@@ -129,12 +145,16 @@ class ResponseHandler:
                 "pingDifference": "+" + str(diff)
                 if (diff := round(lines[-1].get("ping") / lines[-2].get("ping"), 2)) > 1
                 else f"-{round(lines[-2].get('ping') / lines[-1].get('ping'), 2)}",
-                "download": [round(lines[-i].get("download") / 1000000) for i in range(1, 8)],
+                "download": [
+                    round(lines[-i].get("download") / 1000000) for i in range(1, 8)
+                ],
                 "upload": [round(lines[-i].get("upload") / 1000000) for i in range(1, 8)],
             },
             "memory": {
-                "used": round(psutil.virtual_memory().used * (9.31 * 10**-10), 1),
-                "available": round(psutil.virtual_memory().available * (9.31 * 10**-10), 1),
+                "used": round(psutil.virtual_memory().used * (9.31 * 10 ** -10), 1),
+                "available": round(
+                    psutil.virtual_memory().available * (9.31 * 10 ** -10), 1
+                ),
             },
             **processes,
         }
@@ -155,10 +175,15 @@ class ResponseHandler:
 
         response = {
             "cpu": cpu,
-            "os": {"name": distro.id().capitalize(), "processes": (await execute("ps aux | wc -l"))[0]},
+            "os": {
+                "name": distro.id().capitalize(),
+                "processes": (await execute("ps aux | wc -l"))[0],
+            },
             "internet": {
                 "private": (await execute("hostname -i"))[0],
-                "public": (await execute("curl ifconfig.me."))[0] if verified else "*** *** ***",
+                "public": (await execute("curl ifconfig.me."))[0]
+                if verified
+                else "*** *** ***",
             },
         }
         return response
@@ -175,14 +200,26 @@ class ResponseHandler:
             logged in.
         """
         db = await aiosqlite.connect(JESTERBOT_PATH + "/db/database.db")
-        total_commands = await (await db.execute("SELECT score FROM overall_score")).fetchone()
+        total_commands = await (
+            await db.execute("SELECT score FROM overall_score")
+        ).fetchone()
         date, ping, bot_users, guilds, channels, disnake_version = (
             await (await db.execute("SELECT * FROM general_data")).fetchall()
         )[-1]
 
-        jesterbot_status = (await execute("systemctl status raspberry-dashboard.service"))[0].split("\n")
-        status = jesterbot_status[2][jesterbot_status[2].index("Active") :].split()[1].capitalize()
-        uptime = jesterbot_status[2][jesterbot_status[2].index("Active") :].split()[8].capitalize()
+        jesterbot_status = (
+            await execute("systemctl status raspberry-dashboard.service")
+        )[0].split("\n")
+        status = (
+            jesterbot_status[2][jesterbot_status[2].index("Active") :]
+            .split()[1]
+            .capitalize()
+        )
+        uptime = (
+            jesterbot_status[2][jesterbot_status[2].index("Active") :]
+            .split()[8]
+            .capitalize()
+        )
 
         with open(JESTERBOT_PATH + "/dicts/score.json") as stream:
             data = json.load(stream)
@@ -209,7 +246,9 @@ class ResponseHandler:
                 "top_ten_names": [data[u]["name"] for u in users[-11:-1]],
                 "top_ten_scores": json.dumps([data[u]["score"] for u in users[-11:-1]]),
                 "top_ten_command_names": commands[-10:],
-                "top_ten_command_uses": json.dumps([commands_data[c]["score"] for c in commands[-10:]]),
+                "top_ten_command_uses": json.dumps(
+                    [commands_data[c]["score"] for c in commands[-10:]]
+                ),
             },
         }
 
@@ -226,7 +265,7 @@ class ResponseHandler:
         """
         return {}
 
-    async def storage(self, verified: bool) -> dict[Any, Any]: 
+    async def storage(self, verified: bool) -> dict[Any, Any]:
         """
         Generates a response for  the
         storage endpoint.
@@ -244,14 +283,17 @@ class ResponseHandler:
             processes[process.replace("raspberry-", "")] = float(output.split()[0][:-1])
 
         storage = (await execute(f"df -h {DISK_PATH}"))[0].split("\n")[1].split()
-        total = dict(zip(["size", "used", "available", "use"], [
-            (s:=storage[m]) + ("B" if s.endswith("G") else "") for m in range(1, 5)
-        ]))
+        total = dict(
+            zip(
+                ["size", "used", "available", "use"],
+                [
+                    (s := storage[m]) + ("B" if s.endswith("G") else "")
+                    for m in range(1, 5)
+                ],
+            )
+        )
 
-        return {
-            "total": {**total},
-            **processes
-        }
+        return {"total": {**total}, **processes}
 
 
 class WebSocket:
@@ -303,7 +345,9 @@ class WebSocket:
         elif op == self.EXECUTE:
             command = data.get("d")
             stdout, stderr = await execute(command)
-            await self.send_json({"op": self.EXECUTE, "d": {"stdout": stdout, "stderr": stderr}})
+            await self.send_json(
+                {"op": self.EXECUTE, "d": {"stdout": stdout, "stderr": stderr}}
+            )
 
     async def send_json(self, data: Any) -> None:
         """
@@ -400,7 +444,7 @@ class Client:
 
     async def __aenter__(self) -> Client:
         return self
-    
+
     async def __aexit__(self, error_type, error, tb) -> None:
         await self._session.close()
 
@@ -409,16 +453,17 @@ class Client:
 
         ping = (await execute("ping -c 1 google.com"))[0]
         with open("CRITICAL.txt", "a") as critical:
-            critical.write(CRITICAL_LOG.format(
-                time=datetime.datetime.now(),
-                network="bytes from" in ping,
-                error=error,
-                error_type=error_type,
-                traceback="\n".join(traceback.format_exception(error))
-            ))
-        print(f"CRITICAL: process shutdown, initiating backup")
-        
-        
+            critical.write(
+                CRITICAL_LOG.format(
+                    time=datetime.datetime.now(),
+                    network="bytes from" in ping,
+                    error=error,
+                    error_type=error_type,
+                    traceback="\n".join(traceback.format_exception(error)),
+                )
+            )
+        print("CRITICAL: process shutdown, initiating backup")
+
 
 async def update_logs() -> None:
     """
@@ -462,5 +507,6 @@ async def main() -> None:
                 print("Websocket disconnected")
             except Exception as err:
                 print(f"SUBCRITICAL: {err}")
+
 
 asyncio.run(main())
