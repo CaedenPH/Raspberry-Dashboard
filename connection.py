@@ -293,7 +293,7 @@ class ResponseHandler:
             The response generated.
         """
 
-        process_status = await self.fetch_process_status("dashoard")
+        process_status = await self.fetch_process_status("raspberry-dashboard")
         status = process_status["status"]
         uptime = process_status["uptime"]
 
