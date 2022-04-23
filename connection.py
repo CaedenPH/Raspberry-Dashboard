@@ -19,7 +19,7 @@ from typing import Any, Awaitable
 
 
 with open("config.json") as config:
-    data: dict[Any, Any] = json.load(config)
+    data: dict[str, Any] = json.load(config)
 
 JESTERBOT_PATH = data.get("jesterbot_path", "/home/pi/jesterbot/")
 DISK_PATH = data.get("disk_path", "/dev/mmcblk0p2")
@@ -38,6 +38,21 @@ BACKUP INITIATED
 
 
 async def execute(command: str) -> tuple[str]:
+    """
+    Asynchronously executes a command as a 
+    subprocess shell.
+    
+    Parameters
+    ----------
+    command: :class:`str`
+        The command to execute
+    
+    Returns
+    -------
+    `tuple[str]`
+        The output with stdout being at index
+        0 and stderr being at index 1.
+    """
     proc = await asyncio.create_subprocess_shell(
         command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
@@ -45,7 +60,7 @@ async def execute(command: str) -> tuple[str]:
 
 
 class DisconnectError(Exception):
-    """Raised when the websocket is forcebly disconnected from the server."""
+    """Raised when the websocket is forcibly disconnected from the server."""
 
 
 class ResponseHandler:
@@ -65,7 +80,7 @@ class ResponseHandler:
         except ValueError:
             return 0
 
-    async def home(self, verified: bool) -> dict[Any, Any]:
+    async def home(self, verified: bool) -> dict[str, Any]:
         """
         Generates the systeminformation
         required for the base / path.
@@ -75,6 +90,11 @@ class ResponseHandler:
         verified: :class:`bool`
             Whether or not the user is
             logged in.
+
+        Returns
+        -------
+        `dict[str, Any]`
+            The response generated.
         """
 
         with open("logs.txt") as logs:
@@ -161,7 +181,7 @@ class ResponseHandler:
         }
         return response
 
-    async def statistics(self, verified: bool) -> dict[Any, Any]:
+    async def statistics(self, verified: bool) -> dict[str, Any]:
         """
         Generates a response for the
         statistics endpoint.
@@ -171,9 +191,14 @@ class ResponseHandler:
         verified: :class:`bool`
             Whether or not the user is
             logged in.
-        """
-        cpu = cpuinfo.get_cpu_info()
 
+        Returns
+        -------
+        `dict[str, Any]`
+            The response generated.
+        """
+
+        cpu = cpuinfo.get_cpu_info()
         response = {
             "cpu": cpu,
             "os": {
@@ -189,7 +214,7 @@ class ResponseHandler:
         }
         return response
 
-    async def jesterbot(self, verified: bool) -> dict[Any, Any]:
+    async def jesterbot(self, verified: bool) -> dict[str, Any]:
         """
         Generates a response for  the
         jesterbot endpoint.
@@ -199,14 +224,20 @@ class ResponseHandler:
         verified: :class:`bool`
             Whether or not the user is
             logged in.
+
+        Returns
+        -------
+        `dict[str, Any]`
+            The response generated.
         """
-        db = await aiosqlite.connect(JESTERBOT_PATH + "/db/database.db")
-        total_commands = await (
-            await db.execute("SELECT score FROM overall_score")
-        ).fetchone()
-        date, ping, bot_users, guilds, channels, disnake_version = (
-            await (await db.execute("SELECT * FROM general_data")).fetchall()
-        )[-1]
+
+        async with aiosqlite.connect(JESTERBOT_PATH + "/db/database.db") as db:
+            total_commands = await (
+                await db.execute("SELECT score FROM overall_score")
+            ).fetchone()
+            date, ping, bot_users, guilds, channels, disnake_version = (
+                await (await db.execute("SELECT * FROM general_data")).fetchall()
+            )[-1]
 
         jesterbot_status = (
             await execute("systemctl status raspberry-dashboard.service")
@@ -253,7 +284,7 @@ class ResponseHandler:
             },
         }
 
-    async def stealthybot(self, verified: bool) -> dict[Any, Any]:
+    async def stealthybot(self, verified: bool) -> dict[str, Any]:
         """
         Generates a response for  the
         stealthybot endpoint.
@@ -263,10 +294,15 @@ class ResponseHandler:
         verified: :class:`bool`
             Whether or not the user is
             logged in.
+
+        Returns
+        -------
+        `dict[str, Any]`
+            The response generated.
         """
         return {}
 
-    async def storage(self, verified: bool) -> dict[Any, Any]:
+    async def storage(self, verified: bool) -> dict[str, Any]:
         """
         Generates a response for  the
         storage endpoint.
@@ -276,6 +312,11 @@ class ResponseHandler:
         verified: :class:`bool`
             Whether or not the user is
             logged in.
+
+        Returns
+        -------
+        `dict[str, Any]`
+            The response generated.
         """
 
         processes = {}
@@ -293,7 +334,6 @@ class ResponseHandler:
                 ],
             )
         )
-
         return {"total": {**total}, **processes}
 
 
@@ -311,6 +351,8 @@ class WebSocket:
         OPCode sent with the payload request/ack.
     EXECUTE :receive&deliver:
         OPCode sent to indicate a command execution.
+    HEARTBEAT :deliver:
+        OPCode sent to indicate a heartbeat to the server.
     ws: :class:`aiohttp.ClientWebSocketResponse`
         The socket instance connected with the server.
     client: :class:`Client`
@@ -361,6 +403,7 @@ class WebSocket:
         data: :class:`Any`
             The data to send.
         """
+
         try:
             await self.socket.send_json(data)
         except Exception:
@@ -419,13 +462,22 @@ class Client:
     ----------
     _session: :class:`aiohttp.ClientSession`
         The raw client session.
+    loop: :class:`asyncio.AbstractEventLoop`
+        The event loop of which tasks are ran
+        off of.
+
+    Parameters
+    ----------
+    args: :class:`list[str]`
+        The args passed when running to allow 
+        for debug setting.
     """
 
-    def __init__(self, debug: bool) -> None:
+    def __init__(self, args: list[str]) -> None:
         self._session = aiohttp.ClientSession()
         self.loop = asyncio.get_running_loop()
 
-        if debug is not True:
+        if 'debug' not in args:
             self.loop.create_task(update_logs())
 
     async def ws_connect(self) -> WebSocket | bool:
@@ -434,7 +486,7 @@ class Client:
 
         Returns
         -------
-        Union[Websocket, bool]
+        `Union[Websocket, bool]`
             websocket instance or False
             indicating a failed connection.
         """
@@ -489,7 +541,7 @@ async def update_logs() -> None:
         await asyncio.sleep(3600)
 
 
-async def main(args: list[str]) -> None:
+async def main() -> None:
     """
     Initiates the websocket and starts listening
     to messages ensuring the websocket is connected.
@@ -497,7 +549,7 @@ async def main(args: list[str]) -> None:
     for a reopened socket.
     """
 
-    async with Client('debug' in args) as client:
+    async with Client(sys.argv) as client:
         while True:
             connection = await client.ws_connect()
             if connection is False:
@@ -512,4 +564,4 @@ async def main(args: list[str]) -> None:
                 print(f"SUBCRITICAL: {err}")
 
 
-asyncio.run(main(sys.argv))
+asyncio.run(main())
