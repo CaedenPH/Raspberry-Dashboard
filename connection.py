@@ -104,7 +104,7 @@ class ResponseHandler:
             The response generated.
         """
 
-        with open("logs.txt") as logs:
+        with open("logs/network.txt") as logs:
             lines = [
                 dict(zip(["ping", "download", "upload"], [line[0], line[1], line[2] * 10]))
                 for line in [[float(i) for i in _line.strip().split(" | ")] for _line in logs.readlines()]
@@ -296,7 +296,7 @@ class ResponseHandler:
         process_status = await self.fetch_process_status("abrtd")
         status = process_status["status"]
         uptime = process_status["uptime"]
-        
+
         return {
             "general": {
                 "status": status, "uptime": uptime
@@ -519,7 +519,7 @@ class Client:
 async def update_logs() -> None:
     """
     Simulates a crontab-like funcion
-    to update the logs.txt function every
+    to update the network logs every
     hour with the latest network speeds.
     """
 
@@ -532,7 +532,7 @@ async def update_logs() -> None:
         except Exception:
             continue
 
-        with open("logs.txt", "a") as logs:
+        with open("logs/network.txt", "a") as logs:
             logs.write(f"{ping.get('latency')} | {download} | {upload}\n")
         await asyncio.sleep(3600)
 

@@ -169,7 +169,6 @@ app.get("/dashboard", async (req, res) => {
             op: REQUEST,
             d: "dashboard"
         });
-        console.log(data);
         res.render('dashboard', data);
     }
 });
