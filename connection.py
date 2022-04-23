@@ -71,12 +71,21 @@ class ResponseHandler:
     in shell as a response.
     """
 
-    async def get_cpu_usage(self, status: str) -> float:
+    async def fetch_cpu_usage(self, status: str) -> float:
         try:
             main_pid = status[status.index("PID:") + 1]
             return round(float((await execute(f"ps --noheader -p {main_pid} -o %cpu"))[0]))
         except ValueError:
             return 0
+
+    async def fetch_process_status(self, unit: str) -> dict[str, str]:
+        stdout: str = (await execute(f"systemctl status {unit}.service"))[0].split()
+
+        return {
+            "stdout": stdout,
+            "status": stdout[stdout.index("Active:") + 1].capitalize(),
+            "uptime": " ".join(stdout[stdout.index("Active:") + 8 : stdout.index("Process:") - 1]),
+        }
 
     async def home(self, verified: bool) -> dict[str, Any]:
         """
@@ -113,11 +122,11 @@ class ResponseHandler:
 
         processes = {}
         for unit in PROCESSES:
-            status: str = (await execute(f"systemctl status {unit}.service"))[0].split()
+            process_status = await self.fetch_process_status(unit)
             processes[unit.replace("raspberry-", "")] = {
-                "status": status[status.index("Active:") + 1].capitalize(),
-                "uptime": " ".join(status[status.index("Active:") + 8 : status.index("Process:") - 1]),
-                "cpu_usage": await self.get_cpu_usage(status),
+                "status": process_status["status"],
+                "uptime": process_status["uptime"],
+                "cpu_usage": await self.fetch_cpu_usage(process_status["stdout"]),
             }
 
         response = {
@@ -216,9 +225,9 @@ class ResponseHandler:
                 await (await db.execute("SELECT * FROM general_data")).fetchall()
             )[-1]
 
-        jesterbot_status = (await execute("systemctl status raspberry-dashboard.service"))[0].split("\n")
-        status = jesterbot_status[2][jesterbot_status[2].index("Active") :].split()[1].capitalize()
-        uptime = jesterbot_status[2][jesterbot_status[2].index("Active") :].split()[8].capitalize()
+        process_status = await self.fetch_process_status("jesterbot")
+        status = process_status["status"]
+        uptime = process_status["uptime"]
 
         with open(JESTERBOT_PATH + "/dicts/score.json") as stream:
             data = json.load(stream)
@@ -266,6 +275,33 @@ class ResponseHandler:
             The response generated.
         """
         return {}
+
+    async def dashboard(self, verified: bool) -> dict[str, Any]:
+        """
+        Generates a response for  the
+        dashboard endpoint.
+
+        Parameters
+        ----------
+        verified: :class:`bool`
+            Whether or not the user is
+            logged in.
+
+        Returns
+        -------
+        `dict[str, Any]`
+            The response generated.
+        """
+
+        process_status = await self.fetch_process_status("abrtd")
+        status = process_status["status"]
+        uptime = process_status["uptime"]
+        
+        return {
+            "general": {
+                "status": status, "uptime": uptime
+            }
+        }
 
     async def storage(self, verified: bool) -> dict[str, Any]:
         """
