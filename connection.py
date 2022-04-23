@@ -6,6 +6,7 @@ import datetime
 import json
 import math
 import traceback
+import sys
 
 import aiosqlite
 import cpuinfo  # type: ignore
@@ -420,10 +421,12 @@ class Client:
         The raw client session.
     """
 
-    def __init__(self) -> None:
-        self.loop = asyncio.get_running_loop()
-        self.loop.create_task(update_logs())
+    def __init__(self, debug: bool) -> None:
         self._session = aiohttp.ClientSession()
+        self.loop = asyncio.get_running_loop()
+
+        if debug is not True:
+            self.loop.create_task(update_logs())
 
     async def ws_connect(self) -> WebSocket | bool:
         """
@@ -486,7 +489,7 @@ async def update_logs() -> None:
         await asyncio.sleep(3600)
 
 
-async def main() -> None:
+async def main(args: list[str]) -> None:
     """
     Initiates the websocket and starts listening
     to messages ensuring the websocket is connected.
@@ -494,7 +497,7 @@ async def main() -> None:
     for a reopened socket.
     """
 
-    async with Client() as client:
+    async with Client('debug' in args) as client:
         while True:
             connection = await client.ws_connect()
             if connection is False:
@@ -509,4 +512,4 @@ async def main() -> None:
                 print(f"SUBCRITICAL: {err}")
 
 
-asyncio.run(main())
+asyncio.run(main(sys.argv))
