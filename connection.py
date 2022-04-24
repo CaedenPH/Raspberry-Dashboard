@@ -107,7 +107,7 @@ class ResponseHandler:
         with open("logs/network.txt") as logs:
             lines = [
                 dict(zip(["ping", "download", "upload"], [line[0], line[1], line[2] * 10]))
-                for line in [[float(i) for i in _line.strip().split(" | ")] for _line in logs.readlines()]
+                for line in [[float(i) for i in _line.strip().split(" | ") if ":" not in i] for _line in logs.readlines()]
             ]
 
         uptime_seconds = time.time() - psutil.boot_time()
