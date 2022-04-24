@@ -2,3 +2,4 @@ config.json
 node_modules
 logs
 test.py
+!views/logs
