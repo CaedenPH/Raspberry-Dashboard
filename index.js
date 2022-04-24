@@ -233,6 +233,10 @@ app.get("/editor", async (req, res) => {
     res.render('editor');
 });
 
+app.get("/ec2", async (req, res) => {
+    res.render('ec2');
+})
+
 app.get("/explicit", async (req, res) => {
     res.render('explicit');
 });
