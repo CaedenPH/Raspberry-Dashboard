@@ -176,11 +176,27 @@ app.get("/dashboard", async (req, res) => {
 });
 
 app.get("/logs", async (req, res) => {
+    res.render('logs');
+});
+
+app.get("/logs/messages", async (req, res) => {
+    res.render('logs/messages');
+});
+
+app.get("/logs/usage", async (req, res) => {
+    res.render('logs/usage');
+});
+
+app.get("/logs/network", async (req, res) => {
+    res.render('logs/network');
+});
+
+app.get("/logs/processes", async (req, res) => {
     jesterbotLogs = (await execute(req, "journalctl -b -u jesterbot.service")).stdout;
     stealthybotLogs = (await execute(req, "journalctl -b -u stealthybot.service")).stdout;
     dashboardLogs = (await execute(req, "journalctl -b -u raspberry-dashboard.service")).stdout;
 
-    res.render('logs', {
+    res.render('logs/processes', {
         processes: {
             jesterbot: jesterbotLogs,
             stealthybot: stealthybotLogs,
@@ -199,10 +215,6 @@ app.get("/explicit", async (req, res) => {
 
 app.get("/protocols", async (req, res) => {
     res.render('protocols');    
-});
-
-app.get("/usage", async (req, res) => {
-    res.render('usage');
 });
 
 app.get("/logout", async (req, res) => {
