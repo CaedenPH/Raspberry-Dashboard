@@ -107,33 +107,18 @@ class ResponseHandler:
         with open("logs/network.txt") as logs:
             lines = [
                 dict(zip(["ping", "download", "upload"], [line[0], line[1], line[2] * 10]))
-                for line in [[float(i) for i in _line.strip().split(" | ") if ":" not in i] for _line in logs.readlines()]
+                for line in [
+                    [float(i) for i in _line.strip().split(" | ") if ":" not in i] for _line in logs.readlines()
+                ]
             ]
 
         uptime_seconds = time.time() - psutil.boot_time()
-        d, h, m = map(
-            math.floor,
-            [
-                uptime_seconds / 86400,
-                uptime_seconds % 86400 / 3600,
-                uptime_seconds % 3600 / 60,
-            ],
-        )
+        d, h, m = map(math.floor, [uptime_seconds / 86400, uptime_seconds % 86400 / 3600, uptime_seconds % 3600 / 60])
 
         logins = {}
-        numbers = {
-            1: "one",
-            2: "two", 
-            3: "three", 
-            4: "four", 
-            5: "five",
-            6: "six",
-        }
+        numbers = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six"}
         for iteration, login in enumerate([l for l in (await execute("last"))[0].splitlines() if "pts" in l][:6]):
-            logins[numbers[iteration+1]] = {
-                "type": "ssh",
-                "date": login.split()[3]
-            }
+            logins[numbers[iteration + 1]] = {"type": "ssh", "date": login.split()[3]}
         print(logins)
 
         processes = {}
@@ -183,9 +168,7 @@ class ResponseHandler:
                 "used": round(psutil.virtual_memory().used * (9.31 * 10 ** -10), 1),
                 "available": round(psutil.virtual_memory().available * (9.31 * 10 ** -10), 1),
             },
-            "login": {
-                **logins
-            },
+            "login": {**logins},
             **processes,
         }
         return response
@@ -210,10 +193,7 @@ class ResponseHandler:
         cpu = cpuinfo.get_cpu_info()
         response = {
             "cpu": cpu,
-            "os": {
-                "name": distro.id().capitalize(),
-                "processes": (await execute("ps aux | wc -l"))[0],
-            },
+            "os": {"name": distro.id().capitalize(), "processes": (await execute("ps aux | wc -l"))[0]},
             "internet": {
                 "private": (await execute("hostname -i"))[0],
                 "public": (await execute("curl ifconfig.me."))[0] if verified else "*** *** ***",
@@ -316,11 +296,7 @@ class ResponseHandler:
         status = process_status["status"]
         uptime = process_status["uptime"]
 
-        return {
-            "general": {
-                "status": status, "uptime": uptime
-            }
-        }
+        return {"general": {"status": status, "uptime": uptime}}
 
     async def storage(self, verified: bool) -> dict[str, Any]:
         """
@@ -357,17 +333,13 @@ class ResponseHandler:
         with open("logs/messages.txt") as messages:
             content = messages.read()
 
-        return {
-            "messages": content
-        }
+        return {"messages": content}
 
     async def network(self, verified: bool) -> dict[str, Any]:
         with open("logs/network.txt") as network:
             content = network.read()
 
-        return {
-            "network": content
-        }
+        return {"network": content}
 
 
 class WebSocket:
