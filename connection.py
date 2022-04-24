@@ -305,7 +305,7 @@ class ResponseHandler:
 
     async def storage(self, verified: bool) -> dict[str, Any]:
         """
-        Generates a response for  the
+        Generates a response for the
         storage endpoint.
 
         Parameters
@@ -333,6 +333,22 @@ class ResponseHandler:
             )
         )
         return {"total": {**total}, **processes}
+
+    async def messages(self, verified: bool) -> dict[str, Any]:
+        with open("logs/messages.txt") as messages:
+            content = messages.read()
+
+        return {
+            "messages": content
+        }
+
+    async def network(self, verified: bool) -> dict[str, Any]:
+        with open("logs/network.txt") as network:
+            content = network.read()
+
+        return {
+            "network": content
+        }
 
 
 class WebSocket:
@@ -372,7 +388,7 @@ class WebSocket:
 
     async def _log_message(self, message: str) -> None:
         with open("logs/messages.txt", "a") as messages:
-            messages.write(message + "\n")
+            messages.write(message + f" | {datetime.datetime.utcnow().strftime('%c')}\n")
 
     async def _parse_message(self, message: str) -> None:
         await self._log_message(message)
@@ -383,7 +399,7 @@ class WebSocket:
         if op == self.IDENTIFY:
             await self.identify()
 
-        if op == self.REQUEST:
+        elif op == self.REQUEST:
             generator: Awaitable = getattr(self.response_handler, data["d"])
             verified = data.get("v", False)
             response = await generator(verified)
@@ -539,7 +555,7 @@ async def update_logs() -> None:
             continue
 
         with open("logs/network.txt", "a") as logs:
-            logs.write(f"{ping.get('latency')} | {download} | {upload}\n")
+            logs.write(f"{ping.get('latency')} | {download} | {upload} | {datetime.datetime.utcnow().strftime('%c')}\n")
         await asyncio.sleep(3600)
 
 
