@@ -120,6 +120,22 @@ class ResponseHandler:
             ],
         )
 
+        logins = {}
+        numbers = {
+            1: "one",
+            2: "two", 
+            3: "three", 
+            4: "four", 
+            5: "five",
+            6: "six",
+        }
+        for iteration, login in enumerate([l for l in (await execute("last"))[0].splitlines() if "pts" in l][:6]):
+            logins[numbers[iteration+1]] = {
+                "type": "ssh",
+                "date": login.split()[3]
+            }
+        print(logins)
+
         processes = {}
         for unit in PROCESSES:
             process_status = await self.fetch_process_status(unit)
@@ -166,6 +182,9 @@ class ResponseHandler:
             "memory": {
                 "used": round(psutil.virtual_memory().used * (9.31 * 10 ** -10), 1),
                 "available": round(psutil.virtual_memory().available * (9.31 * 10 ** -10), 1),
+            },
+            "login": {
+                **logins
             },
             **processes,
         }
@@ -579,7 +598,8 @@ async def main() -> None:
             except DisconnectError:
                 print("Websocket disconnected")
             except Exception as err:
-                print(f"SUBCRITICAL: {err}")
+                print(f"SUBCRITICAL: ", file=sys.stderr)
+                traceback.print_exc()
 
 
 asyncio.run(main())
