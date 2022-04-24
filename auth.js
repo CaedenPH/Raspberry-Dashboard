@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const fs = require("fs");
 
 module.exports = (request, response, next) => {
-    if (["/", "/statistics", "/logs", "/login", "/jesterbot", "/stealthybot", "/dashboard", "/storage"].includes(request.path)) {
+    if (["/", "/statistics", "/logs/network", "/logs/processes", "/login", "/jesterbot", "/stealthybot", "/dashboard", "/storage"].includes(request.path)) {
         fs.appendFileSync("logs/usage.txt", `${request.path} | ${request.ip} | ${request.protocol} | ${new Date().toUTCString()}\n`)
         next();
     } else if (["/protocols", "/reset"].includes(request.path)) {
