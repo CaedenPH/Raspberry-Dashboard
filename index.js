@@ -180,15 +180,39 @@ app.get("/logs", async (req, res) => {
 });
 
 app.get("/logs/messages", async (req, res) => {
-    res.render('logs/messages');
+    const [ client ] = wss.clients;
+
+    if (client === undefined) {
+        res.render('offline');
+    } else {
+        data = await request(req, client, {
+            op: REQUEST,
+            d: "messages"
+        });
+        res.render('logs/messages', data);
+    }
 });
 
 app.get("/logs/usage", async (req, res) => {
-    res.render('logs/usage');
+    var fileContent = fs.readFileSync("logs/usage.txt")
+    data = {
+        usage: fileContent
+    }
+    res.render('logs/usage', data);
 });
 
 app.get("/logs/network", async (req, res) => {
-    res.render('logs/network');
+    const [ client ] = wss.clients;
+
+    if (client === undefined) {
+        res.render('offline');
+    } else {
+        data = await request(req, client, {
+            op: REQUEST,
+            d: "network"
+        });
+        res.render('logs/network', data);
+    }
 });
 
 app.get("/logs/processes", async (req, res) => {
