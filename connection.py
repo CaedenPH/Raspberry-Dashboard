@@ -117,7 +117,7 @@ class ResponseHandler:
 
         logins = {}
         numbers = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six"}
-        for iteration, login in enumerate([l for l in (await execute("last"))[0].splitlines() if "sys" in l][:6]):
+        for iteration, login in enumerate([l for l in (await execute("last"))[0].splitlines() if "pts" in l][:6]):
             logins[numbers[iteration + 1]] = {"date": "".join(login.split()[3:]).split("-")[0]}
 
         processes = {}
