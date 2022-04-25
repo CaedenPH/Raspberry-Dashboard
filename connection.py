@@ -119,7 +119,6 @@ class ResponseHandler:
         numbers = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six"}
         for iteration, login in enumerate([l for l in (await execute("last"))[0].splitlines() if "pts" in l][:6]):
             logins[numbers[iteration + 1]] = {"type": "ssh", "date": login.split()[3]}
-        print(logins)
 
         processes = {}
         for unit in PROCESSES:
