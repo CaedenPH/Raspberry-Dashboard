@@ -568,6 +568,7 @@ async def main() -> None:
                 await connection.listen()
             except DisconnectError:
                 print("Websocket disconnected")
+                continue
             except Exception as err:
                 print(f"SUBCRITICAL: ", file=sys.stderr)
                 traceback.print_exc()
