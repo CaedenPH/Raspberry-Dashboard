@@ -133,7 +133,7 @@ app.get("/storage", async (req, res) =>{
     }
 });
 
-app.get("/jesterbot", async (req, res) => {
+app.get("/processes/jesterbot", async (req, res) => {
     const [ client ] = wss.clients;
 
     if (client === undefined) {
@@ -143,11 +143,11 @@ app.get("/jesterbot", async (req, res) => {
             op: REQUEST,
             d: "jesterbot"
         });
-        res.render('jesterbot', data);
+        res.render('processes/jesterbot', data);
     }
 });
 
-app.get("/stealthybot", async (req, res) => {
+app.get("/processes/stealthybot", async (req, res) => {
     const [ client ] = wss.clients;
 
     if (client === undefined) {
@@ -157,11 +157,11 @@ app.get("/stealthybot", async (req, res) => {
             op: REQUEST,
             d: "stealthybot"
         });
-        res.render('stealthybot', data);
+        res.render('processes/stealthybot', data);
     }
 });
 
-app.get("/dashboard", async (req, res) => {
+app.get("/processes/dashboard", async (req, res) => {
     const [ client ] = wss.clients;
 
     if (client === undefined) {
@@ -171,7 +171,7 @@ app.get("/dashboard", async (req, res) => {
             op: REQUEST,
             d: "dashboard"
         });
-        res.render('dashboard', data);
+        res.render('processes/dashboard', data);
     }
 });
 
