@@ -1,0 +1,19 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "sqlite"
+    url      = "file:./database.db"
+}
+
+model User {
+    id              Int        @id @default(autoincrement())
+    ip              String     @unique
+    usage           String
+    visits          String
+    name            String     @unique
+    admin           Boolean
+    create_epoch    DateTime  @default(now())
+    last_edit_epoch DateTime  @default(now())
+}
