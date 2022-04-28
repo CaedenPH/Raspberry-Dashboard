@@ -8,6 +8,9 @@ const jwt = require("jsonwebtoken");
 const bodyParser = require('body-parser');
 const { password, explicit_password, ws_token, cookie_value } = require('./config.json');
 
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
 const webSocket = require('ws');
 const crypto = require("crypto");
 const fs = require('fs');
@@ -118,6 +121,10 @@ app.get("/login", async (req, res) => {
 app.get("/console", async (req, res) => {
     res.render('console');
 });
+
+app.get("/verify", async (req, res) => {
+    res.render('verify');
+})
 
 app.get("/storage", async (req, res) =>{
     const [ client ] = wss.clients;
@@ -314,6 +321,7 @@ app.get("/execute", async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
+    console.log("e");
     if (req.body.password && req.body.password === password) {
         res.cookie(cookie_value, jwt.sign({
             username: "username"
@@ -343,6 +351,19 @@ app.post("/explicit", async (req, res) => {
     } else {    
         res.status(400).json({ message: "Bad Argument" });
     }
+});
+
+app.post("/authorize", async (req, res) => {
+    await prisma.user.create({
+        data: {
+            name: req.body.name,
+            usage: req.body.usage,
+            ip: String(req.ip).replace("::ffff:", ""),
+            visits: "",
+            admin: false
+        }
+    });
+    res.redirect("/");
 });
 
 server.listen(8080, () => {
