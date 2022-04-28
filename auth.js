@@ -7,16 +7,22 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 module.exports = async (request, response, next) => {
-    fs.appendFileSync("logs/usage.txt", `${request.path} | ${request.ip} | ${request.protocol} | ${new Date().toUTCString()}\n`)
+    if (request.path.includes(".")) {
+        return;
+    }
     
-    try {
-        const user = await prisma.user.findUnique({
-            where: { ip, }
-        })
-        console.log(user);
-    } catch (error) {
-        if (request.path !== "/verify") {
+    var ip = String(request.ip).replace("::ffff:", "")
+    fs.appendFileSync("logs/usage.txt", `${request.path} | ${ip} | ${request.protocol} | ${new Date().toUTCString()}\n`)
+    
+    const user = await prisma.user.findUnique({
+        where: { ip, }
+    })
+    if (user === null) {
+        if (! ["/verify", "/authorize"].includes(request.path)) {
             response.redirect("/verify");
+            return;
+        } else {
+            next();
             return;
         }
     }
@@ -43,6 +49,10 @@ module.exports = async (request, response, next) => {
             response.redirect("/explicit");
         }
     } else {
+        if (user.admin === true) {
+            next(); // TODO: Dynamic admin assignment page ? 
+            return;
+        }
         try {
             jwt.verify(request.cookies[cookie_value] || "", "aoihfisoduhgoiahusSECRET_KEY");
             next();
