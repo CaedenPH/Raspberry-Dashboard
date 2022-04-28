@@ -7,7 +7,7 @@
   <link rel="apple-touch-icon" sizes="76x76" href="/assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="/assets/img/favicon.png">
   <title>
-    Material Dashboard 2 by Creative Tim
+    rasp.π
   </title>
   <!--     Fonts and icons     -->
   <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900|Roboto+Slab:400,700" />
@@ -91,18 +91,17 @@
         var Usage = document.getElementById("usage-input").value;
         var checked = document.getElementById("flexCheckDefault").checked;
         if (checked !== false) {
-            console.log(Name, Usage);
-            await fetch("/authorize", {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json'
-                },
-                body: JSON.stringify({
-                    name: Name,
-                    usage: Usage
-                })
-            });
+          await fetch("/authorize", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+            },
+            body: JSON.stringify({
+                name: Name,
+                usage: Usage
+            })
+          });
         }
     }
   </script>
