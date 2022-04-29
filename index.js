@@ -114,7 +114,7 @@ app.get('/', async (req, res) => {
     }
 });
 
-app.get("/:static_page(login|console|verify|logs|editor|ec2|excplicit|protocols)", async (req, res) => {
+app.get("/:static_page(login|console|verify|logs|editor|ec2|excplicit|protocols|404|403)", async (req, res) => {
     res.render(req.params.static_page);
 });  
 
@@ -135,14 +135,26 @@ app.get("/:ws_page(storage|jesterbot|stealthybot|dashboard|messages|network)", a
     }
 });
 
+app.get("/edit/:username", async (req, res) => {
+    var name = req.params.username;
+    
+    const user = await prisma.user.findUnique({
+        where: { name, }
+    });
+    if (user === null) {
+        res.render('404');
+    } else {
+        res.render('edit');
+    }
+    
+});
+
 app.get("/logs/usage", async (req, res) => {
     var fileContent = fs.readFileSync("logs/usage.txt")
     data = {
         usage: fileContent
     }
     res.render('logs/usage', data);
-});
-
 });
 
 app.get("/logs/processes", async (req, res) => {
@@ -297,19 +309,6 @@ app.post("/authorize", async (req, res) => {
     res.redirect("/");
 });
 
-app.patch("/edit/:username", async (req, res) => {
-    var name = req.params.username;
-    
-    const user = await prisma.user.findUnique({
-        where: { name, }
-    });
-    if (user === null) {
-        res.render('404');
-    } else {
-        res.render('edit');
-    }
-    
-}
 
 server.listen(8080, () => {
     console.log("Listening at http://localhost:8080");
