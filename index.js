@@ -90,7 +90,7 @@ wss.on('connection', (client) => {
             if (data.token === ws_token) {
                 clearTimeout(t);
                 client.setMaxListeners(0);
-            } else { client.close(); }
+            }
         }
     });
     client.on('close', (reasonCode, description) => {
