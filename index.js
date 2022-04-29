@@ -117,73 +117,20 @@ app.get("/:static_page(login|console|verify|logs|editor|ec2|excplicit|protocols)
     res.render(req.params.static_page);
 });  
 
-app.get("/storage", async (req, res) =>{
+app.get("/:ws_page(storage|jesterbot|stealthybot|dashboard|messages|network)", async (req, res) =>{
     const [ client ] = wss.clients;
-
+    
+    var routes = string.split("/");
+    var endpoint = routes[routes.length - 1];
+    
     if (client === undefined) {
         res.render('offline');
     } else {
         data = await request(req, client, {
             op: REQUEST,
-            d: "storage"
+            d: endpoint
         });
-        res.render('storage', data);
-    }
-});
-
-app.get("/processes/jesterbot", async (req, res) => {
-    const [ client ] = wss.clients;
-
-    if (client === undefined) {
-        res.render('offline');
-    } else {
-        data = await request(req, client, {
-            op: REQUEST,
-            d: "jesterbot"
-        });
-        res.render('processes/jesterbot', data);
-    }
-});
-
-app.get("/processes/stealthybot", async (req, res) => {
-    const [ client ] = wss.clients;
-
-    if (client === undefined) {
-        res.render('offline');
-    } else {
-        data = await request(req, client, {
-            op: REQUEST,
-            d: "stealthybot"
-        });
-        res.render('processes/stealthybot', data);
-    }
-});
-
-app.get("/processes/dashboard", async (req, res) => {
-    const [ client ] = wss.clients;
-
-    if (client === undefined) {
-        res.render('offline');
-    } else {
-        data = await request(req, client, {
-            op: REQUEST,
-            d: "dashboard"
-        });
-        res.render('processes/dashboard', data);
-    }
-});
-
-app.get("/logs/messages", async (req, res) => {
-    const [ client ] = wss.clients;
-
-    if (client === undefined) {
-        res.render('offline');
-    } else {
-        data = await request(req, client, {
-            op: REQUEST,
-            d: "messages"
-        });
-        res.render('logs/messages', data);
+        res.render(endpoint, data);
     }
 });
 
@@ -195,18 +142,6 @@ app.get("/logs/usage", async (req, res) => {
     res.render('logs/usage', data);
 });
 
-app.get("/logs/network", async (req, res) => {
-    const [ client ] = wss.clients;
-
-    if (client === undefined) {
-        res.render('offline');
-    } else {
-        data = await request(req, client, {
-            op: REQUEST,
-            d: "network"
-        });
-        res.render('logs/network', data);
-    }
 });
 
 app.get("/logs/processes", async (req, res) => {
