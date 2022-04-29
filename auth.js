@@ -11,12 +11,12 @@ module.exports = async (request, response, next) => {
         return;
     }
     
-    var ip = String(request.ip).replace("::ffff:", "")
-    fs.appendFileSync("logs/usage.txt", `${request.path} | ${ip} | ${request.protocol} | ${new Date().toUTCString()}\n`)
+    var ip = String(request.ip).replace("::ffff:", "");
+    fs.appendFileSync("logs/usage.txt", `${request.path} | ${ip} | ${request.protocol} | ${new Date().toUTCString()}\n`);
     
     const user = await prisma.user.findUnique({
         where: { ip, }
-    })
+    });
     if (user === null) {
         if (! ["/verify", "/authorize"].includes(request.path)) {
             response.redirect("/verify");
@@ -38,7 +38,7 @@ module.exports = async (request, response, next) => {
         "/processes/stealthybot", 
         "/statistics",
         "/storage", 
-        "/verify"
+        "/verify",
     ].includes(request.path)) {
         next();
     } else if (["/protocols", "/reset"].includes(request.path)) {
