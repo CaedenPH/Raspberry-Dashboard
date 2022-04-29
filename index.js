@@ -297,6 +297,20 @@ app.post("/authorize", async (req, res) => {
     res.redirect("/");
 });
 
+app.patch("/edit/:username", async (req, res) => {
+    var name = req.params.username;
+    
+    const user = await prisma.user.findUnique({
+        where: { name, }
+    });
+    if (user === null) {
+        res.render('404');
+    } else {
+        res.render('edit');
+    }
+    
+}
+
 server.listen(8080, () => {
     console.log("Listening at http://localhost:8080");
 }); 
