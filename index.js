@@ -31,7 +31,7 @@ const IDENTIFY = 2
 const EXECUTE = 3
 
 async function request (req, client, outgoingData) {
-    outgoingData.ipFrom = req.ip;
+    outgoingData.ipFrom = String(req.ip).replace("::ffff:", "");
 
     client.send(JSON.stringify(outgoingData));
     result = new Promise(resolve => {
@@ -49,6 +49,7 @@ async function request (req, client, outgoingData) {
 
 async function execute (req, command) {
     const [ client ] = wss.clients;
+    
     if (client === undefined) {
         result = new Promise(resolve => {
             resolve({stdout: undefined, stderr: undefined});
@@ -58,7 +59,7 @@ async function execute (req, command) {
         client.send(JSON.stringify({
             op: EXECUTE,
             d: command,
-            ipFrom: req.ip
+            ipFrom: String(req.ip).replace("::ffff:", "")
         }));
             
         result = new Promise(resolve => {
@@ -275,11 +276,20 @@ app.post("/explicit", async (req, res) => {
 });
 
 app.post("/authorize", async (req, res) => {
+    var ip = String(req.ip).replace("::ffff:", "");
+    const user = await prisma.user.findUnique({
+        where: { ip, }
+    });
+    
+    if (user !== null) {
+        return;
+    }
+        
     await prisma.user.create({
         data: {
             name: req.body.name,
             usage: req.body.usage,
-            ip: String(req.ip).replace("::ffff:", ""),
+            ip: ip,
             visits: "",
             admin: false
         }
