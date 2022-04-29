@@ -113,18 +113,9 @@ app.get('/', async (req, res) => {
     }
 });
 
-
-app.get("/login", async (req, res) => {
-    res.render('login');
-});
-
-app.get("/console", async (req, res) => {
-    res.render('console');
-});
-
-app.get("/verify", async (req, res) => {
-    res.render('verify');
-})
+app.get("/:static_page(login|console|verify|logs|editor|ec2|excplicit|protocols)", async (req, res) => {
+    res.render(req.params.static_page);
+});  
 
 app.get("/storage", async (req, res) =>{
     const [ client ] = wss.clients;
@@ -182,10 +173,6 @@ app.get("/processes/dashboard", async (req, res) => {
     }
 });
 
-app.get("/logs", async (req, res) => {
-    res.render('logs');
-});
-
 app.get("/logs/messages", async (req, res) => {
     const [ client ] = wss.clients;
 
@@ -236,26 +223,25 @@ app.get("/logs/processes", async (req, res) => {
     });
 });
 
-app.get("/editor", async (req, res) => {
-    res.render('editor');
-});
-
-app.get("/ec2", async (req, res) => {
-    res.render('ec2');
-})
-
-app.get("/explicit", async (req, res) => {
-    res.render('explicit');
-});
-
-app.get("/protocols", async (req, res) => {
-    res.render('protocols');    
-});
-
 app.get("/logout", async (req, res) => {
     res.clearCookie(cookie_value);
     res.redirect("/login");
 });
+
+app.get("/user/:username", async (req, res) => {
+    var username = req.params.username;
+    const user = await prisma.user.findUnique({
+        where: { 
+            name: username, 
+        }
+    });
+    console.log(user);
+    if (user !== null) {
+        res.render('user', user);
+        return;
+    }
+    res.render('404');
+})
 
 app.get("/statistics", async (req, res) => {
     var verified = false;
