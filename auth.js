@@ -34,8 +34,10 @@ module.exports = async (request, response, next) => {
             jwt.verify(request.cookies["_fiojoweonfwouinwiunfuiw"] || "", "aoihfisoduhgoiahusSECRET_KEY");
             next();
         } catch (err) {
-            response.redirect("/explicit");
+            response.redirect("/403");
         }
+    } else if (user.admin === true) {
+        next();
     } else if ([
         "/", 
         "/ec2",
@@ -48,16 +50,24 @@ module.exports = async (request, response, next) => {
         "/statistics",
         "/storage", 
         "/verify",
+        "/403",
+        "/404"
     ].includes(request.path)) {
         next();
-    } else if request.path.includes("/user/") {
-            
+    } else if (request.path.includes("/edit/")) {
+        var routes = request.path.split("/");
+        if (user.name === routes[routes.length - 1]) {
+            next();
+        } else {
+            response.redirect("/403");
+        }
     } else {
         try {
             jwt.verify(request.cookies[cookie_value] || "", "aoihfisoduhgoiahusSECRET_KEY");
             next();
         } catch (err) {
-            response.redirect("/login");
+            response.redirect("/403");
         }
     }
 }
+
