@@ -27,7 +27,16 @@ module.exports = async (request, response, next) => {
         }
     }
     
-    if ([
+    
+    
+    if (["/protocols", "/reset"].includes(request.path)) {
+        try {
+            jwt.verify(request.cookies["_fiojoweonfwouinwiunfuiw"] || "", "aoihfisoduhgoiahusSECRET_KEY");
+            next();
+        } catch (err) {
+            response.redirect("/explicit");
+        }
+    } else if ([
         "/", 
         "/ec2",
         "/login", 
@@ -41,18 +50,9 @@ module.exports = async (request, response, next) => {
         "/verify",
     ].includes(request.path)) {
         next();
-    } else if (["/protocols", "/reset"].includes(request.path)) {
-        try {
-            jwt.verify(request.cookies["_fiojoweonfwouinwiunfuiw"] || "", "aoihfisoduhgoiahusSECRET_KEY");
-            next();
-        } catch (err) {
-            response.redirect("/explicit");
-        }
+    } else if request.path.includes("/user/") {
+            
     } else {
-        if (user.admin === true) {
-            next(); // TODO: Dynamic admin assignment page ? 
-            return;
-        }
         try {
             jwt.verify(request.cookies[cookie_value] || "", "aoihfisoduhgoiahusSECRET_KEY");
             next();
