@@ -30,9 +30,9 @@
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
             <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a></li>
-            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">403</li>
+            <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Error</li>
           </ol>
-          <h6 class="font-weight-bolder mb-0">403</h6>
+          <h6 class="font-weight-bolder mb-0"><%= error.code; %></h6>
         </nav>
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
           <div class="ms-md-auto pe-md-3 d-flex align-items-center">
@@ -56,7 +56,8 @@
         </div>
       </div>
     </nav>
-    <h3 style="margin-left: 5%; margin-top: 2%;">403 Forbidden</h3>
+    <h3 style="margin-left: 5%; margin-top: 2%;"><%= error.code; %> <%= error.name %></h3>
+    <h4 style="margin-left: 5%; margin-top: 2%;"><%= error.message; %></h4>
   </main>
   <div class="fixed-plugin">  
     <a class="fixed-plugin-button text-dark position-fixed px-3 py-2">
