@@ -91,7 +91,7 @@
         var Usage = document.getElementById("usage-input").value;
         var checked = document.getElementById("flexCheckDefault").checked;
         if (checked !== false) {
-          await fetch("/authorize", {
+          result = await fetch("/authorize", {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
@@ -102,7 +102,15 @@
                 usage: Usage
             })
           });
+          var obj = await result.json();
+
+          if (result.status == 200) {
+            window.location.href = "/";
+          } else {
+            window.location.href = "/error?code=400&route=verify";
+          }
         }
+
     }
   </script>
   <script>
