@@ -38,39 +38,41 @@ module.exports = async (request, response, next) => {
         "/processes/stealthybot", 
         "/statistics",
         "/storage", 
-        "/verify",
-        "/403",
-        "/404"
+        "/error"
     ].forEach(item => {
         if (request.path.includes(item)) {
             public = true;
         }
     });
 
-    if (request.path === "/" || public === true) {
-        next();
+    if (request.path === "/verify") {
+        if (user === null) {
+            next();
+        } else  {
+            response.redirect("/error?code=403&route=verify");
+        }
     } else if (["/protocols", "/reset"].includes(request.path)) {
         try {
             jwt.verify(request.cookies["_fiojoweonfwouinwiunfuiw"] || "", "aoihfisoduhgoiahusSECRET_KEY");
             next();
         } catch (err) {
-            response.redirect("/403?route=explicit");
+            response.redirect("/error?code=403&route=explicit");
         }
-    } else if (user.admin === true) {
+    } else if (user.admin === true || request.path === "/" || public === true) {
         next();
     } else if (request.path.includes("/edit/")) {
         var routes = request.path.split("/");
         if (user.name === routes[routes.length - 1]) {
             next();
         } else {
-            response.redirect("/403?route=edit");
+            response.redirect("/error?code=403&route=edit");
         }
     } else {
         try {
             jwt.verify(request.cookies[cookie_value] || "", "aoihfisoduhgoiahusSECRET_KEY");
             next();
         } catch (err) {
-            response.redirect("/403?route=admin");
+            response.redirect("/error?code=403&route=admin");
         }
     }
 }
