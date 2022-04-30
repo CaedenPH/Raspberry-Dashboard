@@ -114,7 +114,7 @@ app.get('/', async (req, res) => {
     }
 });
 
-app.get("/:static_page(login|console|verify|logs|editor|ec2|excplicit|protocols|404|403)", async (req, res) => {
+app.get("/:static_page(login|console|verify|logs|editor|ec2|excplicit|protocols|404)", async (req, res) => {
     res.render(req.params.static_page);
 });  
 
@@ -149,11 +149,31 @@ app.get("/edit/:username", async (req, res) => {
     
 });
 
+app.get("/user/:username", async (req, res) => {
+    var username = req.params.username;
+    const user = await prisma.user.findUnique({
+        where: { 
+            name: username, 
+        }
+    });
+    console.log(user);
+    if (user !== null) {
+        res.render('user', user);
+        return;
+    }
+    res.render('404');
+});
+
+app.get("/403", async (req, res) => {
+    var route = req.query;
+    res.render('403', route);
+});
+
 app.get("/logs/usage", async (req, res) => {
-    var fileContent = fs.readFileSync("logs/usage.txt")
+    var fileContent = fs.readFileSync("logs/usage.txt");
     data = {
         usage: fileContent
-    }
+    };
     res.render('logs/usage', data);
 });
 
@@ -170,26 +190,6 @@ app.get("/logs/processes", async (req, res) => {
         }
     });
 });
-
-app.get("/logout", async (req, res) => {
-    res.clearCookie(cookie_value);
-    res.redirect("/login");
-});
-
-app.get("/user/:username", async (req, res) => {
-    var username = req.params.username;
-    const user = await prisma.user.findUnique({
-        where: { 
-            name: username, 
-        }
-    });
-    console.log(user);
-    if (user !== null) {
-        res.render('user', user);
-        return;
-    }
-    res.render('404');
-})
 
 app.get("/statistics", async (req, res) => {
     var verified = false;
@@ -210,6 +210,11 @@ app.get("/statistics", async (req, res) => {
         });
         res.render('statistics', data);
     }
+});
+
+app.get("/logout", async (req, res) => {
+    res.clearCookie(cookie_value);
+    res.redirect("/login");
 });
 
 app.get("/pull", async(req, res) => {
