@@ -39,7 +39,6 @@ document.addEventListener('DOMContentLoaded', function() {
   var checkWord = async() => {
     textInputValue = document.getElementById('terminalTextInput').value.trim();
     textInputValueLowerCase = textInputValue.toLowerCase();
-    console.log(textInputValueLowerCase)
  
     if (textInputValue != ""){
       addTextToResults("<p class='userEnteredText'>> " + textInputValue + "</p>");
@@ -47,7 +46,6 @@ document.addEventListener('DOMContentLoaded', function() {
           method: "GET"
       });
       var msg = (await output.json()).message.trim()
-      console.log(msg);
       if ( msg.endsWith("found") ) {
         msg = `Command ${textInputValue} not found`
       }
