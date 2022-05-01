@@ -118,10 +118,10 @@ app.get("/:static_page(login|console|verify|logs|editor|ec2|excplicit|protocols)
     res.render(req.params.static_page);
 });  
 
-app.get("/:ws_page(storage|jesterbot|stealthybot|dashboard|messages|network)", async (req, res) =>{
+app.get("/:ws_page(storage|processes/jesterbot|processes/stealthybot|processes/dashboard|logs/messages|logs/network)", async (req, res) =>{
     const [ client ] = wss.clients;
     
-    var routes = string.split("/");
+    var routes = req.params.ws_page.split("/");
     var endpoint = routes[routes.length - 1];
     
     if (client === undefined) {
@@ -131,7 +131,36 @@ app.get("/:ws_page(storage|jesterbot|stealthybot|dashboard|messages|network)", a
             op: REQUEST,
             d: endpoint
         });
-        res.render(endpoint, data);
+        res.render(req.params.ws_page, data);
+    }
+});
+
+app.get("/account", async (req, res) => {
+    const user = await prisma.user.findUnique({
+        where: { 
+            ip: String(req.ip).replace("::ffff:", "")
+        }
+    });
+    res.render('user', user);
+});
+
+app.get("/users", async (req, res) => {
+    const users = await prisma.user.findMany();
+    console.log(users);
+});
+
+app.get("/user/:username", async (req, res) => {
+    var username = req.params.username;
+    const user = await prisma.user.findUnique({
+        where: { 
+            name: username, 
+        }
+    });
+
+    if (user !== null) {
+        res.render('user', user);
+    } else {
+        res.redirect('/error?code=404');
     }
 });
 
@@ -147,29 +176,6 @@ app.get("/edit/:username", async (req, res) => {
         res.render('edit', user);
     }
     
-});
-
-app.get("/user", async (req, res) => {
-    const user = await prisma.user.findUnique({
-        where: { 
-            ip: String(req.ip).replace("::ffff:", "")
-        }
-    });
-    res.render('user', user);
-});
-
-app.get("/user/:username", async (req, res) => {
-    var username = req.params.username;
-    const user = await prisma.user.findUnique({
-        where: { 
-            name: username, 
-        }
-    });
-    if (user !== null) {
-        res.render('user', user);
-    } else {
-        res.redirect('/error?code=404');
-    }
 });
 
 app.get("/error", async (req, res) => {
