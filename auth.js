@@ -15,7 +15,7 @@ module.exports = async (request, response, next) => {
     fs.appendFileSync("logs/usage.txt", `${request.path} | ${ip} | ${request.protocol} | ${new Date().toUTCString()}\n`);
     
     const user = await prisma.user.findUnique({
-        where: { ip, }
+        where: { ip }
     });
     if (user === null) {
         if (! ["/verify", "/authorize"].includes(request.path)) {
@@ -44,7 +44,13 @@ module.exports = async (request, response, next) => {
             public = true;
         }
     });
-
+    
+    var superior = false;
+    try {
+        jwt.verify(request.cookies["_fiojoweonfwouinwiunfuiw"] || "", "aoihfisoduhgoiahusSECRET_KEY");
+        superior = true;
+    } catch (err) {}
+    
     if (request.path === "/verify") {
         if (user === null) {
             next();
@@ -52,28 +58,29 @@ module.exports = async (request, response, next) => {
             response.redirect("/error?code=403&route=verify");
         }
     } else if (["/protocols", "/reset"].includes(request.path)) {
-        try {
-            jwt.verify(request.cookies["_fiojoweonfwouinwiunfuiw"] || "", "aoihfisoduhgoiahusSECRET_KEY");
+        if (superior === true) {
             next();
-        } catch (err) {
+        } else {
             response.redirect("/error?code=403&route=explicit");
         }
     } else if (user.admin === true || request.path === "/" || public === true) {
         next();
     } else if (request.path.includes("/edit/")) {
         var routes = request.path.split("/");
-        if (user.name === routes[routes.length - 1]) {
+        if (user.name === routes[routes.length - 1] || superior === true) {
             next();
         } else {
             response.redirect("/error?code=403&route=edit");
         }
-    } else {
+    } else if (["usage", "messages", "console", "editor", "restart", "pull", "execute"].some(element => request.path.includes(element))) {
         try {
             jwt.verify(request.cookies[cookie_value] || "", "aoihfisoduhgoiahusSECRET_KEY");
             next();
         } catch (err) {
             response.redirect("/error?code=403&route=admin");
         }
+    } else {
+        next();
     }
 }
 
