@@ -10,6 +10,8 @@ datasource db {
 model User {
     id              Int        @id @default(autoincrement())
     ip              String     @unique
+    email           String
+    phone           String
     usage           String
     visits          String
     name            String     @unique

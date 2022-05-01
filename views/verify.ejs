@@ -42,7 +42,7 @@
               <div class="card card-plain">
                 <div class="card-header pb-1">
                   <h4 class="font-weight-bolder">Verify</h4>
-                  <p class="mb-0">Enter your name and a brief description of why you want to use the website</p>
+                  <p class="mb-0">Enter your name and a brief description of why you want to use the website. Email and phone number are optional, but will raise your trust score.</p>
                 </div>
                 <div class="card-body">
                   <form role="form" id="frm">
@@ -53,6 +53,14 @@
                     <div class="input-group input-group-outline mb-3">
                       <label class="form-label">Usage</label>
                       <input type="text" class="form-control" id="usage-input">
+                    </div>
+                    <div class="input-group input-group-outline mb-3">
+                      <label class="form-label">Email</label>
+                      <input type="text" class="form-control" id="email-input">
+                    </div>
+                    <div class="input-group input-group-outline mb-3">
+                      <label class="form-label">Phone #</label>
+                      <input type="text" class="form-control" id="phone-input">
                     </div>
                     <div class="form-check form-check-info text-start ps-0">
                       <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" checked>
@@ -87,9 +95,13 @@
   <script>
       document.getElementById("verify-button").onclick = async (e) => {
         e.preventDefault();
-        var Name = document.getElementById("name-input").value;
-        var Usage = document.getElementById("usage-input").value;
+        var name = document.getElementById("name-input").value;
+        var usage = document.getElementById("usage-input").value;
+        var email = document.getElementById("email-input").value;
+        var phone = document.getElementById("phone-input").value;
+
         var checked = document.getElementById("flexCheckDefault").checked;
+
         if (checked !== false) {
           result = await fetch("/authorize", {
             method: "POST",
@@ -98,8 +110,7 @@
                 Accept: 'application/json'
             },
             body: JSON.stringify({
-                name: Name,
-                usage: Usage
+                name, usage, email, phone
             })
           });
           var obj = await result.json();
