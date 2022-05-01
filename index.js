@@ -149,6 +149,15 @@ app.get("/edit/:username", async (req, res) => {
     
 });
 
+app.get("/user", async (req, res) => {
+    const user = await prisma.user.findUnique({
+        where: { 
+            ip: String(req.ip).replace("::ffff:", "")
+        }
+    });
+    res.render('user', user);
+});
+
 app.get("/user/:username", async (req, res) => {
     var username = req.params.username;
     const user = await prisma.user.findUnique({
@@ -168,19 +177,28 @@ app.get("/error", async (req, res) => {
     
     if (error.code == 403) {
         error.name = "Forbidden";
-        console.log(error.route);
         if (error.route === "verify") {
-            error.message = "You can't reverify - Only one account per IP";
+            error.message = "You can only have one account per IP";
+            error.link = "/";
+            error.linkMessage = "Back to homepage";
         } else if (error.route === "edit") {
-            error.message = "You require admin to edit user accounts. <a href='/login'>Log in here</a>";
+            error.message = "You require admin to edit user accounts";
+            error.link = "/login";
+            error.linkMessage = "Click here to sign in as admin";
         } else if (error.route === "admin") {
-            error.message = "Admin is required for this endpoint. <a href='/login'>Log in here</a>";
+            error.message = "Admin is required for this endpoint";
+            error.link = "/login";
+            error.linkMessage = "Click here to sign in as admin";
         } else {
-            error.message = "Superior admin is required for this endpoint. <a href='/explicit'>Log in here</a>";
+            error.message = "Superior admin is required for this endpoint";
+            error.link = "/explicit";
+            error.linkMessage = "Click here to sign in as superior admin";
         }
     } else  if (error.code == 404) {
         error.name = "Not found";
         error.message = "You tried to visit a page that wasnt found";
+        error.link = "/";
+        error.linkMessage = "Back to homepage";
     } else  if (error.code == 400) {
         error.name = "Bad request";
         error.message = "The page you tried to visit is not found";
@@ -283,7 +301,6 @@ app.get('*', async (req, res) => {
   });
 
 app.post("/login", async (req, res) => {
-    console.log("e");
     if (req.body.password && req.body.password === password) {
         res.cookie(cookie_value, jwt.sign({
             username: "username"
@@ -317,27 +334,35 @@ app.post("/explicit", async (req, res) => {
 
 app.post("/authorize", async (req, res) => {
     var ip = String(req.ip).replace("::ffff:", "");
-    const user = await prisma.user.findUnique({
-        where: { 
-            ip,
-            name: req.body.name,
-        }
+    let user = await prisma.user.findUnique({
+        where: { ip }
     });
     
     if (user !== null) {
-        res.status(400).json({"message": "IP or name is already registered"});
+        res.status(400).json({"message": "IP is already registered"});
+        return;
+    }   
+    user = await prisma.user.findUnique({
+        where: { name: req.body.name }
+    });
+    if (user !== null) {
+        res.status(400).json({"message": "Name is already registered"});
         return;
     }
+
+
     await prisma.user.create({
         data: {
             name: req.body.name,
             usage: req.body.usage,
+            email: req.body.email,
+            phone: req.body.phone,
             ip: ip,
             visits: "",
             admin: false
         }
     });
-    res.status(200);
+    res.status(200).json({"message": "Successful creation"});
 });
 
 
