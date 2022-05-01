@@ -56,8 +56,10 @@
         </div>
       </div>
     </nav>
-    <h3 style="margin-left: 5%; margin-top: 2%;"><%= error.code; %> <%= error.name %></h3>
-    <h4 style="margin-left: 5%; margin-top: 2%;"><%= error.message; %></h4>
+      <h3 style="margin-left: 5%; margin-top: 2%;"><%= error.code; %> <%= error.name; %></h3>
+      <h4 style="margin-left: 5%; margin-top: 2%;"><%= error.message; %></h4>
+      <a style="margin-left: 5%; margin-top: 2%;" href="<%= error.link; %>"><%= error.linkMessage; %></a>
+    </div>  
   </main>
   <div class="fixed-plugin">  
     <a class="fixed-plugin-button text-dark position-fixed px-3 py-2">
