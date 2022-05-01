@@ -146,7 +146,9 @@ app.get("/account", async (req, res) => {
 
 app.get("/users", async (req, res) => {
     const users = await prisma.user.findMany();
-    console.log(users);
+    res.render('users', {
+        users: users.map(user => user.name), 
+    });
 });
 
 app.get("/user/:username", async (req, res) => {
@@ -157,10 +159,10 @@ app.get("/user/:username", async (req, res) => {
         }
     });
 
-    if (user !== null) {
-        res.render('user', user);
-    } else {
+    if (user === null) {
         res.redirect('/error?code=404');
+    } else {
+        res.render('user', user);
     }
 });
 
