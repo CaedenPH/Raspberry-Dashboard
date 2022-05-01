@@ -330,6 +330,13 @@
   <script src="/assets/js/plugins/perfect-scrollbar.min.js"></script>
   <script src="/assets/js/plugins/smooth-scrollbar.min.js"></script>
   <script>
+    const textarea = document.getElementById("editor");
+    const end = textarea.value.length;
+
+    textarea.setSelectionRange(end, end-1);
+    textarea.focus();
+  </script>
+  <script>
     var win = navigator.platform.indexOf('Win') > -1;
     if (win && document.querySelector('#sidenav-scrollbar')) {
       var options = {
