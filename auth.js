@@ -72,7 +72,7 @@ module.exports = async (request, response, next) => {
         } else {
             response.redirect("/error?code=403&route=edit");
         }
-    } else if (["usage", "messages", "console", "editor", "restart", "pull", "execute"].some(element => request.path.includes(element))) {
+    } else if (["usage", "messages", "console", "editor", "users", "restart", "pull", "execute"].some(element => request.path.includes(element))) {
         try {
             jwt.verify(request.cookies[cookie_value] || "", "aoihfisoduhgoiahusSECRET_KEY");
             next();
