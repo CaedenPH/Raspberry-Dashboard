@@ -151,12 +151,10 @@ app.get("/users", async (req, res) => {
     });
 });
 
-app.get("/user/:username", async (req, res) => {
-    var username = req.params.username;
+app.get("/users/:username", async (req, res) => {
+    var name = req.params.username;
     const user = await prisma.user.findUnique({
-        where: { 
-            name: username, 
-        }
+        where: { name, }
     });
 
     if (user === null) {
@@ -168,16 +166,15 @@ app.get("/user/:username", async (req, res) => {
 
 app.get("/edit/:username", async (req, res) => {
     var name = req.params.username;
-    
     const user = await prisma.user.findUnique({
         where: { name, }
     });
+
     if (user === null) {
         res.redirect('/error?code=404');
     } else {
         res.render('edit', user);
     }
-    
 });
 
 app.get("/error", async (req, res) => {

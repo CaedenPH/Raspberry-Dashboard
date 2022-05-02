@@ -11,6 +11,7 @@ module.exports = async (request, response, next) => {
         return;
     }
 
+
     var ip = String(request.ip).replace("::ffff:", "");
     fs.appendFileSync("logs/usage.txt", `${request.path} | ${ip} | ${request.protocol} | ${new Date().toUTCString()}\n`);
     
@@ -65,6 +66,13 @@ module.exports = async (request, response, next) => {
         }
     } else if (user.admin === true || request.path === "/" || public === true) {
         next();
+    } else if (req.path.includes("/users/")) {
+        var routes = request.path.split("/");
+        if (user.name === routes[routes.length - 1] || user.admin === true) {
+            next();
+        } else {
+            response.redirect("/error?code=40&route=user")
+        }
     } else if (request.path.includes("/edit/")) {
         var routes = request.path.split("/");
         if (user.name === routes[routes.length - 1] || superior === true) {
