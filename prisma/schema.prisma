@@ -9,12 +9,13 @@ datasource db {
 
 model User {
     id              Int        @id @default(autoincrement())
-    ip              String     @unique
-    email           String
-    phone           String
-    usage           String
+    ip              String     @unique                          
+    username        String     @unique                          //input
+    firstname       String                                      //input
+    lastname        String                                      //input
+    email           String                                      //input
+    phone           String                                      //input
     visits          String
-    name            String     @unique
     admin           Boolean
     create_epoch    DateTime  @default(now())
     last_edit_epoch DateTime  @default(now())
