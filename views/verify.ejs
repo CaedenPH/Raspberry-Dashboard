@@ -9,61 +9,58 @@
   <div class="container">
     <div class="title">Registration</div>
     <div class="content">
-      <form>
-        <div class="user-details">
-          <div class="input-box">
-            <span class="details">First name</span>
-            <input type="text" placeholder="Enter your first name" id="firstname" required>
-          </div>
-          <div class="input-box">
-            <span class="details">Second name</span>
-            <input type="text" placeholder="Confirm your second name" id="lastname" required>
-          </div>
-          <div class="input-box">
-            <span class="details">Email</span>
-            <input type="text" placeholder="Enter your email" id="email" required>
-          </div>
-          <div class="input-box">
-            <span class="details">Phone Number</span>
-            <input type="text" placeholder="Enter your number" id="phone" required>
-          </div>
-          <div class="input-box">
-            <span class="details">Username</span>
-            <input type="text" placeholder="Enter your username" id="username" required>
-          </div>
+      <div class="user-details">
+        <div class="input-box">
+          <span class="details">First name</span>
+          <input type="text" placeholder="Enter your first name" id="firstname" required>
         </div>
-        <div class="button">  
-          <input type="submit" value="Register">
+        <div class="input-box">
+          <span class="details">Second name</span>
+          <input type="text" placeholder="Confirm your second name" id="lastname" required>
         </div>
-      </form>
+        <div class="input-box">
+          <span class="details">Email</span>
+          <input type="text" placeholder="Enter your email" id="email" required>
+        </div>
+        <div class="input-box">
+          <span class="details">Phone Number</span>
+          <input type="text" placeholder="Enter your number" id="phone" required>
+        </div>
+        <div class="input-box">
+          <span class="details">Username</span>
+          <input type="text" placeholder="Enter your username" id="username" required>
+        </div>
+      </div>
+      <div class="button">  
+        <input type="submit" value="Register" id="button">
+      </div>
     </div>
   </div>
 <script>
-  document.getElementsByTagName("form")[0].onsubmit = async () => {
+  document.getElementById("button").onclick = async () => {
     let firstname = document.getElementById("firstname").value;
     let lastname = document.getElementById("lastname").value;
     let username = document.getElementById("username").value;
     let email = document.getElementById("email").value;
     let phone = document.getElementById("phone").value;
 
-    console.log(firstname,  lastname, username, email, phone);
-    // result = await fetch("/register", {
-    //   method: "POST",
-    //   headers: {
-    //       'Content-Type': 'application/json',
-    //       Accept: 'application/json'
-    //   },
-    //   body: JSON.stringify({
-    //       firstname, lastname, username, email, phone
-    //   })
-    // }); 
-    // var obj = await result.json();
-    // console.log(obj.message);
-    // if (result.status == 200) {
-    //   window.location.href = "/";
-    // } else {
-    //   window.location.href = "/error?code=400&route=verify";
-    // }
+    result = await fetch("/register", {
+      method: "POST",
+      headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+      },
+      body: JSON.stringify({
+          firstname, lastname, username, email, phone
+      })
+    }); 
+    var obj = await result.json();
+    console.log(obj.message);
+    if (result.status == 200) {
+      window.location.href = "/";
+    } else {
+      window.location.href = "/error?code=400&route=verify";
+    }
   }
 </script>
 </body>

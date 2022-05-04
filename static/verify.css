@@ -35,17 +35,17 @@ body{
   width: 30px;
   border-radius: 5px;
 }
-.content form .user-details{
+.content .user-details{
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   margin: 20px 0 12px 0;
 }
-form .user-details .input-box{
+.user-details .input-box{
   margin-bottom: 15px;
   width: calc(100% / 2 - 20px);
 }
-form .input-box span.details{
+.input-box span.details{
   display: block;
   font-weight: 500;
   margin-bottom: 5px;
@@ -65,22 +65,22 @@ form .input-box span.details{
 .user-details .input-box input:valid{
   border-color: #9b59b6;
 }
- form .gender-details .gender-title{
+ .gender-details .gender-title{
   font-size: 20px;
   font-weight: 500;
  }
- form .category{
+ .category{
    display: flex;
    width: 80%;
    margin: 14px 0 ;
    justify-content: space-between;
  }
- form .category label{
+ .category label{
    display: flex;
    align-items: center;
    cursor: pointer;
  }
- form .category label .dot{
+ .category label .dot{
   height: 18px;
   width: 18px;
   border-radius: 50%;
@@ -95,15 +95,15 @@ form .input-box span.details{
    background: #9b59b6;
    border-color: #d9d9d9;
  }
- form input[type="radio"]{
+ input[type="radio"]{
    display: none;
  }
- form .button{
+ .button{
    height: 45px;
    margin: 35px 0;
    margin-bottom: 1%;
  }
- form .button input{
+ .button input{
    height: 100%;
    width: 100%;
    border-radius: 5px;
@@ -116,7 +116,7 @@ form .input-box span.details{
    transition: all 0.3s ease;
    background: linear-gradient(135deg, #71b7e6, #9b59b6);
  }
- form .button input:hover{
+ .button input:hover{
   box-shadow: 0 0.5em 0.5em -0.4em var(--hover);
   transform: translateY(-0.25em);
   }
@@ -124,14 +124,14 @@ form .input-box span.details{
  .container{
   max-width: 100%;
 }
-form .user-details .input-box{
+.user-details .input-box{
     margin-bottom: 15px;
     width: 100%;
   }
-  form .category{
+  .category{
     width: 100%;
   }
-  .content form .user-details{
+  .content .user-details{
     max-height: 300px;
     overflow-y: scroll;
   }
