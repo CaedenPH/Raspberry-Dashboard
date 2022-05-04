@@ -19,7 +19,7 @@ module.exports = async (request, response, next) => {
         where: { ip }
     });
     if (user === null) {
-        if (! ["/verify", "/authorize"].includes(request.path)) {
+        if (! ["/verify", "/register"].includes(request.path)) {
             response.redirect("/verify");
             return;
         } else {

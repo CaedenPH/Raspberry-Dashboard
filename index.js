@@ -337,7 +337,7 @@ app.post("/explicit", async (req, res) => {
     }
 });
 
-app.post("/authorize", async (req, res) => {
+app.post("/register", async (req, res) => {
     var ip = String(req.ip).replace("::ffff:", "");
     let user = await prisma.user.findUnique({
         where: { ip }
@@ -348,18 +348,18 @@ app.post("/authorize", async (req, res) => {
         return;
     }   
     user = await prisma.user.findUnique({
-        where: { name: req.body.name }
+        where: { username: req.body.username }
     });
     if (user !== null) {
         res.status(400).json({"message": "Name is already registered"});
         return;
     }
 
-
     await prisma.user.create({
         data: {
-            name: req.body.name,
-            usage: req.body.usage,
+            username: req.body.username,
+            firstname: req.body.firstname,
+            lastname: req.body.lastname,
             email: req.body.email,
             phone: req.body.phone,
             ip: ip,
