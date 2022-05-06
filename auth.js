@@ -66,7 +66,7 @@ module.exports = async (request, response, next) => {
         }
     } else if (user.admin === true || request.path === "/" || public === true) {
         next();
-    } else if (req.path.includes("/users/")) {
+    } else if (request.path.includes("/users/")) {
         var routes = request.path.split("/");
         if (user.name === routes[routes.length - 1] || user.admin === true) {
             next();
@@ -78,7 +78,7 @@ module.exports = async (request, response, next) => {
         if (user.name === routes[routes.length - 1] || superior === true) {
             next();
         } else {
-            response.redirect("/error?code=403&route=edit");
+            response.redirect("/error?code=403&route=explicit");
         }
     } else if (["usage", "messages", "console", "editor", "users", "restart", "pull", "execute"].some(element => request.path.includes(element))) {
         try {
