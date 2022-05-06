@@ -68,14 +68,14 @@ module.exports = async (request, response, next) => {
         next();
     } else if (request.path.includes("/users/")) {
         var routes = request.path.split("/");
-        if (user.name === routes[routes.length - 1] || user.admin === true) {
+        if (user.username === routes[routes.length - 1] || user.admin === true) {
             next();
         } else {
             response.redirect("/error?code=40&route=user")
         }
     } else if (request.path.includes("/edit/")) {
         var routes = request.path.split("/");
-        if (user.name === routes[routes.length - 1] || superior === true) {
+        if (user.username === routes[routes.length - 1] || superior === true) {
             next();
         } else {
             response.redirect("/error?code=403&route=explicit");
