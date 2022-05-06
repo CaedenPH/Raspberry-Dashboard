@@ -150,7 +150,6 @@ app.get("/account", async (req, res) => {
 
 app.get("/users", async (req, res) => {
     const users = await prisma.user.findMany();
-    console.log(users);
     res.render('users', {
         users: users.map(user => user.username), 
     });
