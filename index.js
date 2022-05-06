@@ -141,7 +141,11 @@ app.get("/account", async (req, res) => {
             ip: String(req.ip).replace("::ffff:", "")
         }
     });
-    res.render('user', user);
+    res.render('user', {
+        user,
+        account: "active bg-gradient-primary",
+        users: ""
+    });
 });
 
 app.get("/users", async (req, res) => {
@@ -152,22 +156,26 @@ app.get("/users", async (req, res) => {
 });
 
 app.get("/users/:username", async (req, res) => {
-    var name = req.params.username;
+    var username = req.params.username;
     const user = await prisma.user.findUnique({
-        where: { name, }
+        where: { username, }
     });
 
     if (user === null) {
         res.redirect('/error?code=404');
     } else {
-        res.render('user', user);
+        res.render('user', {
+            user,
+            account: "",
+            users: "active bg-gradient-primary"
+        });
     }
 });
 
 app.get("/edit/:username", async (req, res) => {
-    var name = req.params.username;
+    var username = req.params.username;
     const user = await prisma.user.findUnique({
-        where: { name, }
+        where: { username, }
     });
 
     if (user === null) {
