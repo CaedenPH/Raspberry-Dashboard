@@ -8,9 +8,6 @@ const jwt = require("jsonwebtoken");
 const bodyParser = require('body-parser');
 const { password, explicit_password, ws_token, cookie_value } = require('./config.json');
 
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
-
 const webSocket = require('ws');
 const crypto = require("crypto");
 const fs = require('fs');
@@ -114,7 +111,7 @@ app.get('/', async (req, res) => {
     }
 });
 
-app.get("/:static_page(login|console|verify|logs|editor|ec2|excplicit|protocols)", async (req, res) => {
+app.get("/:static_page(login|console|logs|editor|ec2|excplicit|protocols)", async (req, res) => {
     res.render(req.params.static_page);
 });  
 
@@ -135,70 +132,12 @@ app.get("/:ws_page(storage|processes/jesterbot|processes/stealthybot|processes/d
     }
 });
 
-app.get("/account", async (req, res) => {
-    const user = await prisma.user.findUnique({
-        where: { 
-            ip: String(req.ip).replace("::ffff:", "")
-        }
-    });
-    res.render('user', {
-        user,
-        account: "active bg-gradient-primary",
-        users: ""
-    });
-});
-
-app.get("/users", async (req, res) => {
-    const users = await prisma.user.findMany();
-    res.render('users', {
-        users: users.map(user => user.username), 
-    });
-});
-
-app.get("/users/:username", async (req, res) => {
-    var username = req.params.username;
-    const user = await prisma.user.findUnique({
-        where: { username, }
-    });
-
-    if (user === null) {
-        res.redirect('/error?code=404');
-    } else {
-        res.render('user', {
-            user,
-            account: "",
-            users: "active bg-gradient-primary"
-        });
-    }
-});
-
-app.get("/edit/:username", async (req, res) => {
-    var username = req.params.username;
-    const user = await prisma.user.findUnique({
-        where: { username, }
-    });
-
-    if (user === null) {
-        res.redirect('/error?code=404');
-    } else {
-        res.render('edit', user);
-    }
-});
-
 app.get("/error", async (req, res) => {
     let error = req.query;
     
     if (error.code == 403) {
         error.name = "Forbidden";
-        if (error.route === "verify") {
-            error.message = "You can only have one account per IP";
-            error.link = "/";
-            error.linkMessage = "Back to homepage";
-        } else if (error.route === "edit") {
-            error.message = "You require admin to edit user accounts";
-            error.link = "/login";
-            error.linkMessage = "Click here to sign in as admin";
-        } else if (error.route === "admin") {
+        if (error.route === "admin") {
             error.message = "Admin is required for this endpoint";
             error.link = "/login";
             error.linkMessage = "Click here to sign in as admin";
@@ -343,39 +282,6 @@ app.post("/explicit", async (req, res) => {
     } else {    
         res.status(400).json({ message: "Bad Argument" });
     }
-});
-
-app.post("/register", async (req, res) => {
-    var ip = String(req.ip).replace("::ffff:", "");
-    let user = await prisma.user.findUnique({
-        where: { ip }
-    });
-    
-    if (user !== null) {
-        res.status(400).json({"message": "IP is already registered"});
-        return;
-    }   
-    user = await prisma.user.findUnique({
-        where: { username: req.body.username }
-    });
-    if (user !== null) {
-        res.status(400).json({"message": "Name is already registered"});
-        return;
-    }
-
-    await prisma.user.create({
-        data: {
-            username: req.body.username,
-            firstname: req.body.firstname,
-            lastname: req.body.lastname,
-            email: req.body.email,
-            phone: req.body.phone,
-            ip: ip,
-            visits: "",
-            admin: false
-        }
-    });
-    res.status(200).json({"message": "Successful creation"});
 });
 
 

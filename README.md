@@ -5,8 +5,6 @@ run tasks and manage processes.
 **Examples:**
 *home:*
 > <img src="assets/examples/dashboard.png">
-*account:*
-> <img src="assets/examples/account.png">
 *console:*
 > <img src="assets/examples/console.png">
 *editor:*

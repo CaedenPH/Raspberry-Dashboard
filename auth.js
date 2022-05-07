@@ -3,31 +3,14 @@ const jwt = require("jsonwebtoken");
 
 const fs = require("fs");
 
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
-
 module.exports = async (request, response, next) => {
     if (request.path.includes(".")) {
         return;
     }
 
-
     var ip = String(request.ip).replace("::ffff:", "");
     fs.appendFileSync("logs/usage.txt", `${request.path} | ${ip} | ${request.protocol} | ${new Date().toUTCString()}\n`);
     
-    const user = await prisma.user.findUnique({
-        where: { ip }
-    });
-    if (user === null) {
-        if (! ["/verify", "/register"].includes(request.path)) {
-            response.redirect("/verify");
-            return;
-        } else {
-            next();
-            return;
-        }
-    }
-
     var public = false;
     [
         "/ec2",
@@ -52,35 +35,15 @@ module.exports = async (request, response, next) => {
         superior = true;
     } catch (err) {}
     
-    if (request.path === "/verify") {
-        if (user === null) {
-            next();
-        } else  {
-            response.redirect("/error?code=403&route=verify");
-        }
-    } else if (["/protocols", "/reset"].includes(request.path)) {
+    if (["/protocols", "/reset"].includes(request.path)) {
         if (superior === true) {
             next();
         } else {
             response.redirect("/error?code=403&route=explicit");
         }
-    } else if (user.admin === true || request.path === "/" || public === true) {
+    } else if (request.path === "/" || public === true) {
         next();
-    } else if (request.path.includes("/users/")) {
-        var routes = request.path.split("/");
-        if (user.username === routes[routes.length - 1] || user.admin === true) {
-            next();
-        } else {
-            response.redirect("/error?code=40&route=user")
-        }
-    } else if (request.path.includes("/edit/")) {
-        var routes = request.path.split("/");
-        if (user.username === routes[routes.length - 1] || superior === true) {
-            next();
-        } else {
-            response.redirect("/error?code=403&route=explicit");
-        }
-    } else if (["usage", "messages", "console", "editor", "users", "restart", "pull", "execute"].some(element => request.path.includes(element))) {
+    } else if (["usage", "messages", "console", "editor", "restart", "pull", "execute"].some(element => request.path.includes(element))) {
         try {
             jwt.verify(request.cookies[cookie_value] || "", "aoihfisoduhgoiahusSECRET_KEY");
             next();
