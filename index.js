@@ -134,6 +134,8 @@ app.get("/:ws_page(storage|processes/jesterbot|processes/stealthybot|processes/d
 
 app.get("/error", async (req, res) => {
     let error = req.query;
+    error.link = "/";
+    error.linkMessage = "Back to homepage";
     
     if (error.code == 403) {
         error.name = "Forbidden";
@@ -149,11 +151,9 @@ app.get("/error", async (req, res) => {
     } else  if (error.code == 404) {
         error.name = "Not found";
         error.message = "You tried to visit a page that wasnt found";
-        error.link = "/";
-        error.linkMessage = "Back to homepage";
     } else  if (error.code == 400) {
         error.name = "Bad request";
-        error.message = "The page you tried to visit is not found";
+        error.message = "Your request was improperly formed";
     }   
     res.render('error', {error});
 });
@@ -283,7 +283,6 @@ app.post("/explicit", async (req, res) => {
         res.status(400).json({ message: "Bad Argument" });
     }
 });
-
 
 server.listen(8080, () => {
     console.log("Listening at http://localhost:8080");
