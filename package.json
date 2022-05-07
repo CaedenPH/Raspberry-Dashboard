@@ -34,7 +34,6 @@
     "node-fetch": "^3.2.3",
     "nodemon": "^2.0.15",
     "pg": "^8.7.3",
-    "react": "^17.0.2",
-    "systeminformation": "^5.11.9"
+    "react": "^17.0.2"
   }
 }
