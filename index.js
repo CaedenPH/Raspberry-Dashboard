@@ -111,7 +111,7 @@ app.get('/', async (req, res) => {
     }
 });
 
-app.get("/:static_page(login|console|logs|editor|ec2|excplicit|protocols)", async (req, res) => {
+app.get("/:static_page(login|console|logs|editor|ec2|excplicit|protocols|about)", async (req, res) => {
     res.render(req.params.static_page);
 });  
 
