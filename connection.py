@@ -331,13 +331,11 @@ class ResponseHandler:
     async def messages(self, verified: bool) -> dict[str, Any]:
         with open("logs/messages.txt") as messages:
             content = messages.read()
-
         return {"messages": content}
 
     async def network(self, verified: bool) -> dict[str, Any]:
         with open("logs/network.txt") as network:
             content = network.read()
-
         return {"network": content}
 
 
@@ -415,6 +413,7 @@ class WebSocket:
         try:
             await self.socket.send_json(data)
         except Exception:
+            self.is_closed = True
             raise DisconnectError
 
     async def identify(self) -> None:
@@ -434,11 +433,12 @@ class WebSocket:
     async def listen(self) -> None:
         """Listens for messages from the server."""
 
-        self.loop.create_task(self.send_heartbeats())
+        try:
+            self.loop.create_task(self.send_heartbeats())
+        except Exception as err: 
+            raise DisconnectError  # connection disconnected
         async for message in self.socket:
             await self._parse_message(message.data)
-
-        self.is_closed = True
         raise DisconnectError  # connection disconnected
 
     @classmethod
