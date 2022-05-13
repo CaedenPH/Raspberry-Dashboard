@@ -117,7 +117,9 @@ class ResponseHandler:
 
         logins = {}
         numbers = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six"}
-        for iteration, login in enumerate([l for l in (await execute("last"))[0].splitlines() if "pts" in l][:6]):
+        for iteration, login in enumerate(
+            [_login for _login in (await execute("last"))[0].splitlines() if "pts" in _login][:6]
+        ):
             logins[numbers[iteration + 1]] = {"date": " ".join(login.split()[3:]).split("-")[0]}
 
         processes = {}
@@ -413,8 +415,7 @@ class WebSocket:
         try:
             await self.socket.send_json(data)
         except Exception:
-            self.is_closed = True
-            raise DisconnectError
+            await self.listen(error=True)
 
     async def identify(self) -> None:
         """Sends the identify payload."""
@@ -428,18 +429,22 @@ class WebSocket:
 
         while not self.is_closed:
             await self.send_json({"op": self.HEARTBEAT})
-            await asyncio.sleep(30)
+            await asyncio.sleep(5)
 
-    async def listen(self) -> None:
+    async def close(self) -> None:
+        self.is_closed = True
+        raise DisconnectError
+
+    async def listen(self, *, error: bool = False) -> None:
         """Listens for messages from the server."""
 
-        try:
-            self.loop.create_task(self.send_heartbeats())
-        except Exception as err: 
-            raise DisconnectError  # connection disconnected
+        if error is True:
+            await self.close()
+
+        self.loop.create_task(self.send_heartbeats())
         async for message in self.socket:
             await self._parse_message(message.data)
-        raise DisconnectError  # connection disconnected
+        await self.close()  # connection disconnected
 
     @classmethod
     async def connect(cls, client: Client) -> WebSocket:
@@ -508,7 +513,7 @@ class Client:
     async def __aenter__(self) -> Client:
         return self
 
-    async def __aexit__(self, error_type, error, tb) -> None:
+    async def __aexit__(self, error_type, error, tb) -> bool[True]:
         await self._session.close()
 
         if error_type is asyncio.CancelledError:
@@ -525,7 +530,7 @@ class Client:
                     traceback="\n".join(traceback.format_exception(error)),
                 )
             )
-        print("CRITICAL: process shutdown, initiating backup")
+        return True
 
 
 async def update_logs() -> None:
@@ -569,8 +574,8 @@ async def main() -> None:
             except DisconnectError:
                 print("Websocket disconnected")
                 continue
-            except Exception as err:
-                print(f"SUBCRITICAL: ", file=sys.stderr)
+            except Exception:
+                print("SUBCRITICAL: ", file=sys.stderr)
                 traceback.print_exc()
 
 
