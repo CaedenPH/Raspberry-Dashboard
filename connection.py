@@ -527,7 +527,7 @@ class Client:
                     network="bytes from" in ping,
                     error=error,
                     error_type=error_type,
-                    traceback="".join(traceback.format_exception(error, error, error.__traceback__))),
+                    traceback="".join(traceback.format_exception(error, error, error.__traceback__)),
                 )
             )
         return True
