@@ -1,4 +1,4 @@
-const { cookie_value } = require("./config.json");
+const { cookie_value, jwt_secret } = require("./config.json");
 const jwt = require("jsonwebtoken");
 
 const fs = require("fs");
@@ -45,7 +45,7 @@ module.exports = async (request, response, next) => {
         next();
     } else if (["usage", "messages", "console", "editor", "restart", "pull", "execute"].some(element => request.path.includes(element))) {
         try {
-            jwt.verify(request.cookies[cookie_value] || "", "aoihfisoduhgoiahusSECRET_KEY");
+            jwt.verify(request.cookies[cookie_value] || "", jwt_secret);
             next();
         } catch (err) {
             response.redirect("/error?code=403&route=admin");
