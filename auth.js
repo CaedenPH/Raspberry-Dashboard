@@ -31,7 +31,7 @@ module.exports = async (request, response, next) => {
     
     var superior = false;
     try {
-        jwt.verify(request.cookies["_fiojoweonfwouinwiunfuiw"] || "", "aoihfisoduhgoiahusSECRET_KEY");
+        jwt.verify(request.cookies["_fiojoweonfwouinwiunfuiw"] || "", jwt_secret);
         superior = true;
     } catch (err) {}
     
