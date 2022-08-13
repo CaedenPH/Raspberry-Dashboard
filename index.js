@@ -6,7 +6,7 @@ const app = express();
 const auth = require('./auth.js');
 const jwt = require("jsonwebtoken");
 const bodyParser = require('body-parser');
-const { password, explicit_password, ws_token, cookie_value } = require('./config.json');
+const { password, explicit_password, ws_token, cookie_value, jwt_secret } = require('./config.json');
 
 const webSocket = require('ws');
 const crypto = require("crypto");
@@ -256,7 +256,7 @@ app.post("/login", async (req, res) => {
     if (req.body.password && req.body.password === password) {
         res.cookie(cookie_value, jwt.sign({
             username: "username"
-        }, "aoihfisoduhgoiahusSECRET_KEY", {
+        }, jwt_secret, {
             expiresIn: 10800
         }), {
             httpOnly: true,
@@ -272,7 +272,7 @@ app.post("/explicit", async (req, res) => {
     if (req.body.password && req.body.password === explicit_password) {
         res.cookie("_fiojoweonfwouinwiunfuiw", jwt.sign({
             username: "explicit_username"
-        }, "aoihfisoduhgoiahusSECRET_KEY", {
+        }, jwt_secret, {
             expiresIn: 10800
         }), {
             httpOnly: true,
