@@ -84,7 +84,7 @@ class ResponseHandler:
         return {
             "stdout": stdout,
             "status": stdout[stdout.index("Active:") + 1].capitalize(),
-            "uptime": " ".join(stdout[stdout.index("Active:") + 8 : stdout.index("Process:") - 1]),
+            "uptime": "Unable to find",  # TODO: Fix
         }
 
     async def home(self, verified: bool) -> dict[str, Any]:
