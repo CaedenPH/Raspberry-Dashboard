@@ -1,8 +1,8 @@
-<nav>
+<nav id="sidebar">
   <header>
     <img alt="logo of the website" />
     <h3>rasp.π</h3>
-    <button class="close">
+    <button class="close" (click)="close($event)" clickable>
       <span class="material-symbols-outlined">close</span>
     </button>
   </header>
@@ -11,7 +11,7 @@
       <h5>GENERAL</h5>
       <ul>
         <li>
-          <a routerLink="home"
+          <a routerLink="home" routerLinkActive="active"
             ><span class="material-symbols-outlined"> home </span>Home</a
           >
         </li>
