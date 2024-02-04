@@ -1,0 +1,30 @@
+:root {
+    /** colors **/
+    --bg_color: #f0f2f5;
+    --gradient: linear-gradient(195deg, #ffffff, #dfdfdf);
+    --text_color: #000;
+    --text_primary: #5e6d86;
+    /** images / links **/
+    --logo: url("/assets/logo-ct.jpg");
+    /** other settings **/
+    font-family: "Roboto", Helvetica, Arial, sans-serif;
+    color: var(--text_color);
+}
+
+button {
+    background: inherit;
+    border: inherit;
+    color: inherit;
+}
+
+@media (prefers-color-scheme: dark) {
+    
+   :root {
+        /** colors on darkmode **/
+        --bg_color: #1a2035; 
+        --gradient: linear-gradient(195deg, #323a54, #1a2035);
+        --text_color: #fff;
+        --text_primary: #d7d7d8;
+        --logo: url("/assets/logo-ct-dark.jpg");
+    }
+}
