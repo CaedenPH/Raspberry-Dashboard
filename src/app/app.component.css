@@ -1,4 +1,7 @@
-body {
+.body {
+    display: flex;
     background-color: var(--bg_color);
-    color: var(--text-color);
+    height: 100vh;
+    padding: 1rem;
+    gap: 1rem;
 }
