@@ -1,0 +1,55 @@
+nav {
+  background: var(--gradient);
+  max-width: 250px;
+  border-radius: 1rem;
+  max-height: 36rem;
+}
+
+header {
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  padding: 1rem;
+  color: var(--text_primary);
+  align-items: center;
+  border-bottom: 1px solid #ffffff94;
+}
+
+header > .close {
+  margin-left: auto;
+  margin-bottom: auto;
+  border-bottom: none;
+}
+
+header > img {
+  min-width: 3rem;
+  max-height: 3rem;
+  border-radius: 0.5rem;
+  content: var(--logo);
+  padding-right: 0.5rem;
+}
+
+content {
+  display: block;
+  max-height: 30rem;
+  overflow-y: scroll;
+}
+
+section {
+  color: var(--text_primary);
+  padding: 1rem;
+}
+
+section > ul {
+  padding: 0;
+  list-style: none;
+}
+
+li {
+  padding-block: 1rem;
+  display: flex;
+}
+
+li :first-child {
+  padding-inline: 0.5rem;
+}
