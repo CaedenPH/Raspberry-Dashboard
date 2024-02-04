@@ -1,8 +1,14 @@
 nav {
   background: var(--gradient);
-  max-width: 250px;
+  min-width: 250px;
   border-radius: 1rem;
-  max-height: 36rem;
+  max-height: 100vh;
+  transform: translateX(0%);
+  transition: transform ease-out 0.3s;
+}
+
+nav.is_hidden {
+  transform: translateX(-200%);
 }
 
 header {
@@ -31,7 +37,7 @@ header > img {
 
 content {
   display: block;
-  max-height: 30rem;
+  max-height: 80vh;
   overflow-y: scroll;
 }
 
@@ -46,8 +52,25 @@ section > ul {
 }
 
 li {
-  padding-block: 1rem;
   display: flex;
+}
+
+li > a {
+
+  padding-block: 1rem;
+  border-radius: 0.5rem;
+  width: 100%;
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+}
+
+li :hover {
+  background-color: var(--hover);
+}
+
+li > a.active {
+  background: var(--accent-gradient);
 }
 
 li :first-child {
