@@ -276,6 +276,24 @@ class ResponseHandler:
         """
         return {}
 
+    async def pizzahat(self, verified: bool) -> dict[str, Any]:
+        """
+        Generates a response for  the
+        pizzahat endpoint.
+
+        Parameters
+        ----------
+        verified: :class:`bool`
+            Whether or not the user is
+            logged in.
+
+        Returns
+        -------
+        `dict[str, Any]`
+            The response generated.
+        """
+        return {}
+
     async def dashboard(self, verified: bool) -> dict[str, Any]:
         """
         Generates a response for  the
