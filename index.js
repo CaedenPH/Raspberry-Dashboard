@@ -115,7 +115,7 @@ app.get("/:static_page(login|console|logs|editor|ec2|explicit|protocols|about)",
     res.render(req.params.static_page);
 });  
 
-app.get("/:ws_page(storage|processes/jesterbot|processes/stealthybot|processes/dashboard|logs/messages|logs/network)", async (req, res) =>{
+app.get("/:ws_page(storage|processes/jesterbot|processes/pizzahat|processes/stealthybot|processes/dashboard|logs/messages|logs/network)", async (req, res) =>{
     const [ client ] = wss.clients;
     
     var routes = req.params.ws_page.split("/");
