@@ -5,6 +5,8 @@
     --gradient: linear-gradient(195deg, #ffffff, #dfdfdf);
     --text_color: #000;
     --text_primary: #5e6d86;
+    --hover: #c7c7c733;
+    --accent-gradient: linear-gradient(195deg, #ec407a, #d81b60);
 
     /** images / links **/
 
@@ -14,6 +16,11 @@
     
     font-family: "Roboto", Helvetica, Arial, sans-serif;
     color: var(--text_color);
+}
+
+html, body {
+    overflow: hidden;
+    margin: 0px;
 }
 
 button {
