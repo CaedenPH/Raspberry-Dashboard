@@ -1,0 +1,83 @@
+<nav id="sidebar">
+  <header>
+    <img alt="logo of the website" />
+    <h3>rasp.π</h3>
+    <button class="close" (click)="close($event)" clickable>
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </header>
+  <content>
+    <section>
+      <h5>GENERAL</h5>
+      <ul>
+        <li>
+          <a routerLink="home" routerLinkActive="active"
+            ><span class="material-symbols-outlined"> home </span>Home</a
+          >
+        </li>
+        <li>
+          <a routerLink="ec2" routerLinkActive="active"
+            ><span class="material-symbols-outlined"> dns </span>EC2</a
+          >
+        </li>
+        <li>
+          <a
+            ><span class="material-symbols-outlined"> bar_chart </span
+            >Statistics</a
+          >
+        </li>
+        <li>
+          <a><span class="material-symbols-outlined"> storage </span>Storage</a>
+        </li>
+        <li>
+          <a><span class="material-symbols-outlined"> info </span>About</a>
+        </li>
+      </ul>
+    </section>
+    <section>
+      <h5>Processes</h5>
+      <ul>
+        <li>
+          <a href="www.google.com"
+            ><span class="material-symbols-outlined"> robot </span>jesterbot</a
+          >
+        </li>
+        <li>
+          <a
+            ><span class="material-symbols-outlined">
+              precision_manufacturing </span
+            >Stealthybot</a
+          >
+        </li>
+        <li>
+          <a>
+            <span class="material-symbols-outlined"> dashboard </span
+            >Dashboard</a
+          >
+        </li>
+        <li>
+          <a><span class="material-symbols-outlined"> storage </span>Storage</a>
+        </li>
+      </ul>
+    </section>
+    <!-- <section>
+    <h3>logs</h3>
+    <ul>
+      <li>
+        <span class="material-symbols-outlined"> robot </span><a>jesterbot</a>
+      </li>
+      <li>
+        <span class="material-symbols-outlined"> precision_manufacturing </span
+        ><a>Stealthybot</a>
+      </li>
+      <li>
+        <span class="material-symbols-outlined"> dashboard </span
+        ><a> Dashboard</a>
+      </li>
+      <li>
+        <span class="material-symbols-outlined"> storage </span><a>Storage</a>
+      </li>
+    </ul>
+  </section> -->
+  </content>
+</nav>
