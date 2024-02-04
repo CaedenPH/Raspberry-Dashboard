@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, RouterModule, RouterOutlet } from '@angular/router';
 import { SidebarComponent } from "./sidebar/sidebar.component";
 
 @Component({
@@ -12,4 +12,14 @@ import { SidebarComponent } from "./sidebar/sidebar.component";
 })
 export class AppComponent {
   title = 'raspberry-dashboard';
+  constructor(private route: ActivatedRoute) {}
+  current_route: string = "";
+  ngOnInit() {
+    this.route.url.subscribe(([url]) => {
+      const { path, parameters } = url;
+      this.current_route = url.toString();
+      console.log(url);
+    });
+  }
+
 }

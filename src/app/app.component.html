@@ -1,2 +1,7 @@
-<app-sidebar></app-sidebar>
-<router-outlet></router-outlet>
+<section class="body">
+  <app-sidebar></app-sidebar>
+  <section>
+    <p>page {{ current_route }}</p>
+    <router-outlet></router-outlet>
+  </section>
+</section>
