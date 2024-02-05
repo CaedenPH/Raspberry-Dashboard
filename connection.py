@@ -1,30 +1,29 @@
 from __future__ import annotations
 import re
 
-import aiohttp
 import asyncio
 import datetime
 import json
 import math
-import traceback
 import sys
+import time
+import traceback
+from typing import Any, Awaitable
 
+import aiohttp
 import aiosqlite
 import cpuinfo  # type: ignore
 import distro  # type: ignore
 import psutil
-import time
 import speedtest
-
-from typing import Any, Awaitable
-
 
 with open("config.json") as config:
     data: dict[str, Any] = json.load(config)
 
 JESTERBOT_PATH = data.get("jesterbot_path", "/home/pi/jesterbot/")
+PIZZAHAT_PATH = data.get("pizzahat_path", "/home/pi/pizzahat/")
 DISK_PATH = data.get("disk_path", "/dev/mmcblk0p2")
-PROCESSES = ["jesterbot", "stealthybot", "raspberry-dashboard"]
+PROCESSES = ["jesterbot", "pizzahat", "stealthybot", "raspberry-dashboard"]
 CRITICAL_LOG = """\
 CRITICAL ERROR
 --------------
@@ -75,7 +74,9 @@ class ResponseHandler:
     async def fetch_cpu_usage(self, status: str) -> float:
         try:
             main_pid = status[status.index("PID:") + 1]
-            return round(float((await execute(f"ps --noheader -p {main_pid} -o %cpu"))[0]))
+            return round(
+                float((await execute(f"ps --noheader -p {main_pid} -o %cpu"))[0])
+            )
         except ValueError:
             return 0
 
@@ -112,21 +113,39 @@ class ResponseHandler:
 
         with open("logs/network.txt") as logs:
             lines = [
-                dict(zip(["ping", "download", "upload"], [line[0], line[1], line[2] * 10]))
+                dict(
+                    zip(
+                        ["ping", "download", "upload"], [line[0], line[1], line[2] * 10]
+                    )
+                )
                 for line in [
-                    [float(i) for i in _line.strip().split(" | ") if ":" not in i] for _line in logs.readlines()
+                    [float(i) for i in _line.strip().split(" | ") if ":" not in i]
+                    for _line in logs.readlines()
                 ]
             ]
 
         uptime_seconds = time.time() - psutil.boot_time()
-        d, h, m = map(math.floor, [uptime_seconds / 86400, uptime_seconds % 86400 / 3600, uptime_seconds % 3600 / 60])
+        d, h, m = map(
+            math.floor,
+            [
+                uptime_seconds / 86400,
+                uptime_seconds % 86400 / 3600,
+                uptime_seconds % 3600 / 60,
+            ],
+        )
 
         logins = {}
         numbers = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six"}
         for iteration, login in enumerate(
-            [_login for _login in (await execute("last"))[0].splitlines() if "pts" in _login][:6]
+            [
+                _login
+                for _login in (await execute("last"))[0].splitlines()
+                if "pts" in _login
+            ][:6]
         ):
-            logins[numbers[iteration + 1]] = {"date": " ".join(login.split()[3:]).split("-")[0]}
+            logins[numbers[iteration + 1]] = {
+                "date": " ".join(login.split()[3:]).split("-")[0]
+            }
 
         processes = {}
         for unit in PROCESSES:
@@ -144,7 +163,9 @@ class ResponseHandler:
                 "labels": json.dumps(
                     list(
                         map(
-                            lambda i: (datetime.datetime.utcnow() - datetime.timedelta(hours=i)).strftime("%H:%M"),
+                            lambda i: (
+                                datetime.datetime.utcnow() - datetime.timedelta(hours=i)
+                            ).strftime("%H:%M"),
                             range(7),
                         )
                     )
@@ -158,7 +179,11 @@ class ResponseHandler:
                     list(
                         map(
                             lambda m: round(int(m) / 1000000),
-                            (await execute("cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq"))[0].split("\n"),
+                            (
+                                await execute(
+                                    "cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq"
+                                )
+                            )[0].split("\n"),
                         )
                     )
                 ),
@@ -168,12 +193,18 @@ class ResponseHandler:
                 "pingDifference": "+" + str(diff)
                 if (diff := round(lines[-1].get("ping") / lines[-2].get("ping"), 2)) > 1
                 else f"-{round(lines[-2].get('ping') / lines[-1].get('ping'), 2)}",
-                "download": [round(lines[-i].get("download") / 1000000) for i in range(1, 8)],
-                "upload": [round(lines[-i].get("upload") / 1000000) for i in range(1, 8)],
+                "download": [
+                    round(lines[-i].get("download") / 1000000) for i in range(1, 8)
+                ],
+                "upload": [
+                    round(lines[-i].get("upload") / 1000000) for i in range(1, 8)
+                ],
             },
             "memory": {
-                "used": round(psutil.virtual_memory().used * (9.31 * 10 ** -10), 1),
-                "available": round(psutil.virtual_memory().available * (9.31 * 10 ** -10), 1),
+                "used": round(psutil.virtual_memory().used * (9.31 * 10**-10), 1),
+                "available": round(
+                    psutil.virtual_memory().available * (9.31 * 10**-10), 1
+                ),
             },
             "login": {**logins},
             **processes,
@@ -200,10 +231,15 @@ class ResponseHandler:
         cpu = cpuinfo.get_cpu_info()
         response = {
             "cpu": cpu,
-            "os": {"name": distro.id().capitalize(), "processes": (await execute("ps aux | wc -l"))[0]},
+            "os": {
+                "name": distro.id().capitalize(),
+                "processes": (await execute("ps aux | wc -l"))[0],
+            },
             "internet": {
                 "private": (await execute("hostname -i"))[0],
-                "public": (await execute("curl ifconfig.me."))[0] if verified else "*** *** ***",
+                "public": (await execute("curl ifconfig.me."))[0]
+                if verified
+                else "*** *** ***",
             },
         }
         return response
@@ -226,7 +262,9 @@ class ResponseHandler:
         """
 
         async with aiosqlite.connect(JESTERBOT_PATH + "/db/database.db") as db:
-            total_commands = await (await db.execute("SELECT score FROM overall_score")).fetchone()
+            total_commands = await (
+                await db.execute("SELECT score FROM overall_score")
+            ).fetchone()
             date, ping, bot_users, guilds, channels, disnake_version = (
                 await (await db.execute("SELECT * FROM general_data")).fetchall()
             )[-1]
@@ -260,7 +298,9 @@ class ResponseHandler:
                 "top_ten_names": [data[u]["name"] for u in users[-11:-1]],
                 "top_ten_scores": json.dumps([data[u]["score"] for u in users[-11:-1]]),
                 "top_ten_command_names": commands[-10:],
-                "top_ten_command_uses": json.dumps([commands_data[c]["score"] for c in commands[-10:]]),
+                "top_ten_command_uses": json.dumps(
+                    [commands_data[c]["score"] for c in commands[-10:]]
+                ),
             },
         }
 
@@ -281,6 +321,30 @@ class ResponseHandler:
             The response generated.
         """
         return {}
+
+    async def pizzahat(self, verified: bool) -> dict[str, Any]:
+        """
+        Generates a response for  the
+        pizzahat endpoint.
+
+        Parameters
+        ----------
+        verified: :class:`bool`
+            Whether or not the user is
+            logged in.
+
+        Returns
+        -------
+        `dict[str, Any]`
+            The response generated.
+        """
+
+        process_status = await self.fetch_process_status("pizzahat")
+        status = process_status["status"]
+
+        return {
+            "general": {"status": status},
+        }
 
     async def dashboard(self, verified: bool) -> dict[str, Any]:
         """
@@ -331,7 +395,10 @@ class ResponseHandler:
         total = dict(
             zip(
                 ["size", "used", "available", "use"],
-                [(s := storage[m]) + ("B" if s.endswith("G") else "") for m in range(1, 5)],
+                [
+                    (s := storage[m]) + ("B" if s.endswith("G") else "")
+                    for m in range(1, 5)
+                ],
             )
         )
         return {"total": {**total}, **processes}
@@ -384,7 +451,9 @@ class WebSocket:
 
     async def _log_message(self, message: str) -> None:
         with open("logs/messages.txt", "a") as messages:
-            messages.write(message + f" | {datetime.datetime.utcnow().strftime('%c')}\n")
+            messages.write(
+                message + f" | {datetime.datetime.utcnow().strftime('%c')}\n"
+            )
 
     async def _parse_message(self, message: str) -> None:
         await self._log_message(message)
@@ -404,7 +473,9 @@ class WebSocket:
         elif op == self.EXECUTE:
             command = data.get("d")
             stdout, stderr = await execute(command)
-            await self.send_json({"op": self.EXECUTE, "d": {"stdout": stdout, "stderr": stderr}})
+            await self.send_json(
+                {"op": self.EXECUTE, "d": {"stdout": stdout, "stderr": stderr}}
+            )
 
     async def send_json(self, data: Any) -> None:
         """
@@ -533,7 +604,9 @@ class Client:
                     network="bytes from" in ping,
                     error=error,
                     error_type=error_type,
-                    traceback="".join(traceback.format_exception(error, error, error.__traceback__)),
+                    traceback="".join(
+                        traceback.format_exception(error, error, error.__traceback__)
+                    ),
                 )
             )
         return True
@@ -556,7 +629,9 @@ async def update_logs() -> None:
             continue
 
         with open("logs/network.txt", "a") as logs:
-            logs.write(f"{ping.get('latency')} | {download} | {upload} | {datetime.datetime.utcnow().strftime('%c')}\n")
+            logs.write(
+                f"{ping.get('latency')} | {download} | {upload} | {datetime.datetime.utcnow().strftime('%c')}\n"
+            )
         await asyncio.sleep(3600)
 
 
