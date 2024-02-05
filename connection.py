@@ -1,4 +1,5 @@
 from __future__ import annotations
+import re
 
 import aiohttp
 import asyncio
@@ -79,12 +80,17 @@ class ResponseHandler:
             return 0
 
     async def fetch_process_status(self, unit: str) -> dict[str, str]:
-        stdout: str = (await execute(f"systemctl status {unit}.service"))[0].split()
-
+        stdout = (await execute(f"systemctl status {unit}.service"))[0].split()
+        
+        uptime = "Unable to find uptime"
+        uptime_match = re.search(r"Active:.*?since .*?; (.*?) ago", " ".join(stdout))
+        if uptime_match is not None:
+            uptime = uptime_match.group(1)
+        
         return {
-            "stdout": stdout,
+            "stdout": " ".join(stdout),
             "status": stdout[stdout.index("Active:") + 1].capitalize(),
-            "uptime": "Unable to find",  # TODO: Fix
+            "uptime": uptime
         }
 
     async def home(self, verified: bool) -> dict[str, Any]:
