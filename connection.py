@@ -20,6 +20,7 @@ with open("config.json") as config:
     data: dict[str, Any] = json.load(config)
 
 JESTERBOT_PATH = data.get("jesterbot_path", "/home/pi/jesterbot/")
+PIZZAHAT_PATH = data.get("pizzahat_path", "/home/pi/pizzahat/")
 DISK_PATH = data.get("disk_path", "/dev/mmcblk0p2")
 PROCESSES = ["jesterbot", "pizzahat", "stealthybot", "raspberry-dashboard"]
 CRITICAL_LOG = """\
