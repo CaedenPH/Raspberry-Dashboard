@@ -1,29 +1,27 @@
 from __future__ import annotations
 
-import aiohttp
 import asyncio
 import datetime
 import json
 import math
-import traceback
 import sys
+import time
+import traceback
+from typing import Any, Awaitable
 
+import aiohttp
 import aiosqlite
 import cpuinfo  # type: ignore
 import distro  # type: ignore
 import psutil
-import time
 import speedtest
-
-from typing import Any, Awaitable
-
 
 with open("config.json") as config:
     data: dict[str, Any] = json.load(config)
 
 JESTERBOT_PATH = data.get("jesterbot_path", "/home/pi/jesterbot/")
 DISK_PATH = data.get("disk_path", "/dev/mmcblk0p2")
-PROCESSES = ["jesterbot", "stealthybot", "raspberry-dashboard"]
+PROCESSES = ["jesterbot", "pizzahat", "stealthybot", "raspberry-dashboard"]
 CRITICAL_LOG = """\
 CRITICAL ERROR
 --------------
@@ -292,7 +290,13 @@ class ResponseHandler:
         `dict[str, Any]`
             The response generated.
         """
-        return {}
+
+        process_status = await self.fetch_process_status("pizzahat")
+        status = process_status["status"]
+
+        return {
+            "general": {"status": status},
+        }        
 
     async def dashboard(self, verified: bool) -> dict[str, Any]:
         """
