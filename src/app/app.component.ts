@@ -2,13 +2,20 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule, RouterOutlet } from '@angular/router';
 import { SidebarComponent } from './sidebar/sidebar.component';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
-  imports: [CommonModule, RouterModule, RouterOutlet, SidebarComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    RouterOutlet,
+    HttpClientModule,
+    SidebarComponent,
+  ],
 })
 export class AppComponent {
   title = 'raspberry-dashboard';
