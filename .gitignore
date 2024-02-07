@@ -12,7 +12,7 @@ npm-debug.log
 yarn-error.log
 
 # IDEs and editors
-.idea/
+backend/.idea/
 .project
 .classpath
 .c9/
