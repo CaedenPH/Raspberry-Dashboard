@@ -21,9 +21,10 @@ add_compile_options(-DCROW_ENABLE_SSL)
 
 include_directories(./includes)
 
+
 add_executable(dashboard_backend
         ./includes/crow_all.h
-        main.cpp)
+        src/main.cpp)
 # target_link_libraries(dashboard_backend PRIVATE jwt-cpp::jwt-cpp)
 target_link_libraries(dashboard_backend PRIVATE soci_core soci_sqlite3)
 target_link_libraries(dashboard_backend PRIVATE OpenSSL::SSL)

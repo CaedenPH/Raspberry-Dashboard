@@ -1,2 +1,5 @@
 # ignore certificates
 *.pem
+
+# ignore built files by angular
+public/*
