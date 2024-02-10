@@ -25,6 +25,11 @@ include_directories(./includes)
 add_executable(dashboard_backend
         ./includes/crow_all.h
         src/main.cpp)
+
+set_target_properties(dashboard_backend PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../
+)
+
 # target_link_libraries(dashboard_backend PRIVATE jwt-cpp::jwt-cpp)
 target_link_libraries(dashboard_backend PRIVATE soci_core soci_sqlite3)
 target_link_libraries(dashboard_backend PRIVATE OpenSSL::SSL)
