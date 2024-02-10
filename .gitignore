@@ -30,7 +30,7 @@ backend/.idea/
 .history/*
 
 # Miscellaneous
-/.angular/cache
+.angular/cache
 .sass-cache/
 /connect.lock
 /coverage
