@@ -14,21 +14,22 @@
 // web
 #include "crow_all.h"
 
+crow::App<crow::CookieParser, crow::CORSHandler> app;
 
-crow::App<crow::CookieParser> app;
+crow::CORSHandler &cors = app.get_middleware<crow::CORSHandler>();
 
-soci::session db (soci::sqlite3, "../userdb");
+soci::session db(soci::sqlite3, "../userdb");
 
-
-
-bool verify_pass(const std::string& username,const std::string& password) {
+bool verify_pass(const std::string &username, const std::string &password)
+{
     unsigned char hashed_username[SHA256_DIGEST_LENGTH], hashed_password[SHA256_DIGEST_LENGTH];
-    SHA256(reinterpret_cast<const unsigned char  *>(username.c_str()), username.size(), hashed_username);
-    SHA256(reinterpret_cast<const unsigned char  *>(password.c_str()), password.size(), hashed_password);
+    SHA256(reinterpret_cast<const unsigned char *>(username.c_str()), username.size(), hashed_username);
+    SHA256(reinterpret_cast<const unsigned char *>(password.c_str()), password.size(), hashed_password);
 
     std::stringstream username_stream, password_stream;
 
-    for(int i{0}; i < SHA256_DIGEST_LENGTH; i++) {
+    for (int i{0}; i < SHA256_DIGEST_LENGTH; i++)
+    {
         username_stream << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(hashed_username[i]);
         password_stream << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(hashed_password[i]);
     }
@@ -36,9 +37,12 @@ bool verify_pass(const std::string& username,const std::string& password) {
     std::string pass;
     db << "select password from accounts where username = '" << username_stream.str() << "'", soci::into(pass);
 
-    if(!pass.empty() && pass == password_stream.str()) {
+    if (!pass.empty() && pass == password_stream.str())
+    {
         return true;
-    } else {
+    }
+    else
+    {
         return false;
     }
 }
@@ -46,18 +50,16 @@ bool verify_pass(const std::string& username,const std::string& password) {
 int main()
 {
 
-    CROW_ROUTE(app, "/login").methods(crow::HTTPMethod::POST)
-    (
-        [](const crow::request &req, crow::response& res)
-        {
+    CROW_ROUTE(app, "/login").methods(crow::HTTPMethod::POST)([](const crow::request &req, crow::response &res)
+                                                              {
             std::string auth = req.get_header_value("Authorization");
             std::string credentials = auth.substr(6);
+            std::cout << credentials << std::endl;
             credentials = crow::utility::base64decode(credentials, credentials.size());
             size_t colon = credentials.find(':');
             std::string username = credentials.substr(0, colon), password = credentials.substr(colon+1);
             res.code = verify_pass(username, password) ? 200 : 401;
-            res.end();
-        });
+            res.end(); });
 
-    app.port(18080).run();
+    app.port(18080).ssl_file("../localhost.pem", "../localhost-key.pem").run();
 }

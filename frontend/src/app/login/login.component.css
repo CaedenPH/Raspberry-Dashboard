@@ -1,0 +1,39 @@
+form {
+    background: var(--gradient);
+    border-radius: 1rem;
+    gap: 2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+form > fieldset {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    border: none;
+
+}
+h3 {
+    text-align: center;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    margin-block: 1rem;
+}
+
+.field > input {
+    width: 100%;
+    border-radius: 0.5rem;
+    background-color: white;
+    border: none;
+    min-height: 2rem;
+}
+
+button {
+    background: var(--accent-gradient);
+    border-radius: 1rem;
+    padding: 1rem;
+    margin-inline: 1rem;
+}

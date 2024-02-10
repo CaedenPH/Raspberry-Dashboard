@@ -1,0 +1,14 @@
+<form [formGroup]="authForm">
+  <fieldset>
+    <h3>Login</h3>
+    <section class="field">
+      <label>Email</label>
+      <input name="email" formControlName="email" />
+    </section>
+    <section class="field">
+      <label>Password</label>
+      <input name="password" formControlName="password" type="password" />
+    </section>
+  </fieldset>
+  <button (click)="login()">Login?</button>
+</form>
