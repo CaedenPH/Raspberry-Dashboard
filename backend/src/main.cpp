@@ -12,13 +12,14 @@
 #include <soci/sqlite3/soci-sqlite3.h>
 
 // web
+#define CROW_STATIC_ENDPOINT "/<path>"
 #include "crow_all.h"
+
 
 crow::App<crow::CookieParser, crow::CORSHandler> app;
 
-crow::CORSHandler &cors = app.get_middleware<crow::CORSHandler>();
 
-soci::session db(soci::sqlite3, "../userdb");
+soci::session db(soci::sqlite3, "userdb");
 
 bool verify_pass(const std::string &username, const std::string &password)
 {
@@ -49,17 +50,31 @@ bool verify_pass(const std::string &username, const std::string &password)
 
 int main()
 {
+    CROW_ROUTE(app, "/")
+    ([](const crow::request &req, crow::response &res){
+        // set '/' to be index.html
+        res.set_static_file_info("static/index.html");
 
-    CROW_ROUTE(app, "/login").methods(crow::HTTPMethod::POST)([](const crow::request &req, crow::response &res)
-                                                              {
-            std::string auth = req.get_header_value("Authorization");
-            std::string credentials = auth.substr(6);
-            std::cout << credentials << std::endl;
-            credentials = crow::utility::base64decode(credentials, credentials.size());
-            size_t colon = credentials.find(':');
-            std::string username = credentials.substr(0, colon), password = credentials.substr(colon+1);
-            res.code = verify_pass(username, password) ? 200 : 401;
-            res.end(); });
+        // set response code to 200 and end the resp
+        // rest will be handled by angular
+        res.code = 200;
+        res.end();
+    });
 
-    app.port(18080).ssl_file("../localhost.pem", "../localhost-key.pem").run();
+    CROW_ROUTE(app, "/login").methods(crow::HTTPMethod::POST)
+    ([](const crow::request &req, crow::response &res)
+    {
+        std::string auth = req.get_header_value("Authorization");
+        std::string credentials = auth.substr(6);
+        std::cout << credentials << std::endl;
+        credentials = crow::utility::base64decode(credentials, credentials.size());
+        size_t colon = credentials.find(':');
+        std::string username = credentials.substr(0, colon), password = credentials.substr(colon+1);
+        res.code = verify_pass(username, password) ? 200 : 401;
+        res.end(); 
+    });
+
+    app.port(18080).ssl_file("localhost.pem", "localhost-key.pem").multithreaded().run();
+
+    return 0;
 }
