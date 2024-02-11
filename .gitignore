@@ -47,3 +47,4 @@ config.json
 
 # c++ stuff
 cmake-build-debug/
+frontend/.angular/cache/17.1.2/raspberry-dashboard/.tsbuildinfo
