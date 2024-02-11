@@ -16,8 +16,9 @@
 #define CROW_DISABLE_STATIC_DIR // disable static serving
 #include "crow_all.h"
 
+// these macros might cause issues but they make this more readable
 #define to_uchar(x) reinterpret_cast<const unsigned char *>(x)
-#define stringify(x) std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(x[i])
+#define stringify(x) std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(x)
 
 
 crow::App<crow::CookieParser, crow::CORSHandler> app;
@@ -36,8 +37,8 @@ bool verify_pass(const std::string &username, const std::string &password)
 
     for (int i{0}; i < SHA256_DIGEST_LENGTH; i++)
     {
-        username_stream << stringify(hashed_username);
-        password_stream << stringify(hashed_password);
+        username_stream << stringify(hashed_username[i]);
+        password_stream << stringify(hashed_password[i]);
     }
 
     std::string pass;
@@ -79,12 +80,15 @@ int main()
     // override static file serving
     CROW_ROUTE(app, "/<path>")
     ([](const crow::request &req, crow::response &res, std::string path) {
+        
         crow::utility::sanitize_filename(path);
-        if (path.find(".") == std::string::npos){
+
+        if (path.find(".") == std::string::npos) {
             res.set_static_file_info_unsafe("static/index.html");
         } else {
             res.set_static_file_info_unsafe("static/" + path);
         }
+        
         res.end();
     });
 
