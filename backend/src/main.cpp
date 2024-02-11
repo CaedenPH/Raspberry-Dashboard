@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstring>
 #include <iomanip>
+#include <string>
 
 // crypto
 // #include <jwt-cpp/jwt.h>
@@ -12,7 +13,7 @@
 #include <soci/sqlite3/soci-sqlite3.h>
 
 // web
-#define CROW_STATIC_ENDPOINT "/<path>"
+#define CROW_DISABLE_STATIC_DIR // disable static serving
 #include "crow_all.h"
 
 
@@ -51,8 +52,7 @@ bool verify_pass(const std::string &username, const std::string &password)
 int main()
 {
     CROW_ROUTE(app, "/")
-    ([](const crow::request &req, crow::response &res){
-        // set '/' to be index.html
+    ([](crow::response &res){
         res.set_static_file_info("static/index.html");
 
         // set response code to 200 and end the resp
@@ -62,8 +62,7 @@ int main()
     });
 
     CROW_ROUTE(app, "/login").methods(crow::HTTPMethod::POST)
-    ([](const crow::request &req, crow::response &res)
-    {
+    ([](const crow::request &req, crow::response &res){
         std::string auth = req.get_header_value("Authorization");
         std::string credentials = auth.substr(6);
         std::cout << credentials << std::endl;
@@ -72,6 +71,19 @@ int main()
         std::string username = credentials.substr(0, colon), password = credentials.substr(colon+1);
         res.code = verify_pass(username, password) ? 200 : 401;
         res.end(); 
+        }
+    );
+
+    // override static file serving
+    CROW_ROUTE(app, "/<path>")
+    ([](const crow::request &req, crow::response &res, std::string path) {
+        crow::utility::sanitize_filename(path);
+        if (path.find(".") == std::string::npos){
+            res.set_static_file_info_unsafe("static/index.html");
+        } else {
+            res.set_static_file_info_unsafe("static/" + path);
+        }
+        res.end();
     });
 
     app.port(18080).ssl_file("localhost.pem", "localhost-key.pem").multithreaded().run();
