@@ -63,14 +63,19 @@ int main()
 
     CROW_ROUTE(app, "/login").methods(crow::HTTPMethod::POST)
     ([](const crow::request &req, crow::response &res){
-        std::string auth = req.get_header_value("Authorization");
-        std::string credentials = auth.substr(6);
-        std::cout << credentials << std::endl;
+        std::string auth, credentials, username, password;
+
+        auth = req.get_header_value("Authorization");
+        credentials = auth.substr(6);
         credentials = crow::utility::base64decode(credentials, credentials.size());
+
         size_t colon = credentials.find(':');
-        std::string username = credentials.substr(0, colon), password = credentials.substr(colon+1);
+
+        username = credentials.substr(0, colon);
+        password = credentials.substr(colon+1);
+
         res.code = verify_pass(username, password) ? 200 : 401;
-        res.end(); 
+        res.end();
         }
     );
 
