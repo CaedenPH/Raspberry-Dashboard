@@ -16,37 +16,34 @@
 #define CROW_DISABLE_STATIC_DIR // disable static serving
 #include "crow_all.h"
 
+#define to_uchar(x) reinterpret_cast<const unsigned char *>(x)
+#define stringify(x) std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(x[i])
+
 
 crow::App<crow::CookieParser, crow::CORSHandler> app;
-
 
 soci::session db(soci::sqlite3, "userdb");
 
 bool verify_pass(const std::string &username, const std::string &password)
 {
-    unsigned char hashed_username[SHA256_DIGEST_LENGTH], hashed_password[SHA256_DIGEST_LENGTH];
-    SHA256(reinterpret_cast<const unsigned char *>(username.c_str()), username.size(), hashed_username);
-    SHA256(reinterpret_cast<const unsigned char *>(password.c_str()), password.size(), hashed_password);
+    unsigned char hashed_username[SHA256_DIGEST_LENGTH];
+    unsigned char hashed_password[SHA256_DIGEST_LENGTH];
+
+    SHA256(to_uchar(username.c_str()), username.size(), hashed_username);
+    SHA256(to_uchar(password.c_str()), password.size(), hashed_password);
 
     std::stringstream username_stream, password_stream;
 
     for (int i{0}; i < SHA256_DIGEST_LENGTH; i++)
     {
-        username_stream << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(hashed_username[i]);
-        password_stream << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(hashed_password[i]);
+        username_stream << stringify(hashed_username);
+        password_stream << stringify(hashed_password);
     }
 
     std::string pass;
     db << "select password from accounts where username = '" << username_stream.str() << "'", soci::into(pass);
-
-    if (!pass.empty() && pass == password_stream.str())
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+ 
+    return (!pass.empty() && pass == password_stream.str());
 }
 
 int main()
