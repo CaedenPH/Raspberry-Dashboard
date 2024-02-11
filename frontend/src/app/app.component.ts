@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterModule, RouterOutlet } from '@angular/router';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { HttpClientModule } from '@angular/common/http';
 
@@ -19,8 +19,12 @@ import { HttpClientModule } from '@angular/common/http';
 })
 export class AppComponent {
   title = 'raspberry-dashboard';
-  constructor(private route: ActivatedRoute) {}
-  current_route: string = window.location.pathname
-    .toString()
-    .replace('/', '/ ');
+  current_route = "/"
+  constructor(private router: Router) {
+    router.events.subscribe((e)=>{
+      if (e instanceof NavigationEnd) {
+        this.current_route = e.urlAfterRedirects.replace("/", "");
+      }
+    })
+  }
 }
