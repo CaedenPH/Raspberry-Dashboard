@@ -13,7 +13,7 @@ int main() {
     ...
 
     CROW_ROUTE(app, "/somePath")(
-        [const crow::request &req, crow::reponse &res ]{
+        [](const crow::request &req, crow::reponse &res){
             // do something
 
             ...
