@@ -1,0 +1,14 @@
+section {
+    background: var(--gradient);
+    padding-block-end: 1rem;
+    border-radius: 1rem;
+}
+section > canvas {
+    padding: 1rem;
+    border-radius: 1rem;
+    background: var(--accent-gradient);
+}
+
+section > p {
+    text-align: center;
+}

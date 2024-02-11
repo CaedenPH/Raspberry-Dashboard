@@ -1,13 +1,17 @@
 form {
     background: var(--gradient);
     border-radius: 1rem;
+    margin: 5rem;
+    width: 45vw;
+    padding: 5rem;
     gap: 2rem;
     display: flex;
     flex-direction: column;
 }
 
-section {
-    width: inherit;
+.form-section {
+    width: 100%;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -24,17 +28,22 @@ h3 {
     text-align: center;
 }
 
+label {
+    align-self: flex-start;
+}
+
 .field {
+    position: relative;
     display: flex;
     flex-direction: column;
-    margin-block: 1rem;
+    margin: 0.5rem;
 }
 
 .field > input {
-    width: 100%;
     border-radius: 0.5rem;
     background-color: white;
     border: none;
+    width: 100%;
     min-height: 2rem;
 }
 
@@ -42,5 +51,5 @@ button {
     background: var(--accent-gradient);
     border-radius: 1rem;
     padding: 1rem;
-    margin-inline: 1rem;
+    margin: 1rem;
 }
