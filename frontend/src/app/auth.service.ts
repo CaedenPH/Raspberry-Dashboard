@@ -8,7 +8,8 @@ import { Buffer } from 'buffer';
 export class AuthService {
   login(email: string, password: string) {
     axios
-      .post('http://0.0.0.0:18080/login', {
+      .post('/login', {},
+      {
         headers: {
           Authorization:
             'basic:' +
