@@ -6,6 +6,13 @@ form {
     flex-direction: column;
 }
 
+section {
+    width: inherit;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 form > fieldset {
     display: flex;
     flex-direction: column;

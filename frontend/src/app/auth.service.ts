@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import axios from 'axios';
 import { Buffer } from 'buffer';
 
@@ -6,7 +7,13 @@ import { Buffer } from 'buffer';
   providedIn: 'root',
 })
 export class AuthService {
-  login(email: string, password: string) {
+
+
+  constructor(
+    private router: Router,
+  ) {}
+
+  public login(email: string, password: string) {
     axios
       .post('/login', {},
       {
@@ -18,12 +25,16 @@ export class AuthService {
       })
       .then((respone) => {
         if (respone.status == 200) {
-          return true;
-        } else {
-          return false;
+          localStorage.setItem("token", "makethisjwtsoonpls");
+          this.router.navigate(['/']);
         }
-      });
+    });
+
+  }
+  public isLoggedin(): boolean {
+    let token = localStorage.getItem("token");
+    //TODO: validate the token
+    return token != null && token.length > 0;
   }
 
-  constructor() {}
 }
