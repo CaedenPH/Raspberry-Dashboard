@@ -7,10 +7,9 @@ mkdir -p build
 
 cd build
 
-cmake ..
+cmake -G "Ninja" ..
 
-make
+ninja
 
 cd ..
 
-./dashboard_backend
