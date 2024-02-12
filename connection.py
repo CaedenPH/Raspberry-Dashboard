@@ -388,6 +388,11 @@ class ResponseHandler:
 
         processes = {}
         for process in PROCESSES:
+            if process == "pizzahat":
+                # The pizzahat directory is under PizzaHat
+                # TODO: Fix
+                process = "PizzaHat"
+
             output = (await execute(f"du -s -h ../{process}"))[0]
             processes[process.replace("raspberry-", "")] = float(output.split()[0][:-1])
 
