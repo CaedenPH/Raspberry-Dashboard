@@ -6,7 +6,7 @@ section {
 section > canvas {
     padding: 1rem;
     border-radius: 1rem;
-    background: var(--accent-gradient);
+    background-color: white;
 }
 
 section > p {

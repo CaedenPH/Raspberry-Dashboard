@@ -1,6 +1,12 @@
 
-<section class="grid">
+<section #grid>
     <app-graph-card
-        [description]="'updated since last tuesday'"
+        [lineChartData]="lineChartData"
+        [description]="'cpu usage'"
+        [color]="color"
+    ></app-graph-card>
+    <app-graph-card
+        [lineChartData]="ramusage"
+        [description]="'ram usage'"
     ></app-graph-card>
 </section>

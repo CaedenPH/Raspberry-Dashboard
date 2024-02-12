@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import axios from 'axios';
-import { Buffer } from 'buffer';
 
 @Injectable({
   providedIn: 'root',

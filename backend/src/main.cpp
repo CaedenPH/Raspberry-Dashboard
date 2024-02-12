@@ -3,6 +3,11 @@
 #include <cstring>
 #include <iomanip>
 #include <string>
+#include <fstream>
+#include <vector>
+#include <cmath>
+#include <ctime>
+#include <sys/sysinfo.h>
 
 // crypto
 // #include <jwt-cpp/jwt.h>
@@ -73,6 +78,35 @@ int main()
         password = credentials.substr(colon+1);
 
         res.code = verify_pass(username, password) ? 200 : 401;
+        res.end();
+        }
+    );
+
+    CROW_ROUTE(app, "/api/data/server").methods(crow::HTTPMethod::GET)
+    ([](const crow::request &req, crow::response &res){
+        struct sysinfo info;
+        float load_offset = 1.0f / (1 << SI_LOAD_SHIFT);
+       
+        memset(&info, 0, sizeof(info));
+
+        // sys info returns 0 if it succeded
+        if(sysinfo(&info) != 0) {
+            res.code = 500;
+            res.end();
+        }
+
+        crow::json::wvalue json;
+        json["uptime"] = info.uptime;
+        json["totalram"] = info.totalram;
+        json["freeram"] = info.freeram;
+        json["totalswap"] = info.totalswap;
+        json["freeswap"] = info.freeswap;
+        json["loadavg"] = ceil(info.loads[0] * load_offset);
+        json["time"] = time(nullptr);
+
+        res.write(json.dump());
+        res.set_header("Content-Type", "application/json");
+        res.code = 200;
         res.end();
         }
     );
