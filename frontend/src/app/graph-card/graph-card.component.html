@@ -1,11 +1,16 @@
 <section>
+  <div class="canvas-container" 
+  [style]="color">
     <canvas
     baseChart
     class="chart"
-    [style]="color"
     [data]="lineChartData"
     [options]="lineChartOptions"
     [type]="lineChartType"
   ></canvas>
-    <p>{{ description }}</p>
+  </div>
+  <article>
+    <h3>{{heading}}</h3>
+    <p>{{description}}</p>
+  </article>
 </section>

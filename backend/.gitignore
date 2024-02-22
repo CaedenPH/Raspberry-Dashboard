@@ -8,3 +8,6 @@ dashboard_backend
 # ignore built files by angular
 public/*
 static/*
+
+# ignore db
+userdb

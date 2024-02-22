@@ -1,14 +1,35 @@
 section {
-    background: var(--gradient);
+    background-color: var(--card);
     padding-block-end: 1rem;
     border-radius: 1rem;
+    z-index: 1;
+    margin: 3rem;
+    height: min-content;
+    width: min-content;
+    position: relative;
+    
 }
-section > canvas {
+.canvas-container {
+    position: relative;
     padding: 1rem;
+    z-index: 2;
+    top: -2rem;
+    margin-inline: 1rem;
+    height: 170px;
+    width: 267px;
     border-radius: 1rem;
     background-color: white;
 }
 
-section > p {
-    text-align: center;
+article  {
+    margin-top: -1rem;
+    padding: 1rem;
+    max-width: 327px;
+}
+article > * {
+    margin: 0px;
+}
+
+article > p {
+    color: grey;
 }

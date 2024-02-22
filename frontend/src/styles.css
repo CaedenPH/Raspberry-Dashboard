@@ -6,7 +6,11 @@
     --text_color: #000;
     --text_primary: #5e6d86;
     --hover: #c7c7c733;
-    --accent-gradient: linear-gradient(195deg, #ec407a, #d81b60);
+    --card: #fff;
+    --accent-gradient: linear-gradient(195deg, #ec407a 0%, #d81b60 100%);
+    --accent-green: linear-gradient(195deg, #66BB6A 0%, #43A047 100%);
+    --accent-grey: linear-gradient(195deg, #323a54, #1a2035);
+    --accent-blue: linear-gradient(195deg, #49a3f1 0%, #1A73E8 100%);
 
     /** images / links **/
 
@@ -37,6 +41,7 @@ button {
         --gradient: linear-gradient(195deg, #323a54, #1a2035);
         --text_color: #fff;
         --text_primary: #d7d7d8;
+        --card: #202940;
 
         /** images / links in dark mode **/
 

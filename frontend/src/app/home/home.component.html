@@ -1,12 +1,27 @@
 
 <section #grid>
+    <app-card
+        [color]="'background: var(--accent-gradient)'"
+        [heading]="'Uptime'"
+        [value]="'401 hours'"
+        [icon]="'cloud_upload'"
+        [description]="'16 days, 16 hours and 45 minutes.'"
+        ></app-card>
     <app-graph-card
         [lineChartData]="lineChartData"
-        [description]="'cpu usage'"
+        [heading]="'cpu usage'"
+        [description]="'the percentage of the cpu used at the current moment'"
         [color]="color"
     ></app-graph-card>
     <app-graph-card
         [lineChartData]="ramusage"
-        [description]="'ram usage'"
+        [heading]="'ram usage'"
+        [description]="'the percentage of rame used at the current moment'"
+        [color]="ram_color"
     ></app-graph-card>
+    <app-graph-card
+        [lineChartData]="networkspeed"
+        [heading]="'Network latency'"
+        [description]="'The network upload and download. Download is in MB/s and Upload is in MB/s'"
+        [color]="networkcolor"></app-graph-card>
 </section>

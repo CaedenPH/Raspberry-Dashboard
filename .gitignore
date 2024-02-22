@@ -45,6 +45,7 @@ Thumbs.db
 
 # security stuff
 config.json
+backend/userdb
 
 # c++ stuff
 cmake-build-debug/

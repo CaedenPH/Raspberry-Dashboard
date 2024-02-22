@@ -8,6 +8,7 @@
 #include <cmath>
 #include <ctime>
 #include <sys/sysinfo.h>
+#include <cstdio>
 
 // crypto
 // #include <jwt-cpp/jwt.h>
@@ -29,6 +30,27 @@
 crow::App<crow::CookieParser, crow::CORSHandler> app;
 
 soci::session db(soci::sqlite3, "userdb");
+
+
+std::string exec(std::string command) {
+    char buffer[128];
+    std::string result = "";
+
+    FILE* pipe = popen(command.c_str(), "r");
+    if (!pipe) {
+        return "no pipe";
+    }
+
+    while(!feof(pipe)){
+        if(fgets(buffer, 128, pipe) != nullptr){
+            result += buffer;
+        }
+    }
+
+    pclose(pipe);
+    return result;
+}
+
 
 bool verify_pass(const std::string &username, const std::string &password)
 {
@@ -82,6 +104,23 @@ int main()
         }
     );
 
+
+    CROW_ROUTE(app, "/api/data/serverspeed").methods(crow::HTTPMethod::GET)(
+        []() {
+            crow::json::rvalue json = crow::json::load(exec("speedtest-cli --bytes --json"));
+            double download = json["download"].d();
+            double upload = json["upload"].d();
+            
+            crow::json::wvalue ret;
+            ret["download"] = download;
+            ret["upload"] = upload;
+            ret["time"] = time(nullptr);
+
+
+            return ret;
+        }
+    );
+
     CROW_ROUTE(app, "/api/data/server").methods(crow::HTTPMethod::GET)
     ([](const crow::request &req, crow::response &res){
         struct sysinfo info;
@@ -103,7 +142,6 @@ int main()
         json["freeswap"] = info.freeswap;
         json["loadavg"] = ceil(info.loads[0] * load_offset);
         json["time"] = time(nullptr);
-
         res.write(json.dump());
         res.set_header("Content-Type", "application/json");
         res.code = 200;

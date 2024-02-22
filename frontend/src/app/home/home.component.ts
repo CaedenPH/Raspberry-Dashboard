@@ -15,7 +15,9 @@ import axios from 'axios';
 export class HomeComponent {
   @ViewChild('app-graph-card') graph!: GraphCardComponent;
   timeinterval = interval(5 * 1000);
+  _5minInterval = interval(1 * 60 * 1000);
   counter: number = 0;
+  network_counter: number = 0;
   color = "background: var(--accent-gradient)";
 
 
@@ -30,7 +32,7 @@ export class HomeComponent {
         pointBackgroundColor: '#fad5e205',
         pointBorderColor: '#fff',
         pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: '#fad5e2)',
+        pointHoverBorderColor: '#fad5e2',
         fill: 'origin',
       }
     ],
@@ -53,22 +55,43 @@ export class HomeComponent {
     ],
     labels: []
   };
+  ram_color: string = "background: var(--accent-green);";
+
+
+  networkspeed: ChartData = {
+    datasets: [
+      {
+        // download
+        data: [],
+        borderColor: '#63B3ED',
+        pointBackgroundColor: '#63B3Ed'
+      },
+      {
+        // upload
+        data: [],
+        borderColor: '#d63384',
+        pointBackgroundColor: 'd63384'
+      }
+    ],
+    labels: []
+  };
+  networkcolor: string = "background: var(--accent-grey);"
 
   constructor() {
     this.timeinterval.subscribe(() => {
-      let json: any;
       axios.get("/api/data/server").then(
         (response) => {
-          if(this.counter > 7){
+        if(this.counter > 7){
             this.lineChartData.datasets[0].data.shift();
             this.ramusage.datasets[0].data.shift();
 
             this.lineChartData.labels?.shift();
             this.ramusage.labels?.shift();
-          }
+
   
           this.lineChartData = {...this.lineChartData};
           this.ramusage = {...this.ramusage};
+        }
           
           
 
@@ -91,8 +114,35 @@ export class HomeComponent {
 
         }
       );
-    })
-  }
+    });
+  
 
+  this._5minInterval.subscribe(() => {
+
+    axios.get("/api/data/serverspeed").then(
+      (response) => {
+        if (this.network_counter > 3) {
+          this.networkspeed.datasets[0].data.shift();
+          this.networkspeed.datasets[1].data.shift();
+          this.networkspeed.labels?.shift();
+
+  
+          this.networkspeed = {...this.networkspeed};
+          this.network_counter--;
+        }
+
+        let time = new Date(response.data["time"] * 1000);
+        let time_string = time.getUTCHours().toString() + ":" + time.getMinutes().toString() + ":" + time.getUTCSeconds().toString();
+        this.networkspeed.datasets[0].data.push(response.data["download"]);
+        this.networkspeed.datasets[1].data.push(response.data["upload"]);
+        this.networkspeed.labels?.push(time_string);
+
+        this.networkspeed = {...this.networkspeed};
+        this.network_counter++;
+      }
+    )
+  });
+
+  }
   
 }

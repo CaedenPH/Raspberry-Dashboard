@@ -7,7 +7,6 @@ import {
 } from '@angular/core';
 import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 import {  Chart, ChartConfiguration, ChartType, Filler } from 'chart.js';
-
 @Component({
   selector: 'app-graph-card',
   standalone: true,
@@ -19,6 +18,7 @@ export class GraphCardComponent {
   @Input() newLabel? = 'New label';
   @Input() description: string = 'something';
   @Input() color: string = '#fff';
+  @Input() heading: string = "usage";
 
 
   constructor() {
@@ -56,7 +56,12 @@ export class GraphCardComponent {
       	ticks: {
         	autoSkip: false
         }
-      }
+      },
+      
+    },
+    interaction: {
+      intersect: false,
+      mode: 'index',
     },
     plugins: {
       legend: { display: false },
